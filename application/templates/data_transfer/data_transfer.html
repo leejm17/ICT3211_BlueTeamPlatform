@@ -1,0 +1,31 @@
+<head>
+	<title>Data Transfer</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+    <h1>Where to initiate data transfer?</h1>
+
+	<!-- Features section-->
+    <div class="container px-5 my-5">
+        <div class="row gx-5">
+            <div class="col-lg-6"><!-- mb-5 mb-lg-0">-->
+                <a href="/data_transfer/t_pot"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-box-seam"></i></div></a>
+                <h2 class="h4 fw-bolder">From T-Pot</h2>
+                <p>Initiate the data transfer process from the Debian machine hosting the T-pot to this machine.</p>
+            </div>
+
+            <div class="col-lg-6"><!-- mb-5 mb-lg-0">-->
+                <a href="/data_transfer/smart_meter"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-speedometer2"></i></div></a>
+                <h2 class="h4 fw-bolder">From Smart Meter</h2>
+                <p>Initiate the data transfer process from the Windows machine hosting the Smart Meter to this machine.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

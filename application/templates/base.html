@@ -1,0 +1,113 @@
+<head>
+    <!doctype html>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS
+    Source: https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css
+    <link rel=stylesheet type=text/css href="/static/css/bootstrap.min.css"> -->
+    
+    <!-- Bootstrap CSS
+    Source: https://startbootstrap.github.io/startbootstrap-business-frontpage/css/styles.css -->
+    <link rel=stylesheet type=text/css href="/static/css/styles.css">
+    
+    <!-- Bootstrap Icons
+    Source: https://icons.getbootstrap.com -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+    <!-- Bootstrap JS
+    Source: https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js -->
+    <script type="text/javascript" src="/static/js/bootstrap.bundle.min.js"></script>
+
+    <title>Flask application</title>
+</head>
+
+<!-- Responsive navbar-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">SCFAMI Dashboard v0.1</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            	<li class="nav-item"><a
+		        	{% if request.endpoint=="home" %}class="nav-link active" aria-current="page"
+		        	{% else %}class="nav-link"{% endif %} href="/">Home</a></li>
+        	    
+        	    <li class="nav-item dropdown">
+                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.t_pot" or request.endpoint=="data_transfer.smart_meter" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% else %}class="nav-link dropdown-toggle"{% endif %}>
+						Data Transfer</a>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+					    <li><a
+							{% if request.endpoint=="data_transfer" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer">
+							Data Transfer</a></li>
+        	    
+						<li><hr class="dropdown-divider" /></li>
+	                    
+						<li><a
+							{% if request.endpoint=="data_transfer.t_pot" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/t_pot">
+							T-Pot (Debian)</a></li>
+
+                        <li><a
+							{% if request.endpoint=="data_transfer.smart_meter" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/smart_meter">
+							Smart Meter (Windows)</a></li>
+                    </ul>
+                </li>
+
+            	<li class="nav-item"><a
+		        	{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
+		        	{% else %}class="nav-link"{% endif %} href="/app_launch">
+		        	App Launch</a></li>
+        	    
+        	    <li class="nav-item dropdown">
+                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="pcap_files" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% else %}class="nav-link dropdown-toggle"{% endif %}>
+						Admin</a>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+ 	                   <li><a
+							{% if request.endpoint=="admin" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin">
+							Admin Config</a></li>
+
+	                    <li><hr class="dropdown-divider" /></li>
+
+                        <li><a
+							{% if request.endpoint=="honeypot" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/honeypot">
+							Honeypot</a></li>
+
+                        <li><a
+							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/spyder">
+							Spyder</a></li>
+
+                        <li><a
+							{% if request.endpoint=="pcap_files" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/pcap_files">
+							PCAP Files</a></li>
+
+						<li><a
+							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/machine_learning">
+							Machine Learning</a></li>
+                    </ul>
+                </li>
+                
+				<li class="nav-item"><a
+					{% if request.endpoint=="help" %}class="nav-link active" aria-current="page"
+					{% else %}class="nav-link"{% endif %} href="/help">
+					Help</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block body %}
+{% endblock %}

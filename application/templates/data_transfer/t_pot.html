@@ -1,0 +1,23 @@
+<head>
+	<title>Data Transfer</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">    
+	<h1>T-Pot</h1>
+
+	<div class="mb-3">
+		<label for="formFileLg" class="form-label">Select one or more files from the <b>T-Pot Debian machine</b></label>
+		<input class="form-control form-control-lg" type="file" id="formFileMultiple" multiple>
+	</div>
+	<div class="input-group-append">
+		<button class="btn btn-secondary" type="button" id="customFileInput">Reset</button>
+		<button class="btn btn-primary" type="button" id="customFileInput">Submit</button>
+	</div>
+</div>
+
+{% endblock %}
