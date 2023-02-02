@@ -1,0 +1,20 @@
+<head>
+	<title>Data Transfer</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">    
+	<h1>Download Success!</h1>
+	{% if message[0] <= 1 %}
+		<b>{{ message[0] }} file</b> is downloaded to <b>{{ message[1] }}</b>.
+	{% else %}
+		<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }}</b>.
+	{% endif %}
+	<p>Click here to <a href="/data_transfer/smart_meter">transfer Smart Meter files</a> again.</p>
+</div>
+
+{% endblock %}
