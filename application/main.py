@@ -1,7 +1,9 @@
 from flask import request
 from dotenv import load_dotenv
+from zipfile import ZipFile
 import os
 import ftplib, ssl
+import magic
 
 
 # Global Variables
@@ -94,7 +96,13 @@ def windows_ftp_transfer(form_data):
 					ftps.retrbinary(f"RETR {filename}", f.write)
 					download_cnt += 1
 
+				# Unzip zipped files
+				if magic.from_file(filename, mime=True) == "application/zip":
+					with ZipFile(filename, "r") as zipped:
+						zipped.extractall(".".join(filename.split(".")[:-1]))
+
 			os.chdir(current_dir)		# Revert to CWD
+
 		except Exception as e:
 			print("Error Downloading File:", e)
 			return False, e
