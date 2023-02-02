@@ -1,5 +1,5 @@
 <head>
-	<title>Data Transfer</title>
+	<title>T-Pot</title>
 </head>
 
 {% extends "base.html" %}
@@ -11,7 +11,7 @@
 	<h1>T-Pot</h1>
 
 	<div class="mb-3">
-		<label for="formFileLg" class="form-label">Select one or more files from the <b>T-Pot Debian machine</b></label>
+		<label for="formFileLg" class="form-label">Select one or more files from the <b>T-Pot Debian machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></label>
 		<input class="form-control form-control-lg" type="file" id="formFileMultiple" multiple>
 	</div>
 	<div class="input-group-append">

@@ -32,38 +32,7 @@
             	<li class="nav-item"><a
 		        	{% if request.endpoint=="home" %}class="nav-link active" aria-current="page"
 		        	{% else %}class="nav-link"{% endif %} href="/">Home</a></li>
-        	    
-        	    <li class="nav-item dropdown">
-                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.t_pot" or request.endpoint=="data_transfer.smart_meter" %}class="nav-link dropdown-toggle active" aria-current="page"
-						{% else %}class="nav-link dropdown-toggle"{% endif %}>
-						Data Transfer</a>
 
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-					    <li><a
-							{% if request.endpoint=="data_transfer" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/data_transfer">
-							Data Transfer</a></li>
-        	    
-						<li><hr class="dropdown-divider" /></li>
-	                    
-						<li><a
-							{% if request.endpoint=="data_transfer.t_pot" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/t_pot">
-							T-Pot (Debian)</a></li>
-
-                        <li><a
-							{% if request.endpoint=="data_transfer.smart_meter" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/smart_meter">
-							Smart Meter (Windows)</a></li>
-                    </ul>
-                </li>
-
-            	<li class="nav-item"><a
-		        	{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
-		        	{% else %}class="nav-link"{% endif %} href="/app_launch">
-		        	App Launch</a></li>
-        	    
         	    <li class="nav-item dropdown">
                     <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
 						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="pcap_files" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
@@ -99,6 +68,37 @@
 							Machine Learning</a></li>
                     </ul>
                 </li>
+        	    
+        	    <li class="nav-item dropdown">
+                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.t_pot" or request.endpoint=="data_transfer.smart_meter" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% else %}class="nav-link dropdown-toggle"{% endif %}>
+						Data Transfer</a>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+					    <li><a
+							{% if request.endpoint=="data_transfer" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer">
+							Data Transfer</a></li>
+        	    
+						<li><hr class="dropdown-divider" /></li>
+	                    
+                        <li><a
+							{% if request.endpoint=="data_transfer.smart_meter" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/smart_meter">
+							Smart Meter (Windows)</a></li>
+
+						<li><a
+							{% if request.endpoint=="data_transfer.t_pot" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/t_pot">
+							T-Pot (Debian)</a></li>
+                    </ul>
+                </li>
+
+            	<li class="nav-item"><a
+		        	{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
+		        	{% else %}class="nav-link"{% endif %} href="/app_launch">
+		        	App Launch</a></li>
                 
 				<li class="nav-item"><a
 					{% if request.endpoint=="help" %}class="nav-link active" aria-current="page"
