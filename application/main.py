@@ -45,9 +45,14 @@ class MyFTP_TLS(ftplib.FTP_TLS):
 
 
 def windows_ftp_start():
-	ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
-	ftps.prot_p()		# Set up secure connection
-	root = ftps.mlsd()	# FTP Root directory
+	try:
+		ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
+		ftps.prot_p()		# Set up secure connection
+		root = ftps.mlsd()	# FTP Root directory
+	except Exception as e:
+		print("FTP Connection Error:", e)
+		return False, e
+		
 	file_dict = {}		# Store Dir & corresponding Filenames
 	for dir_list in root:
 		# dir_list[0] = dir/filename
@@ -61,7 +66,7 @@ def windows_ftp_start():
 				file_dict[dir_list[0]] += [data[0]]
 	ftps.quit()
 	#print(file_dict)	# Print stored dictionary
-	return file_dict
+	return True, file_dict
 
 
 def windows_ftp_transfer(form_data):
@@ -75,13 +80,13 @@ def windows_ftp_transfer(form_data):
 			file_dict[directory] = []
 		file_dict[directory] += [filename]
 
-	# Download files via FTPS
-	ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
-	ftps.prot_p()		# Set up secure connection
+	try:
+		# Download files via FTPS
+		ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
+		ftps.prot_p()		# Set up secure connection
 
-	for directory in file_dict:
-		# Write file in binary mode
-		try:
+		for directory in file_dict:
+			# Write file in binary mode
 			ftps.cwd("/"+directory)			# Change FTP directory
 			current_dir = os.getcwd()
 			download_dir = "/".join(current_dir.split("/")[:-2]) + "/FTP_Downloads/Smart_Meter/" + directory
@@ -103,9 +108,9 @@ def windows_ftp_transfer(form_data):
 
 			os.chdir(current_dir)		# Revert to CWD
 
-		except Exception as e:
-			print("Error Downloading File:", e)
-			return False, e
+	except Exception as e:
+		print("Error Downloading File:", e)
+		return False, e
 	
 	ftps.quit()
 

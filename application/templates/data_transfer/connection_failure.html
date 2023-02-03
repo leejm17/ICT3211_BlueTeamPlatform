@@ -1,0 +1,19 @@
+<head>
+	<title>Data Transfer</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">    
+	<h1>FTP Connection Failure</h1>
+	<p>
+		Something went wrong. Unable to connect to FTP server.<br />
+		FTP Connection Error: <b>{{ message }}</b>
+	</p>
+	<p>Click here to <a href="/data_transfer/smart_meter">go back</a>.</p>
+</div>
+
+{% endblock %}

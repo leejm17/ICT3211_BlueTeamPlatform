@@ -59,8 +59,11 @@ def datatransfer_smartmeter_page():
 			else:
 				return render_template("/data_transfer/download_failure.html", message=message)
 		else:
-			files = initiate_ftp()
-			return render_template("/data_transfer/smart_meter.html", ip=windows_ip, file_dict=files)
+			success, files = initiate_ftp()
+			if success:
+				return render_template("/data_transfer/smart_meter.html", ip=windows_ip, file_dict=files)
+			else:
+				return render_template("/data_transfer/connection_failure.html", ip=windows_ip, message=files)
 
 	return render_template("/data_transfer/smart_meter.html", ip=windows_ip)
 
