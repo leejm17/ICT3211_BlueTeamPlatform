@@ -13,20 +13,39 @@
 		<div class="mb-3">
 			<label for="formFileLg" class="form-label">Initiate Secure FTP connection to the <b>Smart Meter Windows machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></label><br />
 			<form action="/data_transfer/smart_meter" method="post">
+				<input type="hidden" name="smart_meter_form" value="SmartMeterData">
 				<button class="btn btn-primary" type="submit">
-				{% if not file_dict %}Initiate FTP
+				{% if not file_dict or data_source != "SmartMeterData" %}
+					To /SmartMeterData
 				{% else %}Re-initiate FTP{% endif %}
-				</button
+				</button>
+			</form>
+			<form action="/data_transfer/smart_meter" method="post">
+				<input type="hidden" name="smart_meter_form" value="Archive_SmartMeterData">
+				<button class="btn btn-warning" type="submit">
+				{% if not file_dict or data_source != "Archive_SmartMeterData" %}
+					To /Archive_SmartMeterData
+				{% else %}Re-initiate FTP{% endif %}
+				</button>
+			</form>
+			<form action="/data_transfer/smart_meter" method="post">
+				<input type="hidden" name="smart_meter_form" value="WiresharkData">
+				<button class="btn btn-info" type="submit">
+				{% if not file_dict or data_source != "WiresharkData" %}
+					To /WiresharkData
+				{% else %}Re-initiate FTP{% endif %}
+				</button>
 			</form>
 		</div>
 
 	{% if file_dict %}
-	<label for="formFileLg" class="form-label">Select one or more files from the <b>Smart Meter Windows machine</b>.</label><br />
-	<form action="/data_transfer/smart_meter">
+	<label for="formFileLg" class="form-label">Select one or more files from the <b>{{ data_source }} directory</b> of the <b>Smart Meter Windows machine</b>.</label><br />
+	<form action="/data_transfer/smart_meter" method="post">
 		{% for dir in file_dict %}
 			{% for file in file_dict[dir] %}
 				<div class="form-check">
-					<input class="form-check-input" type="checkbox" value="{{ dir ~':'~ file }}" id="{{dir ~'-'~ file}}" name="{{dir ~'-'~ file}}">
+					<input type="hidden" name="data_source" value="{{ data_source }}">
+					<input class="form-check-input" type="checkbox" name="smart_meter_form" value="{{ dir ~':'~ file }}" id="{{dir ~'-'~ file}}">
 					<label class="form-check-label" for="{{dir ~'-'~ file}}">
 						{{ dir ~": "~ file }}
 					</label>

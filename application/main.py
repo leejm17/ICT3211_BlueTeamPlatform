@@ -16,12 +16,12 @@ ftp_pw = os.getenv("ftp_pw")
 
 ########## START Data Transfer ##########
 
-def initiate_ftp():
+def initiate_ftp(ftp_dir):
 	endpoint = request.referrer.split("/")[-1]
 	if endpoint == "smart_meter":
 		# Initiate FTP for Smart Meter
 		print("Initiate FTP for Smart Meter")
-		files = windows_ftp_start()
+		files = windows_ftp_start(ftp_dir)
 	elif endpoint == "t_pot":
 		# Initiate FTP for T-Pot
 		files = ""
@@ -44,38 +44,46 @@ class MyFTP_TLS(ftplib.FTP_TLS):
 		return conn, size
 
 
-def windows_ftp_start():
+def windows_ftp_start(ftp_dir):
 	try:
 		ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
 		ftps.prot_p()		# Set up secure connection
-		root = ftps.mlsd()	# FTP Root directory
+		root = ftps.mlsd(ftp_dir)	# FTP Root directory
 	except Exception as e:
+		ftps.quit()
 		print("FTP Connection Error:", e)
 		return False, e
 		
 	file_dict = {}		# Store Dir & corresponding Filenames
-	for dir_list in root:
-		# dir_list[0] = dir/filename
-		# dir_list[1] = dir/file data
-		#print(dir_list[0])		# Print Dir
-		file_dict[dir_list[0]] = []
-		if dir_list[1]["type"] == "dir":
-			file_list = ftps.mlsd(dir_list[0])
-			for data in file_list:
-				#print(data[0])	# Print Filename
-				file_dict[dir_list[0]] += [data[0]]
-	ftps.quit()
-	#print(file_dict)	# Print stored dictionary
-	return True, file_dict
+	try:
+		for dir_list in root:
+			# dir_list[0] = dir/filename
+			# dir_list[1] = dir/file data
+			##print("Dir:", dir_list[0])		# Print Dir
+			file_dict[dir_list[0]] = []
+			if dir_list[1]["type"] == "dir":
+				file_list = ftps.mlsd(ftp_dir+"/"+dir_list[0])
+				for data in file_list:
+					##print("File:", data[0])	# Print Filename
+					file_dict[dir_list[0]] += [data[0]]
+		ftps.quit()
+		##print("Dict:", file_dict)	# Print stored dictionary
+		return True, file_dict
+	except Exception as e:
+		ftps.quit()
+		print("File Permissions Error:", e)
+		##print("Dict:", file_dict)	# Print stored dictionary
+		return False, e
 
 
-def windows_ftp_transfer(form_data):
+def windows_ftp_transfer(source, form_data):
 	file_dict = {}
 	download_dir = ""
 	download_cnt = 0	# Count number of files downloaded
+	##print("form_data:",form_data)
 
 	for selection in form_data:
-		directory, filename = selection.split("-")
+		directory, filename = selection.split(":")
 		if directory not in file_dict:
 			file_dict[directory] = []
 		file_dict[directory] += [filename]
@@ -86,10 +94,12 @@ def windows_ftp_transfer(form_data):
 		ftps.prot_p()		# Set up secure connection
 
 		for directory in file_dict:
+			##print("directory:",directory)
 			# Write file in binary mode
-			ftps.cwd("/"+directory)			# Change FTP directory
+			download_path = source[0] + "/" + directory
+			ftps.cwd("/"+download_path)			# Change FTP directory
 			current_dir = os.getcwd()
-			download_dir = "/".join(current_dir.split("/")[:-2]) + "/FTP_Downloads/Smart_Meter/" + directory
+			download_dir = "/".join(current_dir.split("/")[:-2]) + "/FTP_Downloads/Smart_Meter/" + download_path
 			if not os.path.isdir(download_dir):		# Mkdir if Download directory does not exist
 				os.makedirs(download_dir)
 			os.chdir(download_dir)		# Change Download directory
