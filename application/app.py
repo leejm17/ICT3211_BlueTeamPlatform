@@ -1,12 +1,19 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 from dotenv import load_dotenv
 import os
 
 # Import Other Files
-from main import *
+from main import windows_ftp_process
+#from main import initiate_ftp, windows_ftp_transfer
+from forms import DataTransfer_Form
 
 
 # Global Variables
+load_dotenv()   # Take environment variables from .env
+windows_ip = os.getenv("windows_ip")
+debian_ip = os.getenv("debian_ip")
+ftp_user = os.getenv("ftp_user")
+ftp_pw = os.getenv("ftp_pw")
 
 
 # Create Flask App
@@ -51,13 +58,21 @@ def datatransfer_page():
 
 @app.route("/data_transfer/smart_meter", methods=["GET", "POST"], endpoint="data_transfer.smart_meter")
 def datatransfer_smartmeter_page():
+	form = DataTransfer_Form()
 	if request.method == "POST":
 		if request.form:
+			#"""
+			success, message = windows_ftp_process(request.form)
+			if success:
+				return render_template("/data_transfer/download_success.html", message=message)
+			else:
+				return render_template("/data_transfer/download_failure.html", message=message)
+			"""
 			ftp_dir = ["SmartMeterData", "Archive_SmartMeterData", "WiresharkData"]
 			if request.form["smart_meter_form"] in ftp_dir:
 				success, files = initiate_ftp(request.form["smart_meter_form"])
 				if success:
-					return render_template("/data_transfer/smart_meter.html", ip=windows_ip, file_dict=files, data_source=request.form["smart_meter_form"])
+					return render_template("/data_transfer/smart_meter.html", ip=windows_ip, file_dict=files, data_source=request.form["smart_meter_form"], form=form)
 				else:
 					return render_template("/data_transfer/connection_failure.html", ip=windows_ip, message=files)
 			else:
@@ -66,8 +81,8 @@ def datatransfer_smartmeter_page():
 					return render_template("/data_transfer/download_success.html", message=message)
 				else:
 					return render_template("/data_transfer/download_failure.html", message=message)
-
-	return render_template("/data_transfer/smart_meter.html", ip=windows_ip)
+			"""
+	return render_template("/data_transfer/smart_meter.html", ip=windows_ip, form=form)
 
 
 @app.route("/data_transfer/t_pot", methods=["GET"], endpoint="data_transfer.t_pot")

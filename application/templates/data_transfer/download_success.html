@@ -7,12 +7,23 @@
 {% block body %}
 
 <!--Page content-->
-<div class="container mt-5">    
-	<h1>Download Success!</h1>
-	{% if message[0] <= 1 %}
-		<b>{{ message[0] }} file</b> is downloaded to <b>{{ message[1] }}</b>.
+<div class="container mt-5">
+	{% if message[0] == 0 %}
+	<h1>No downloads!</h1>
+	<p><b>No file</b> is downloaded. Please choose different parameters.</p>
 	{% else %}
-		<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }}</b>.
+	<h1>Download Success!</h1>
+	<p>
+		{% if message[0] == 1 %}
+		<b>1 file</b> is downloaded to <b>{{ message[2] }}</b>.
+		{% else %}
+			{% if message[1] == 1 %}
+			<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }} directory</b> in <b>{{ message[2] }}</b>.
+			{% else %}
+			<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }} directories</b> in <b>{{ message[2] }}</b>.
+			{% endif %}
+		{% endif %}
+	</p>
 	{% endif %}
 	<p>Click here to <a href="/data_transfer/smart_meter">transfer Smart Meter files</a> again.</p>
 </div>
