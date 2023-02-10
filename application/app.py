@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 # Import Other Files
-from main import windows_ftp_process
+from main import initiate_ftp, windows_ftp_process, windows_ftp_automate
 #from main import initiate_ftp, windows_ftp_transfer
 from forms import DataTransfer_Form
 
@@ -58,30 +58,36 @@ def datatransfer_page():
 
 @app.route("/data_transfer/smart_meter", methods=["GET", "POST"], endpoint="data_transfer.smart_meter")
 def datatransfer_smartmeter_page():
-	form = DataTransfer_Form()
+	form = DataTransfer_Form(request.form)
 	if request.method == "POST":
 		if request.form:
-			#"""
-			success, message = windows_ftp_process(request.form)
-			if success:
-				return render_template("/data_transfer/download_success.html", message=message)
-			else:
-				return render_template("/data_transfer/download_failure.html", message=message)
-			"""
-			ftp_dir = ["SmartMeterData", "Archive_SmartMeterData", "WiresharkData"]
-			if request.form["smart_meter_form"] in ftp_dir:
-				success, files = initiate_ftp(request.form["smart_meter_form"])
+			# Initiate FTP Process
+			ftp_dir = ["SmartMeterData", "WiresharkData"]
+			if request.form["submit"] in ftp_dir:
+				success, dir_list = initiate_ftp(request.form["submit"])
+				form.data_source.data = request.form["submit"]
+				days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 				if success:
-					return render_template("/data_transfer/smart_meter.html", ip=windows_ip, file_dict=files, data_source=request.form["smart_meter_form"], form=form)
+					return render_template("/data_transfer/smart_meter.html", ip=windows_ip, form=form, dir_list=dir_list, meters=dir_list, days_of_week=days_of_week)
 				else:
-					return render_template("/data_transfer/connection_failure.html", ip=windows_ip, message=files)
+					return render_template("/data_transfer/connection_failure.html", ip=windows_ip, message=dir_list)
+
+			# Data Transfer Process
 			else:
-				success, message = windows_ftp_transfer(request.form.getlist("data_source"), request.form.getlist("smart_meter_form"))
-				if success:
-					return render_template("/data_transfer/download_success.html", message=message)
-				else:
-					return render_template("/data_transfer/download_failure.html", message=message)
-			"""
+				if form.transfer_type.data == "Now":
+					success, message = windows_ftp_process(form)
+					if success:
+						return render_template("/data_transfer/download_success.html", message=message)
+					else:
+						return render_template("/data_transfer/download_failure.html", message=message)
+
+				else: # Schedule the Data Transfer for automation
+					success, cron, job = windows_ftp_automate(form)
+					if success:
+						return render_template("/data_transfer/cronjob_success.html", cron_message=cron, job_message=job)
+					else:
+						return render_template("/data_transfer/cronjob_failure.html", cron_message=cron, job_message=job)
+
 	return render_template("/data_transfer/smart_meter.html", ip=windows_ip, form=form)
 
 

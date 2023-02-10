@@ -17,11 +17,7 @@
 		{% if message[0] == 1 %}
 		<b>1 file</b> is downloaded to <b>{{ message[2] }}</b>.
 		{% else %}
-			{% if message[1] == 1 %}
-			<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }} directory</b> in <b>{{ message[2] }}</b>.
-			{% else %}
-			<b>{{ message[0] }} files</b> are downloaded to <b>{{ message[1] }} directories</b> in <b>{{ message[2] }}</b>.
-			{% endif %}
+			<b>{{ message[0] }} files</b> are downloaded to a folder named "<b>{{ message[1] }}</b>" in <b>{{ message[2] }}</b>.
 		{% endif %}
 	</p>
 	{% endif %}

@@ -1,0 +1,26 @@
+<head>
+	<title>Data Transfer</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+	<h1>Job Schedule Failure</h1>
+	<p>
+		Something went wrong. Unable to schedule the job.<br />
+		Error: <b>{{ cron_message }}</b>
+	</p>
+	<p>
+		<b><u>Job Details</u></b><br />
+		{% set message_list = job_message.split("-") %}
+		{% for param in message_list %}
+			{{ param }}<br />
+		{% endfor %}
+	</p>
+	<p>Click here to <a href="/data_transfer/smart_meter">transfer Smart Meter files</a> again.</p>
+</div>
+
+{% endblock %}

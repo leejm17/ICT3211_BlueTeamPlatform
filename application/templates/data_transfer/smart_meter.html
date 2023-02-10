@@ -7,80 +7,85 @@
 {% block body %}
 
 <!--Page content-->
-<div class="container mt-5">    
-	<h1>Smart Meter</h1>
+<div class="container mt-5">
+	<h1>Smart Meter</h1>	
+	<div class="mb-3">
+		<h5 class="form-label">Choose a folder to initiate Secure FTP connection to the <b>Smart Meter Windows machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></h5>
+		<form action="/data_transfer/smart_meter" method="POST">
+			<button class="btn btn-primary" type="submit" name="submit" value="SmartMeterData">
+			{% if not dir_list or data_source != "SmartMeterData" %}
+				SmartMeter Data
+			{% else %}Re-initiate FTP{% endif %}
+			</button>
+		</form>
+		<form action="/data_transfer/smart_meter" method="POST">
+			<button class="btn btn-info" type="submit" name="submit" value="WiresharkData">
+			{% if not dir_list or data_source != "WiresharkData" %}
+				Wireshark Data
+			{% else %}Re-initiate FTP{% endif %}
+			</button>
+		</form>
+	</div>
 
-	<!--<div class="input-group date" id="datetimepicker1" data-target-input="nearest">
-		<input type="text" class="form-control datetimepicker-input" data-target="#datetimepicker1"/>
-		<div class="input-group-append" data-target="#datetimepicker1" data-toggle="datetimepicker">
-			<div class="input-group-text"><i class="fa fa-calendar"></i></div>
-		</div>
-	</div>-->
-		<div class="mb-3">
-			<label class="form-label">Specify the meters, date & time range to download files from the <b>Smart Meter Windows machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></label><br />
-			<form action="/data_transfer/smart_meter" method="POST">
-				<div>{{ form.data_source.label }}: {{ form.data_source }}</div>
-				<div>{{ form.meters.label }}: {{ form.meters }}</div>
-				<div>{{ form.file_type.label }}: {% for type in form.file_type %}
-					<tr>
-						<td>{{type}}</td>
-						<td>{{type.label}}</td>
-					</tr>
-				{% endfor %}</div>
-				<div>{{ form.date.label }}: {{ form.date }}</div>
-				<div>{{ form.start_time.label }}: {{ form.start_time }}</div>
-				<div>{{ form.end_time.label }}: {{ form.end_time }}</div>
-				<!--<div>{{ form.export_name.label }}: {{ form.export_name }}</div>-->
-				<div>{{ form.submit(class="btn btn-primary")}}</div>
-			</form>
-		</div>
-
-		<br /><br /><hr /><br /><br />
-
-		<div class="mb-3">
-			<label class="form-label">Initiate Secure FTP connection to the <b>Smart Meter Windows machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></label><br />
-			<form action="/data_transfer/smart_meter" method="POST">
-				<input type="hidden" name="smart_meter_form" value="SmartMeterData">
-				<button class="btn btn-primary" type="submit">
-				{% if not file_dict or data_source != "SmartMeterData" %}
-					To /SmartMeterData
-				{% else %}Re-initiate FTP{% endif %}
-				</button>
-			</form>
-			<form action="/data_transfer/smart_meter" method="POST">
-				<input type="hidden" name="smart_meter_form" value="Archive_SmartMeterData">
-				<button class="btn btn-warning" type="submit">
-				{% if not file_dict or data_source != "Archive_SmartMeterData" %}
-					To /Archive_SmartMeterData
-				{% else %}Re-initiate FTP{% endif %}
-				</button>
-			</form>
-			<form action="/data_transfer/smart_meter" method="POST">
-				<input type="hidden" name="smart_meter_form" value="WiresharkData">
-				<button class="btn btn-info" type="submit">
-				{% if not file_dict or data_source != "WiresharkData" %}
-					To /WiresharkData
-				{% else %}Re-initiate FTP{% endif %}
-				</button>
-			</form>
-		</div>
-
-	{% if file_dict %}
-	<label class="form-label">Select one or more files from the <b>{{ data_source }} directory</b> of the <b>Smart Meter Windows machine</b>.</label><br />
-	<form action="/data_transfer/smart_meter" method="POST">
-		{% for dir in file_dict %}
-			{% for file in file_dict[dir] %}
-				<div class="form-check">
-					<input type="hidden" name="data_source" value="{{ data_source }}">
-					<input class="form-check-input" type="checkbox" name="smart_meter_form" value="{{ dir ~':'~ file }}" id="{{dir ~'-'~ file}}">
-					<label class="form-check-label" for="{{dir ~'-'~ file}}">
-						{{ dir ~": "~ file }}
-					</label>
-				</div>
-			{% endfor %}
-		{% endfor %}
-		<button class="btn btn-primary" type="submit">Transfer File(s)</button>
-	</form>
+	{% if dir_list %}
+	<hr />
+	<div class="mb-3">
+		{% if form.data_source.data == "SmartMeterData" %}
+		<h5 class="form-label">Specify the meters, date & time range to download <b>SmartMeter Data</b> files, or automate the process.</h5>
+		{% else %}
+		<h5 class="form-label">Specify the date & time range to download <b>PCAP</b> files, or automate the process.</h5>
+		{% endif %}
+		<form action="/data_transfer/smart_meter" method="POST">
+			<div>
+				<input type="hidden" name="data_source" value="{{ form.data_source.data }}">
+				{{ form.data_source.label }}: {{ form.data_source.data }}
+			</div>
+			{% if form.data_source.data == "SmartMeterData" %}
+			<div>
+				<label>Select Meters:</label>
+				{% for meter in meters %}
+				<label style="margin: 0px 10px 0px 2px;">
+					<input style="margin: 0px 0px 0px 0px;" type="checkbox" name="meters" value="{{ meter }}">
+					{{ meter }}
+				</label>
+				{% endfor %}
+			</div>
+			{% endif %}
+			<div>{{ form.transfer_type.label }}:
+				{% for type in form.transfer_type %}
+				<tr>
+					<td>{{ type }}</td>
+					<td>{{ type.label }}</td>
+				</tr>
+				{% endfor %}
+			</div>
+			<div class="div_automate" style="visibility:hidden; display:none;">{{ form.transfer_freq.label }}:
+				{% for freq in form.transfer_freq %}
+				<tr>
+					<td>{{ freq }}</td>
+					<td>{{ freq.label }}</td>
+				</tr>
+				{% endfor %}
+			</div>
+			<div class="div_automate div_daily">{{ form.transfer_freq_time.label }} {{ form.transfer_freq_time }} every day.</div>
+			<div class="div_automate div_weekly">{{ form.transfer_freq_week_time.label }} {{ form.transfer_freq_week_time }} on a
+				{% for day in days_of_week %}
+				<label style="margin: 0px 2px 0px 2px;">
+					<input style="margin: 0px 0px 0px 0px;" type="checkbox" name="transfer_freq_week" value="{{ day }}">
+					{{ day }}
+				</label>
+				{% endfor %}
+				every week.
+			</div>
+			<div class="div_automate div_monthly">{{ form.transfer_freq_month_time.label }} {{ form.transfer_freq_month_time }} on the {{ form.transfer_freq_month }}day of every month.</div>
+			<div class="div_now">{{ form.date.label }}: {{ form.date }}</div>
+			<div>{{ form.start_time.label }}: {{ form.start_time }}</div>
+			<div class="div_now">{{ form.end_time.label }}: {{ form.end_time }}</div>
+			<div class="div_automate">{{ form.transfer_dur.label }}: {{ form.transfer_dur }}Minute</div>
+			<div class="div_automate">{{ form.job_name.label }}: {{ form.job_name }}</div>
+			<div>{{ form.submit(class="btn btn-primary") }}</div>
+		</form>
+	</div>
 	{% endif %}
 </div>
 
