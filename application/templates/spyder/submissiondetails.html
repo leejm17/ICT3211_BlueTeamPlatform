@@ -1,0 +1,22 @@
+<head>
+	<title>Spyder Submission Details</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+
+	<h1 class="title">Github URLs Post submission Details </h1>
+    <label id="value_lable">
+        {% for submission in submissions %}
+            {{ submission }}<br>
+        {% endfor %}
+    </label>
+
+    
+</div>
+
+{% endblock %}

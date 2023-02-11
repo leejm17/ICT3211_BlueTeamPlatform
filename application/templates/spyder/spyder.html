@@ -1,0 +1,86 @@
+<head>
+	<title>Spyder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            //var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+            $('form#github').submit(function(event) {
+                console.log("NYE");
+
+                valid = true
+
+                var values = [];
+                $('form input:text').each(
+                    function() {
+                    if (values.indexOf(this.value) >= 0) {
+                        $(this).css("border-color", "red");
+                        valid = false;
+                        return valid;
+                    } else {
+                        $(this).css("border-color", ""); //clears since last check
+                        values.push(this.value);
+                    }
+                    }
+                );
+                return valid;
+            });
+        });
+
+    </script>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+
+	<h1 class="title">Submit Github URLs</h1>
+
+    <form id="github" action="/submit" method="post" name="submit_git_URLs">
+      <div class="field">
+        <label for="title" class="label">Input 1</label>
+        <div class="control">
+          <input id=githubURL1 type="text" name="githubURL1" class="input" required="required"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="year" class="label">Input 2</label>
+        <div class="control">
+          <input id=githubURL2 type="text" name="githubURL2" class="input"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="year" class="label">Input 3</label>
+        <div class="control">
+          <input id=githubURL3 type="text" name="githubURL3" class="input"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="year" class="label">Input 4</label>
+        <div class="control">
+          <input id=githubURL4 type="text" name="githubURL4" class="input"/>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="year" class="label">Input 5</label>
+        <div class="control">
+          <input id=githubURL5 type="text" name="githubURL5" class="input"/>
+        </div>
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <input type="submit" id="submit" value="Submit URLs">
+        </div>
+      </div>
+    </form>
+</div>
+
+{% endblock %}

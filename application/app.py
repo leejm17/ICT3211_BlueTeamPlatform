@@ -36,9 +36,9 @@ def admin_honeypot_page():
     return render_template("/admin/honeypot.html")
 
 
-@app.route("/admin/spyder", methods=["GET"], endpoint="spyder")
-def admin_spyder_page():
-    return render_template("/admin/spyder.html")
+# @app.route("/admin/spyder", methods=["GET"], endpoint="spyder")
+# def admin_spyder_page():
+#     return render_template("/admin/spyder.html")
 
 
 @app.route("/admin/pcap_files", methods=["GET"], endpoint="pcap_files")
@@ -98,3 +98,27 @@ def applaunch_page():
 @app.route("/help", methods=["GET"], endpoint="help")
 def help_page():
     return render_template("/help.html")
+
+
+@app.route('/spyder', methods = ['POST', 'GET'])
+def spyder_submission_page():
+	# if request.method == "POST":
+	# 	details =  request.form
+	# 	print(type(details))
+	# 	for detail in details:
+	# 		print (type(detail))
+    
+	return render_template('/spyder/spyder.html')
+
+
+@app.route('/submit', methods = ['POST', 'GET'])
+def spyder_submission_detail_page():
+        submissions =  request.form
+        
+        for k, v in submissions.items():
+              print(k, v)
+
+        # for values in submissions.values():
+        #       print(values)
+        
+        return render_template('/spyder/submissiondetails.html', submissions=submissions.values())
