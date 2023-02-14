@@ -15,6 +15,9 @@
                     function() {
                     if (values.indexOf(this.value) >= 0) {
                         $(this).css("border-color", "red");
+                        // console.log(this.after('<p>Phone number has to be 10 digits long.</p>'));
+                        this.after('Duplicate values exists.')
+                        //div.classList.remove("hide");
                         valid = false;
                         return valid;
                     } else {
@@ -39,11 +42,14 @@
 
 	<h1 class="title">Submit Github URLs</h1>
 
-    <form id="github" action="/submit" method="post" name="submit_git_URLs">
-      <div class="field">
+    <form class="form" id="github" action="/submit" method="post" name="submit_git_URLs">
+      <!-- <div class="field">
         <label for="title" class="label">Input 1</label>
         <div class="control">
           <input id=githubURL1 type="text" name="githubURL1" class="input" required="required"/>
+        </div>
+        <div class="githubURL1-error hide">
+          Duplicate value detected
         </div>
       </div>
 
@@ -52,12 +58,19 @@
         <div class="control">
           <input id=githubURL2 type="text" name="githubURL2" class="input"/>
         </div>
+        <div class="githubURL2-error hide">
+          Duplicate value detected
+        </div>
       </div>
+
 
       <div class="field">
         <label for="year" class="label">Input 3</label>
         <div class="control">
           <input id=githubURL3 type="text" name="githubURL3" class="input"/>
+        </div>
+        <div class="githubURL3-error hide">
+          Duplicate value detected
         </div>
       </div>
 
@@ -66,6 +79,9 @@
         <div class="control">
           <input id=githubURL4 type="text" name="githubURL4" class="input"/>
         </div>
+        <div class="githubURL4-error hide">
+          Duplicate value detected
+        </div>
       </div>
 
       <div class="field">
@@ -73,13 +89,57 @@
         <div class="control">
           <input id=githubURL5 type="text" name="githubURL5" class="input"/>
         </div>
+        <div class="githubURL5-error hide">
+          Duplicate value detected
+        </div>
+      </div> -->
+
+      <div class="field">
+        <div class="row mb-3 align-item-center">
+          <label for="formGroupEampleInput" class="form-label" id="username">Input 1</label>
+          <input type="text" class="form-control" id="githubURL1" name="githubURL1" placeholder="Github URL" required>
+          <div class="username-error"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="row mb-3 align-item-center">
+          <label for="formGroupEampleInput" class="form-label" id="username">Input 2</label>
+          <input type="text" class="form-control" id="githubURL2" name="githubURL2" placeholder="Github URL" required>
+          <div class="username-error"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="row mb-3 align-item-center">
+          <label for="formGroupEampleInput" class="form-label" id="username">Input 3</label>
+          <input type="text" class="form-control" id="githubURL3" name="githubURL3" placeholder="Github URL" required>
+          <div class="username-error"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="row mb-3 align-item-center">
+          <label for="formGroupEampleInput" class="form-label" id="username">Input 4</label>
+          <input type="text" class="form-control" id="githubURL4" name="githubURL4" placeholder="Github URL" required>
+          <div class="username-error"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="row mb-3 align-item-center">
+          <label for="formGroupEampleInput" class="form-label" id="username">Input 5</label>
+          <input type="text" class="form-control" id="githubURL5" name="githubURL5" placeholder="Github URL" required>
+          <div class="username-error"></div>
+        </div>
       </div>
 
       <div class="field is-grouped">
         <div class="control">
-          <input type="submit" id="submit" value="Submit URLs">
+          <button class="btn btn-primary" id=submit type="submit">text here</button>
         </div>
-      </div>
+      </div> 
+      
     </form>
 </div>
 

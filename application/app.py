@@ -100,25 +100,19 @@ def help_page():
     return render_template("/help.html")
 
 
-@app.route('/spyder', methods = ['POST', 'GET'])
-def spyder_submission_page():
-	# if request.method == "POST":
-	# 	details =  request.form
-	# 	print(type(details))
-	# 	for detail in details:
-	# 		print (type(detail))
-    
-	return render_template('/spyder/spyder.html')
 
+@app.route('/spyder', methods = ['POST', 'GET'])
+def spyder_submission_page():      
+      return render_template('/spyder/spyder.html')
+	  
 
 @app.route('/submit', methods = ['POST', 'GET'])
 def spyder_submission_detail_page():
         submissions =  request.form
-        
         for k, v in submissions.items():
               print(k, v)
+              
+        # send POST requests to scrapyd in code below
 
-        # for values in submissions.values():
-        #       print(values)
-        
+		# display return values from scrapyd to submissiondetails.html
         return render_template('/spyder/submissiondetails.html', submissions=submissions.values())
