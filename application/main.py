@@ -397,6 +397,28 @@ def cronjob_process(data_source, meters, start_time, end_time):
 
 
 ########## END Data Transfer (Smart Meter): Schedule Transfer ##########
+########## START Data Transfer (Smart Meter): Manage Schedules ##########
+
+def retrieve_cronjobs():
+	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "start_time": "12:00", "end_time": "12:30"}]
+
+	cron_list = []
+	job_id = 0
+
+	# Initialise Cron
+	root_cron = CronTab(user="user")
+	for job in root_cron:
+		job_id += 1
+		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split(", ")
+		meters = parameters[1].strip("\"()' ")
+		if meters == "[]":
+			meters = "-"
+		cron_dict = {"id": job_id, "data_source": parameters[0].strip("\"()' "), "name": job.comment, "data_source": parameters[0].strip("\"()' "), "meters": meters, "start_time": ":".join(parameters[2].strip("\"()' ").split(":")[0:2]), "end_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2])}
+		cron_list.append(cron_dict)
+
+	return cron_list
+
+########## END Data Transfer (Smart Meter): Manage Schedules ##########
 
 
 ########## START App Launch ##########

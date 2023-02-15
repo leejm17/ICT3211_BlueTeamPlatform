@@ -1,0 +1,59 @@
+<head>
+	<title>Manage Jobs</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">    
+	<h1>Manage Jobs</h1>
+
+	<div class="mb-3">
+		<h5 class="form-label">Manage your scheduled jobs here!</h5>
+		<input type="text" id="jobs_search" onkeyup="search_jobs_table()" placeholder="Search for meters...">
+		<table id="jobs_table">
+			<thead>
+				<tr>
+					<th onclick="sort_jobs_table(0)">Job ID</th>
+					<th onclick="sort_jobs_table(1)">Job Name</th>
+					<th onclick="sort_jobs_table(2)">Job scheduled for {string}</th>
+					<th onclick="sort_jobs_table(3)"><span>Data Source</span></th>
+					<th onclick="sort_jobs_table(4)"><span>Meters (if any)</span></th>
+					<th onclick="sort_jobs_table(5)"><span>Data Start Time</span></th>
+					<th onclick="sort_jobs_table(6)"><span>Data End Time</span></th>
+					<th><span>Action</span></th>
+				</tr>
+			</thead>
+			<form action="/data_transfer/manage_jobs" method="POST">
+				<tbody>
+					<!--<tr>
+						<td>1</td>
+						<td>Job One</td>
+						<td>{}:{} every day | {}:{} every {} | {}:{} on every {} day of the month</td>
+						<td><span>SmartMeterData | WiresharkData</span></td>
+						<td><span>Meter1, Meter2, Meter3 | []</span></td>
+						<td><span>12:00</span></td>
+						<td><span>12:30</span></td>
+						<td><button class="btn btn-danger" type="submit" name="cancel" value="jobID">Cancel</button></td>
+					</tr>-->
+					{% for job in job_list %}
+					<tr>
+						<td>{{ job["id"] }}</td>
+						<td>{{ job["name"] }}</td>
+						<td>{}:{} every day | {}:{} every {} | {}:{} on every {} day of the month</td>
+						<td><span>{{ job["data_source"] }}</span></td>
+						<td><span>{{ job["meters"] }}</span></td>
+						<td><span>{{ job["start_time"] }}</span></td>
+						<td><span>{{ job["end_time"] }}</span></td>
+						<td><button class="btn btn-danger" type="submit" name="cancel" value="{{ job['id'] }}">Cancel</button></td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</form>
+		</table>
+	</div>
+</div>
+
+{% endblock %}
