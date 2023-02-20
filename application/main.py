@@ -13,6 +13,7 @@ windows_ip = os.getenv("windows_ip")
 debian_ip = os.getenv("debian_ip")
 ftp_user = os.getenv("ftp_user")
 ftp_pw = os.getenv("ftp_pw")
+cron_user = os.getenv("cron_user")
 
 
 ########## START Data Transfer (Smart Meter): Initiate FTP ##########
@@ -98,14 +99,14 @@ def windows_ftp_process(form):
 	print("data_source: {}".format(form.data_source.data))
 	print("meters: {}".format(form.meters.data))
 	#print("file_type: {}".format(form["file_type"]))
-	success, file_dict = windows_ftp_initiate(form.data_source.data, form.meters.data)
+	success, file_dict = windows_ftp_initiate(form.data_source.data, form.meters.data, form.wireshark_source.data)
 	if not success:
 		return success, file_dict
 
 	print("date: {}".format(form.date.data))
 	print("start_time: {}".format(form.start_time.data))
 	print("end_time: {}".format(form.end_time.data))
-	success, file_dict = windows_ftp_filter_datetime(form.date.data, form.start_time.data, form.end_time.data, file_dict)
+	success, file_dict = windows_ftp_filter_datetime(form.data_source.data, form.date.data, form.start_time.data, form.end_time.data, file_dict)
 	if not success:
 		return success, file_dict
 
@@ -115,7 +116,7 @@ def windows_ftp_process(form):
 	return success, message
 
 
-def windows_ftp_initiate(ftp_dir, meters):#, file_type):
+def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 	file_dict = {}		# Store Dir & corresponding Filenames
 
 	if ftp_dir == "SmartMeterData":
@@ -142,7 +143,9 @@ def windows_ftp_initiate(ftp_dir, meters):#, file_type):
 		try:
 			for dir_list in root:
 				if root_dir == "WiresharkData":
-					file_dict[root_dir] += [dir_list[0]]
+					print(dir_list[0])
+					if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
+						file_dict[root_dir] += [dir_list[0]]
 				elif dir_list[0] in meters:
 					# dir_list[0] = dir/filename
 					# dir_list[1] = dir/file data
@@ -165,7 +168,7 @@ def windows_ftp_initiate(ftp_dir, meters):#, file_type):
 	return True, file_dict
 
 
-def windows_ftp_filter_datetime(date, start_time, end_time, file_dict):
+def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_dict):
 	filtered_dict = {}
 	start_datetime = datetime.combine(date, start_time) - timedelta(hours=8)
 	start_date = start_datetime.strftime("%Y%m%d")
@@ -180,30 +183,32 @@ def windows_ftp_filter_datetime(date, start_time, end_time, file_dict):
 	print("start_time: {}".format(start_time))
 	print("end_date: {}".format(end_date))
 	print("end_time: {}".format(end_time))
+	print(file_dict)
 
 	for meter in file_dict:
 		filtered_dict[meter] = []
 		for csv_file in file_dict[meter]:
 			filtered_date_file = csv_file.split("_")[0]
 			##print(start_date, filtered_date_file)	# Print Filtered Date & Date of selected .csv file
-			
+
+			if data_source == "WiresharkData":
+				filtered_time_file = int("{}00".format(csv_file.split("_")[1].split(".")[0]))
+			else:
+				filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 			# Filter .csv filename if date is same
 			if start_date == end_date:
-				filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 				# Store .csv filename if Start time <= filtered range <= End time
 				if (start_time <= filtered_time_file) and (filtered_time_file <= end_time):
 					print("{} <= {} <= {}".format(start_time, filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
 					filtered_dict[meter] += [csv_file]
 			else:
 				if filtered_date_file == start_date:
-					filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 					# Store .csv filename if Start time <= filtered range <= 235959
 					if (start_time <= filtered_time_file) and (filtered_time_file <= 235959):
 						print("{} <= {} <= 235959".format(start_time, filtered_time_file))	# Print Filtered Start-End times & Time of selected .csv file
 						filtered_dict[meter] += [csv_file]
 
 				elif filtered_date_file == end_date:
-					filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 					# Store .csv filename if 000000 <= filtered range <= End time
 					if (000000 <= filtered_time_file) and (filtered_time_file <= end_time):
 						print("000000 <= {} <= {}".format(filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
@@ -318,7 +323,7 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 	sched_time = str(sched_time)
 
 	# Initialise Cron
-	root_cron = CronTab(user="user")
+	root_cron = CronTab(user=cron_user)
 	##root_cron.remove_all()
 	##root_cron.write()
 
@@ -406,7 +411,7 @@ def retrieve_cronjobs():
 	job_id = 0
 
 	# Initialise Cron
-	root_cron = CronTab(user="user")
+	root_cron = CronTab(user=cron_user)
 	for job in root_cron:
 		job_id += 1
 		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split(", ")
@@ -417,6 +422,24 @@ def retrieve_cronjobs():
 		cron_list.append(cron_dict)
 
 	return cron_list
+
+
+def action_cronjobs(action_jobid):
+	action = action_jobid.split("_")[0]
+	job_id = action_jobid.split("_")[1]
+
+	job_cnt = 0
+	# Initialise Cron
+	root_cron = CronTab(user=cron_user)
+	for job in root_cron:
+		job_cnt += 1
+		if job_cnt == job_id:
+			cron_action(action)
+
+
+def cron_action(action):
+	print(action)
+
 
 ########## END Data Transfer (Smart Meter): Manage Schedules ##########
 

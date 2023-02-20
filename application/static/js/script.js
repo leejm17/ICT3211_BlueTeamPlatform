@@ -41,6 +41,7 @@ function toggle_transfer_type(id) {
 			div_automate[i].style.visibility = "hidden";
 			div_automate[i].style.display = "none";
 		}
+		document.getElementById("div_btn").value = "Data Transfer";
 	} else {
 		for (let i=0; i < div_now.length; i++) {
 			div_now[i].style.visibility = "hidden";
@@ -56,6 +57,7 @@ function toggle_transfer_type(id) {
 		div_weekly[0].style.display = "none";
 		div_monthly[0].style.visibility = "hidden";
 		div_monthly[0].style.display = "none";
+		document.getElementById("div_btn").value = "Schedule";
 	}
 }
 

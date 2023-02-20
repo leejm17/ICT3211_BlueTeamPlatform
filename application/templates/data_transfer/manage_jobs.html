@@ -47,7 +47,11 @@
 						<td><span>{{ job["meters"] }}</span></td>
 						<td><span>{{ job["start_time"] }}</span></td>
 						<td><span>{{ job["end_time"] }}</span></td>
-						<td><button class="btn btn-danger" type="submit" name="cancel" value="{{ job['id'] }}">Cancel</button></td>
+						<td>
+							<button class="btn btn-success" type="submit" name="action" value="enable_{{ job['id'] }}">Enable</button>
+							<button class="btn btn-warning" type="submit" name="action" value="disable_{{ job['id'] }}">Disable</button>
+							<button class="btn btn-danger" type="submit" name="action" value="delete_{{ job['id'] }}">Delete</button>
+						</td>
 					</tr>
 					{% endfor %}
 				</tbody>

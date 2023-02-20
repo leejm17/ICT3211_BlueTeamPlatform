@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 # Import Other Files
-from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs
+from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
 #from main import initiate_ftp, windows_ftp_transfer
 from forms import DataTransfer_Form
 
@@ -99,14 +99,15 @@ def datatransfer_tpot_page():
 @app.route("/data_transfer/manage_jobs", methods=["GET", "POST"], endpoint="data_transfer.manage_jobs")
 def datatransfer_managejobs_page():
 	if request.method == "POST":
-		if request.form["cancel"]:
-			print("job_ID: {}".format(request.form["cancel"]))
+		if request.form["action"]:
+			print("job_ID: {}".format(request.form["action"]))
+			success, message = action_cronjobs(request.form["action"])
 	# Retrieve list of dictionary-per-job from CronTab
 	cron_jobs = retrieve_cronjobs()
 	"""cron_jobs = [
 		{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "start_time": "12:00", "end_time": "12:30"},
 		{"id": "2", "name": "Job Two", "data_source": "WiresharkData", "meters": "[]", "start_time": "14:00", "end_time": "14:15"}]"""
-	# Cancel job based on job_ID
+	# Delete job based on job_ID
 	# Enable/Disable job based on job_ID
 	return render_template("/data_transfer/manage_jobs.html", job_list=cron_jobs)
 

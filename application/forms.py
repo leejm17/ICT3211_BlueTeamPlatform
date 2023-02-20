@@ -44,6 +44,13 @@ class DataTransfer_Form(Form):
 		render_kw={"step": "1", })
 
 
+	#### Wireshark Data: WiresharkData only ####
+	wireshark_source = RadioField(
+		"Wireshark Source",
+		choices=["Ethernet", "WiFi"],
+		default="Ethernet")
+
+
 	#### Transfer Type: Now only ####
 	date = DateField(
 		"Date",
@@ -114,4 +121,4 @@ class DataTransfer_Form(Form):
 			InputRequired()],
 		render_kw={"placeholder": "Enter a job name"})
 
-	submit = SubmitField("Data Transfer")
+	submit = SubmitField("Data Transfer", render_kw={"id": "div_btn"})

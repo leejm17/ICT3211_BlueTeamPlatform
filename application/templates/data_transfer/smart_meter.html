@@ -14,14 +14,14 @@
 		<h5 class="form-label">Choose a folder to initiate Secure FTP connection to the <b>Smart Meter Windows machine</b> <i style="color:red;">(IP: <b>{{ip}}</b>)</i></h5>
 		<form action="/data_transfer/smart_meter" method="POST">
 			<button class="btn btn-primary" type="submit" name="submit" value="SmartMeterData">
-			{% if not dir_list or data_source != "SmartMeterData" %}
+			{% if not dir_list or form.data_source.data != "SmartMeterData" %}
 				SmartMeter Data
 			{% else %}Re-initiate FTP{% endif %}
 			</button>
 		</form>
 		<form action="/data_transfer/smart_meter" method="POST">
 			<button class="btn btn-info" type="submit" name="submit" value="WiresharkData">
-			{% if not dir_list or data_source != "WiresharkData" %}
+			{% if not dir_list or form.data_source.data != "WiresharkData" %}
 				Wireshark Data
 			{% else %}Re-initiate FTP{% endif %}
 			</button>
@@ -49,6 +49,15 @@
 					<input style="margin: 0px 0px 0px 0px;" type="checkbox" name="meters" value="{{ meter }}">
 					{{ meter }}
 				</label>
+				{% endfor %}
+			</div>
+			{% else %}
+			<div>{{ form.wireshark_source.label }}:
+				{% for source in form.wireshark_source %}
+				<tr>
+					<td>{{ source }}</td>
+					<td>{{ source.label }}</td>
+				</tr>
 				{% endfor %}
 			</div>
 			{% endif %}
