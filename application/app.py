@@ -1,6 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 from dotenv import load_dotenv
-import os
+import os, subprocess
 
 # Import Other Files
 from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
@@ -91,9 +91,12 @@ def datatransfer_smartmeter_page():
 	return render_template("/data_transfer/smart_meter.html", ip=windows_ip, form=form)
 
 
-@app.route("/data_transfer/t_pot", methods=["GET"], endpoint="data_transfer.t_pot")
-def datatransfer_tpot_page():
-    return render_template("/data_transfer/t_pot.html", ip=debian_ip)
+@app.route("/data_transfer/network", methods=["GET", "POST"], endpoint="data_transfer.network")
+def datatransfer_network_page():
+	if request.method == "POST" and request.form["action"] == "browse":
+		filepath = "{}/FTP_Downloads".format("/".join(os.getcwd().split("/")[:-2]))
+		subprocess.Popen(["xdg-open", filepath])
+	return render_template("/data_transfer/network_capture.html")
 
 
 @app.route("/data_transfer/manage_jobs", methods=["GET", "POST"], endpoint="data_transfer.manage_jobs")

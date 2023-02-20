@@ -1,0 +1,21 @@
+<head>
+	<title>Network Capture</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">    
+	<h1>Network Capture</h1>
+
+	<div class="mb-3">
+		<label for="formFileLg" class="form-label">Browse the captured network packets from the <b>Honeypot Debian machine</b> here.</label><br />
+		<form action="/data_transfer/network" method="POST">
+			<button class="btn btn-primary" type="submit" name="action" value="browse">Browse Files</button>
+		</form>
+	</div>
+</div>
+
+{% endblock %}
