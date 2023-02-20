@@ -5,6 +5,7 @@ from crontab import CronTab
 import os
 import ftplib, ssl
 import magic
+import ast
 
 
 # Global Variables
@@ -414,11 +415,39 @@ def retrieve_cronjobs():
 	root_cron = CronTab(user=cron_user)
 	for job in root_cron:
 		job_id += 1
-		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split(", ")
+		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split("\", \"")
+		job_enabled = str(job)[0]
+
 		meters = parameters[1].strip("\"()' ")
 		if meters == "[]":
 			meters = "-"
-		cron_dict = {"id": job_id, "data_source": parameters[0].strip("\"()' "), "name": job.comment, "data_source": parameters[0].strip("\"()' "), "meters": meters, "start_time": ":".join(parameters[2].strip("\"()' ").split(":")[0:2]), "end_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2])}
+		meter_list = ast.literal_eval(meters)
+		meters = ", ".join(meter_list)
+
+		sched = str(job).split(" cd ")[0].split(" ")
+		if job_enabled == "#":
+			sched.pop(0)
+		minute = sched[0]
+		hour = sched[1]
+		day_of_month = sched[2]
+		day_of_week = sched[4]
+		
+		try:
+			if int(minute) < 10:
+				minute = "0{}".format(minute)
+			if int(hour) < 10:
+				hour = "0{}".format(hour)
+		except:
+			pass
+
+		if minute != "*" and hour != "*" and day_of_month != "*":
+			sched_desc = "{}:{}H on every {} day of the month.".format(hour, minute, day_of_month)
+		elif minute != "*" and hour != "*" and day_of_week != "*":
+			sched_desc = "{}:{}H every {}.".format(hour, minute, ", ".join(day_of_week.split(",")))
+		elif minute != "*" and hour != "*":
+			sched_desc = "{}:{}H every day.".format(hour, minute)
+
+		cron_dict = {"id": job_id, "name": job.comment, "sched_desc": sched_desc, "data_source": parameters[0].strip("\"()' "), "meters": meters, "start_time": ":".join(parameters[2].strip("\"()' ").split(":")[0:2]), "end_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2]), "enabled": job_enabled}
 		cron_list.append(cron_dict)
 
 	return cron_list
@@ -426,7 +455,7 @@ def retrieve_cronjobs():
 
 def action_cronjobs(action_jobid):
 	action = action_jobid.split("_")[0]
-	job_id = action_jobid.split("_")[1]
+	job_id = int(action_jobid.split("_")[1])
 
 	job_cnt = 0
 	# Initialise Cron
@@ -434,11 +463,23 @@ def action_cronjobs(action_jobid):
 	for job in root_cron:
 		job_cnt += 1
 		if job_cnt == job_id:
-			cron_action(action)
+			if action == "enable":
+				job.enable()
+			elif action == "disable":
+				job.enable(False)
+			elif action == "delete":
+				root_cron.remove(job)
+			else:
+				print("Unable to ascertain Job {} action for Job ID: {}.".format(action, job_id))
 
+	try:
+		root_cron.write()
+	except Exception as e:
+		print("Error Enabling/Disabling Cron job: {}\nJob: {}".format(e, job))
+		root_cron.clear()
+		#return 0, 0
 
-def cron_action(action):
-	print(action)
+	#return 1, 1
 
 
 ########## END Data Transfer (Smart Meter): Manage Schedules ##########

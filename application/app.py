@@ -103,15 +103,14 @@ def datatransfer_network_page():
 def datatransfer_managejobs_page():
 	if request.method == "POST":
 		if request.form["action"]:
-			print("job_ID: {}".format(request.form["action"]))
-			success, message = action_cronjobs(request.form["action"])
+			# Action: Enable, Disable, Delete job
+			action_cronjobs(request.form["action"])
+
 	# Retrieve list of dictionary-per-job from CronTab
 	cron_jobs = retrieve_cronjobs()
 	"""cron_jobs = [
 		{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "start_time": "12:00", "end_time": "12:30"},
 		{"id": "2", "name": "Job Two", "data_source": "WiresharkData", "meters": "[]", "start_time": "14:00", "end_time": "14:15"}]"""
-	# Delete job based on job_ID
-	# Enable/Disable job based on job_ID
 	return render_template("/data_transfer/manage_jobs.html", job_list=cron_jobs)
 
 

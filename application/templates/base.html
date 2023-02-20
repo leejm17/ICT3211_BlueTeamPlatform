@@ -100,7 +100,7 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
         	    
         	    <li class="nav-item dropdown">
                     <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.t_pot" or request.endpoint=="data_transfer.smart_meter" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.smart_meter" or request.endpoint=="data_transfer.network" or request.endpoint=="data_transfer.manage_jobs" %}class="nav-link dropdown-toggle active" aria-current="page"
 						{% else %}class="nav-link dropdown-toggle"{% endif %}>
 						Data Transfer</a>
 
