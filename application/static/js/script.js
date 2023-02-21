@@ -94,38 +94,6 @@ function toggle_transfer_freq(id) {
 	}
 }
 
-/*function toggle_transfer_freq(id) {
-	const freq_dur = document.getElementById("transfer_freq_dur");
-	const freq_dur_span = document.getElementById("freq_dur_span");
-	switch (id.substr(id.length-1)) {
-		case "0":
-			freq_dur.min = "1";
-			freq_dur.max = "60";
-			freq_dur_span.textContent = "Minute(s)";
-			break;
-		case "1":
-			freq_dur.min = "1";
-			freq_dur.max = "23";
-			freq_dur_span.textContent = "Hour(s)";
-			break;
-		case "2":
-			freq_dur.min = "1";
-			freq_dur.max = "6";
-			freq_dur_span.textContent = "Day(s)";
-			break;
-		case "3":
-			freq_dur.min = "1";
-			freq_dur.max = "4";
-			freq_dur_span.textContent = "Week(s)";
-			break;
-		case "4":
-			freq_dur.min = "1";
-			freq_dur.max = "11";
-			freq_dur_span.textContent = "Month(s)";
-			break;
-	}
-}*/
-
 
 // Source: https://www.w3schools.com/howto/howto_js_filter_table.asp
 function search_jobs_table() {
@@ -203,4 +171,18 @@ function sort_jobs_table(n) {
 			}
 		}
 	}
+}
+
+
+function retrieve_global_var() {
+	$.ajax({
+		url:"/global_var",
+		success: function(resp) {
+			document.getElementById("windows_ip").defaultValue = resp.windows_ip;
+			document.getElementById("debian_ip").defaultValue = resp.debian_ip;
+			document.getElementById("ftp_user").defaultValue = resp.ftp_user;
+			document.getElementById("ftp_pw").defaultValue = resp.ftp_pw;
+			document.getElementById("cron_user").defaultValue = resp.cron_user;
+		}
+	});
 }

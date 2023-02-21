@@ -12,6 +12,9 @@ from wtforms import (
 from wtforms.validators import NumberRange, InputRequired
 from datetime import datetime
 
+# Import Local Files
+from admin import retrieve_glob_var
+
 
 class DataTransfer_Form(Form):
 
@@ -122,3 +125,32 @@ class DataTransfer_Form(Form):
 		render_kw={"placeholder": "Enter a job name"})
 
 	submit = SubmitField("Data Transfer", render_kw={"id": "div_btn"})
+
+
+class AdminConfig_Form(Form):
+	global_dict = retrieve_glob_var()
+
+	windows_ip = StringField(
+		"Windows IP",
+		validators=[
+			InputRequired()])
+
+	debian_ip = StringField(
+		"Debian IP",
+		validators=[
+			InputRequired()])
+
+	ftp_user = StringField(
+		"FTP User",
+		validators=[
+			InputRequired()])
+
+	ftp_pw = StringField(
+		"FTP Password",
+		validators=[
+			InputRequired()])
+
+	cron_user = StringField(
+		"Host Username",
+		validators=[
+			InputRequired()])

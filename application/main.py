@@ -1,5 +1,4 @@
 from flask import request
-from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from crontab import CronTab
 import os
@@ -7,14 +6,8 @@ import ftplib, ssl
 import magic
 import ast
 
-
-# Global Variables
-load_dotenv()   # Take environment variables from .env
-windows_ip = os.getenv("windows_ip")
-debian_ip = os.getenv("debian_ip")
-ftp_user = os.getenv("ftp_user")
-ftp_pw = os.getenv("ftp_pw")
-cron_user = os.getenv("cron_user")
+# Import Local Files
+from admin import retrieve_glob_var
 
 
 ########## START Data Transfer (Smart Meter): Initiate FTP ##########
@@ -59,7 +52,9 @@ def windows_ftp_start(ftp_dir):
 	dir_list = []		# Store Dir & corresponding Filenames
 	for root_dir in ftp_dir:
 		try:
-			ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
+			global_dict = retrieve_glob_var()
+			print(global_dict["windows_ip"], global_dict["ftp_user"], global_dict["ftp_pw"])
+			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 			ftps.prot_p()		# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
 			if root_dir == "WiresharkData":
@@ -127,7 +122,8 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 
 	for root_dir in ftp_dir:
 		try:
-			ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
+			global_dict = retrieve_glob_var()
+			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 			ftps.prot_p()		# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
 			if root_dir == "WiresharkData":
@@ -227,7 +223,8 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 
 	try:
 		# Download files via FTPS
-		ftps = MyFTP_TLS(host=windows_ip, user=ftp_user, passwd=ftp_pw)
+		global_dict = retrieve_glob_var()
+		ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 		ftps.prot_p()		# Set up secure connection
 		current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -324,11 +321,12 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 	sched_time = str(sched_time)
 
 	# Initialise Cron
-	root_cron = CronTab(user=cron_user)
+	root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
 	##root_cron.remove_all()
 	##root_cron.write()
 
 	# Creating a new job
+	## HELP !!!
 	job = root_cron.new(command="cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application/cron_output.txt".format(data_source, meters, start_time, end_time), comment=job_name)
 
 	if data_source == "SmartMeterData":
@@ -411,8 +409,13 @@ def retrieve_cronjobs():
 	cron_list = []
 	job_id = 0
 
-	# Initialise Cron
-	root_cron = CronTab(user=cron_user)
+	try:
+		# Initialise Cron
+		root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
+	except Exception as e:
+		print("Cron User Error: {}".format(e))
+		return "Cron User Error"
+
 	for job in root_cron:
 		job_id += 1
 		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split("\", \"")
@@ -459,7 +462,7 @@ def action_cronjobs(action_jobid):
 
 	job_cnt = 0
 	# Initialise Cron
-	root_cron = CronTab(user=cron_user)
+	root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
 	for job in root_cron:
 		job_cnt += 1
 		if job_cnt == job_id:

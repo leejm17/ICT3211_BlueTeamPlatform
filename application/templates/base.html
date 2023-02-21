@@ -24,7 +24,7 @@
 
 	<!-- Bootstrap 4 -->
 	<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
-	<script type="text/javascript" src="/static/js/jquery-3.6.3.slim.min.js"></script>
+	<script type="text/javascript" src="/static/js/jquery-3.6.3.min.js"></script>
 	<!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 	<script src="https://code.jquery.com/jquery-3.6.3.slim.min.js" integrity="sha256-ZwqZIVdD3iXNyGHbSYdsmWP//UBokj2FHAxKuSBKDSo=" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
@@ -64,7 +64,7 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 
         	    <li class="nav-item dropdown">
                     <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="pcap_files" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="admin.data_transfer" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
 						{% else %}class="nav-link dropdown-toggle"{% endif %}>
 						Admin</a>
 
@@ -87,9 +87,9 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							Spyder</a></li>
 
                         <li><a
-							{% if request.endpoint=="pcap_files" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/admin/pcap_files">
-							PCAP Files</a></li>
+							{% if request.endpoint=="admin.data_transfer" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/data_transfer">
+							Data Transfer</a></li>
 
 						<li><a
 							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
@@ -145,7 +145,7 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
     </div>
 </nav>
 
-<body onload="current_datetime()">
+<body onload="retrieve_global_var(); current_datetime();">
 {% block body %}
 {% endblock %}
 </body>

@@ -1,0 +1,23 @@
+<head>
+	<title>Success</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+	{% if not configs %}
+	<h1>Config not updated.</h1>
+	<p>No variable is updated.<br />
+	{% else %}
+	<h1>Updated Config!</h1>
+	<p>
+		Configs updated:
+		<b>{{ configs|join(", ") }}</b>.<br />
+	{% endif %}
+	Click here to <a href="/admin/data_transfer">modify config settings</a> again.</p>
+</div>
+
+{% endblock %}
