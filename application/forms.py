@@ -12,9 +12,6 @@ from wtforms import (
 from wtforms.validators import NumberRange, InputRequired
 from datetime import datetime
 
-# Import Local Files
-from admin import retrieve_glob_var
-
 
 class DataTransfer_Form(Form):
 
@@ -128,7 +125,6 @@ class DataTransfer_Form(Form):
 
 
 class AdminConfig_Form(Form):
-	global_dict = retrieve_glob_var()
 
 	windows_ip = StringField(
 		"Windows IP",
