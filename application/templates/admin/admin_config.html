@@ -7,6 +7,29 @@
 {% block body %}
 
 <!--Page content-->
+<div class="container mt-5">
+	<h1>Which module to configure?</h1>
 
+	<!-- Features section-->
+	<div class="container px-5 my-5">
+		<div class="row gx-5">
+			<div class="col-lg-6">
+				<a href="/admin/data_transfer"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-collection"></i></div></a>
+				<h2 class="h4 fw-bolder">Data Transfer</h2>
+				<p>Initiate the file transfer process from another computer to Analyst machine.</p>
+			</div>
+			<div class="col-lg-6">
+				<a href="/admin/spyder"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="fas fa-spider"></i></div></a>
+				<h2 class="h4 fw-bolder">Spider</h2>
+				<p>Crawl GitHub repositories for Yara Rules.</p>
+			</div>
+			<div class="col-lg-6">
+				<a href="/admin/honeypot"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="fas fa-network-wired"></i></div></a>
+				<h2 class="h4 fw-bolder">Network Captures</h2>
+				<p>View network captures initiated from this machine.</p>
+			</div>
+		</div>
+	</div>
+</div>
 
 {% endblock %}

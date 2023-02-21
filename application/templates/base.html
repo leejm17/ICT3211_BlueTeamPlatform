@@ -32,6 +32,7 @@
 
 	<!-- Font Awesome -->
 	<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css">
 
 	<!-- Moment.js -->
 	<script type="text/javascript" src="/static/js/moment.min.js"></script>
@@ -77,24 +78,24 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 	                    <li><hr class="dropdown-divider" /></li>
 
                         <li><a
-							{% if request.endpoint=="honeypot" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/admin/honeypot">
-							Honeypot</a></li>
-
-                        <li><a
-							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/admin/spyder">
-							Spyder</a></li>
-
-                        <li><a
 							{% if request.endpoint=="admin.data_transfer" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/data_transfer">
 							Data Transfer</a></li>
 
 						<li><a
+							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/spyder">
+							Spyder</a></li>
+
+						<li><a
+							{% if request.endpoint=="honeypot" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/honeypot">
+							Network Captures</a></li>
+
+						<!--<li><a
 							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/machine_learning">
-							Machine Learning</a></li>
+							Machine Learning</a></li>-->
                     </ul>
                 </li>
         	    
