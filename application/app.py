@@ -110,7 +110,6 @@ def datatransfer_managejobs_page():
 
 	# Retrieve list of dictionary-per-job from CronTab
 	cron_jobs = retrieve_cronjobs()
-	print(cron_jobs)
 	return render_template("/data_transfer/manage_jobs.html", job_list=cron_jobs)
 
 

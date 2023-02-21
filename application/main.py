@@ -53,7 +53,6 @@ def windows_ftp_start(ftp_dir):
 	for root_dir in ftp_dir:
 		try:
 			global_dict = retrieve_glob_var()
-			print(global_dict["windows_ip"], global_dict["ftp_user"], global_dict["ftp_pw"])
 			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 			ftps.prot_p()		# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
@@ -235,10 +234,8 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 			current_dir = os.getcwd()
 			if job_name is not None:	# job_name taken from Job Schedule
 				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, job_name, current_datetime)
-				#download_dir = "/".join(current_dir.split("/")[:-2]) + "/FTP_Downloads/Smart_Meter/" + data_source + "/" + job_name + "/" + current_datetime
 			else:
 				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, current_datetime)
-				#download_dir = "/".join(current_dir.split("/")[:-2]) + "/FTP_Downloads/Smart_Meter/" + data_source + "/" + current_datetime
 			if not os.path.isdir(download_dir):		# Mkdir if Download directory does not exist
 				os.makedirs(download_dir)
 			os.chdir(download_dir)		# Change Download directory
@@ -299,7 +296,7 @@ def windows_ftp_automate(form):
 			"weekly", form.transfer_freq_week.data, form.transfer_freq_week_time.data, form.job_name.data,
 			form.data_source.data, form.meters.data, form.start_time.data, end_time)
 	elif form.transfer_freq.data == "Monthly":
-		print("transfer_freq_month_time: {}".format(form.transfer_freq_month.data))
+		print("transfer_freq_month: {}".format(form.transfer_freq_month.data))
 		print("transfer_freq_month_time: {}".format(form.transfer_freq_month_time.data))
 		success, cron, job = cronjob_format(
 			"monthly", form.transfer_freq_month.data, form.transfer_freq_month_time.data, form.job_name.data,
@@ -326,8 +323,7 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 	##root_cron.write()
 
 	# Creating a new job
-	## HELP !!!
-	job = root_cron.new(command="cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application/cron_output.txt".format(data_source, meters, start_time, end_time), comment=job_name)
+	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(os.getcwd(), data_source, meters, start_time, end_time, os.getcwd()), comment=job_name)
 
 	if data_source == "SmartMeterData":
 		job_message = "Job Name: {}-Data Source: {}-Meters: {}-Data Start Time: {}-Data End Time: {}".format(job_name, data_source, meters, start_time, end_time)
@@ -396,7 +392,6 @@ def cronjob_process(data_source, meters, start_time, end_time):
 		print("Cron unable to download files: {}".format(file_dict))
 
 	success, message = windows_ftp_transfer(data_source, file_dict)
-
 	print("Cron Job Success: {}".format(message))
 
 
@@ -480,9 +475,6 @@ def action_cronjobs(action_jobid):
 	except Exception as e:
 		print("Error Enabling/Disabling Cron job: {}\nJob: {}".format(e, job))
 		root_cron.clear()
-		#return 0, 0
-
-	#return 1, 1
 
 
 ########## END Data Transfer (Smart Meter): Manage Schedules ##########
