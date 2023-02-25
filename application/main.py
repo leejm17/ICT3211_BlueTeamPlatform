@@ -119,11 +119,16 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 	else:
 		ftp_dir = [ftp_dir]
 
+	import time
+	start = time.time()
+	global_dict = retrieve_glob_var()
+	ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
+	ftps.prot_p()		# Set up secure connection
 	for root_dir in ftp_dir:
 		try:
-			global_dict = retrieve_glob_var()
-			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-			ftps.prot_p()		# Set up secure connection
+			#global_dict = retrieve_glob_var()
+			#ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
+			#ftps.prot_p()		# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
 			if root_dir == "WiresharkData":
 				file_dict[root_dir] = []
@@ -153,13 +158,20 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 						for data in file_list:
 							##print("File: {}".format(data[0]))	# Print Filename
 							file_dict[directory] += [data[0]]
-			ftps.quit()
+			#ftps.quit()
 		except Exception as e:
 			ftps.quit()
 			print("File Permissions Error: {}".format(e))
 			##print("Dict: {}".format(file_dict))	# Print stored dictionary
 			return False, e
+	try:
+		ftps.quit()
+	except Exception as e:
+		print("Unable to end FTP connection gracefully: {}".format(e))
+		return False, e
 
+	end = time.time()
+	print(end-start)
 	##print("Dict: {}".format(file_dict))	# Print stored dictionary
 	return True, file_dict
 
@@ -179,7 +191,6 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 	print("start_time: {}".format(start_time))
 	print("end_date: {}".format(end_date))
 	print("end_time: {}".format(end_time))
-	print(file_dict)
 
 	for meter in file_dict:
 		filtered_dict[meter] = []
@@ -195,19 +206,19 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 			if start_date == end_date:
 				# Store .csv filename if Start time <= filtered range <= End time
 				if (start_time <= filtered_time_file) and (filtered_time_file <= end_time):
-					print("{} <= {} <= {}".format(start_time, filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
+					##print("{} <= {} <= {}".format(start_time, filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
 					filtered_dict[meter] += [csv_file]
 			else:
 				if filtered_date_file == start_date:
 					# Store .csv filename if Start time <= filtered range <= 235959
 					if (start_time <= filtered_time_file) and (filtered_time_file <= 235959):
-						print("{} <= {} <= 235959".format(start_time, filtered_time_file))	# Print Filtered Start-End times & Time of selected .csv file
+						##print("{} <= {} <= 235959".format(start_time, filtered_time_file))	# Print Filtered Start-End times & Time of selected .csv file
 						filtered_dict[meter] += [csv_file]
 
 				elif filtered_date_file == end_date:
 					# Store .csv filename if 000000 <= filtered range <= End time
 					if (000000 <= filtered_time_file) and (filtered_time_file <= end_time):
-						print("000000 <= {} <= {}".format(filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
+						##print("000000 <= {} <= {}".format(filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
 						filtered_dict[meter] += [csv_file]
 
 	return True, filtered_dict
@@ -233,9 +244,9 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 			ftps.cwd("/"+directory)		# Change FTP directory
 			current_dir = os.getcwd()
 			if job_name is not None:	# job_name taken from Job Schedule
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, job_name, current_datetime)
+				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
 			else:
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, current_datetime)
+				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
 			if not os.path.isdir(download_dir):		# Mkdir if Download directory does not exist
 				os.makedirs(download_dir)
 			os.chdir(download_dir)		# Change Download directory
@@ -413,7 +424,11 @@ def retrieve_cronjobs():
 
 	for job in root_cron:
 		job_id += 1
-		parameters = job.command.split(">>")[0].split("cronjob_process")[2].split("\", \"")
+		try:
+			parameters = job.command.split(">>")[0].split("cronjob_process")[2].split("\", \"")
+		except Exception as e:
+			print("Cron Split Error (Job ID: {}): {}".format(job_id, e))
+			continue
 		job_enabled = str(job)[0]
 
 		meters = parameters[1].strip("\"()' ")
