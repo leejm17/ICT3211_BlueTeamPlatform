@@ -1,5 +1,6 @@
 from flask import Flask, render_template, redirect, url_for, request
 import os, subprocess
+import dotenv, ast
 
 # Import Local Files
 from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
@@ -164,7 +165,11 @@ def applaunch_localapps_page():
 
 @app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
 def applaunch_arkimefilters_page():
-	return render_template("/app_launch/arkime.html")
+	dotenv_file = dotenv.find_dotenv(".arkimefilter")
+	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .env
+	arkime_filters = ast.literal_eval(os.environ["ARKIME_FILTERS"])
+	button_style = ["info", "primary", "success", "danger", "warning"]
+	return render_template("/app_launch/arkime.html", arkime_filters=arkime_filters, style=button_style)
 
 
 @app.route("/help", methods=["GET"], endpoint="help")

@@ -17,6 +17,8 @@
 				{{ form.new_app.label }}: {{ form.new_app }}
 				<button class="btn btn-success" type="submit" name="action" value="new">Add App</button>
 			</div>
+		</form>
+		<form action="/admin/app_launch" method="POST">
 			<div>
 				<label>Applications:</label>
 				<select id="app_list" required>
@@ -25,6 +27,17 @@
 				{% endfor %}
 				</select>
 				<button class="btn btn-danger" type="submit" name="action" value="remove">Remove App</button>
+			</div>
+		</form>
+
+		<form action="/admin/app_launch" method="POST">
+			<div>Filter Name
+			</div>
+			<div>URL
+			<div>
+		</form>
+		<form action="/admin/app_launch" method="POST">
+			<div>List of Filters
 			</div>
 		</form>
 	</div>
