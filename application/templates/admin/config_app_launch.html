@@ -1,0 +1,33 @@
+<head>
+	<title>Config App Launch</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+	<h1>Configure Applications To Launch</h1>
+
+	<div class="mb-3">
+		<h5 class="form-label">Configure your admin settings for App Launch here!</h5>
+		<form action="/admin/app_launch" method="POST">
+			<div>
+				{{ form.new_app.label }}: {{ form.new_app }}
+				<button class="btn btn-success" type="submit" name="action" value="new">Add App</button>
+			</div>
+			<div>
+				<label>Applications:</label>
+				<select id="app_list" required>
+				{% for n in range(apps_len) %}
+					<option value=""></option>
+				{% endfor %}
+				</select>
+				<button class="btn btn-danger" type="submit" name="action" value="remove">Remove App</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+{% endblock %}

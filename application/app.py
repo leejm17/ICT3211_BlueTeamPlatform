@@ -22,12 +22,18 @@ def admin_page():
 	return render_template("/admin/admin_config.html")
 
 
-@app.route("/admin/honeypot", methods=["GET"], endpoint="honeypot")
+@app.route("/global_var", methods=["GET"])
+def global_var():
+	glob_dict = retrieve_glob_var()
+	return glob_dict
+
+
+@app.route("/admin/honeypot", methods=["GET"], endpoint="admin.honeypot")
 def admin_honeypot_page():
 	return render_template("/admin/honeypot.html")
 
 
-@app.route("/admin/spyder", methods=["GET"], endpoint="spyder")
+@app.route("/admin/spyder", methods=["GET"], endpoint="admin.spyder")
 def admin_spyder_page():
 	return render_template("/admin/spyder.html")
 
@@ -38,16 +44,24 @@ def admin_datatransfer_page():
 	if request.method == "POST":
 		updated_configs = update_env(form)
 		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
-	return render_template("/admin/data_transfer.html", form=form)
+	return render_template("/admin/config_data_transfer.html", form=form)
 
 
-@app.route("/global_var", methods=["GET"])
-def global_var():
-	glob_dict = retrieve_glob_var()
-	return glob_dict
+@app.route("/admin/app_launch", methods=["GET", "POST"], endpoint="admin.app_launch")
+def admin_applaunch_page():
+	form = AdminConfig_Form(request.form)
+	if request.method == "POST":
+		if request.form["action"] == "new":
+			print("Insert New App")
+		elif request.form["action"] == "remove":
+			print("Remove Existing App")
+			print(request.form.get("app_list"))
+		#updated_configs = update_env(form)
+		return render_template("/admin/config_success.html", form=form)#, configs=updated_configs)
+	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")))
 
 
-@app.route("/admin/machine_learning", methods=["GET"], endpoint="machine_learning")
+@app.route("/admin/machine_learning", methods=["GET"], endpoint="admin.machine_learning")
 def admin_machinelearning_page():
 	return render_template("/admin/machine_learning.html")
 
@@ -79,16 +93,16 @@ def datatransfer_smartmeter_page():
 				if form.transfer_type.data == "Now":
 					success, message = windows_ftp_process(form)
 					if success:
-						return render_template("/data_transfer/download_success.html", message=message)
+						return render_template("/data_transfer/smart_meter/download_success.html", message=message)
 					else:
-						return render_template("/data_transfer/download_failure.html", message=message)
+						return render_template("/data_transfer/smart_meter/download_failure.html", message=message)
 
 				else: # Schedule the Data Transfer for automation
 					success, cron, job = windows_ftp_automate(form)
 					if success:
-						return render_template("/data_transfer/cronjob_success.html", cron_message=cron, job_message=job)
+						return render_template("/data_transfer/jobs/cronjob_success.html", cron_message=cron, job_message=job)
 					else:
-						return render_template("/data_transfer/cronjob_failure.html", cron_message=cron, job_message=job)
+						return render_template("/data_transfer/jobs/cronjob_failure.html", cron_message=cron, job_message=job)
 
 	global_dict = retrieve_glob_var()
 	return render_template("/data_transfer/smart_meter.html", ip=global_dict["windows_ip"], form=form)
@@ -115,7 +129,42 @@ def datatransfer_managejobs_page():
 
 @app.route("/app_launch", methods=["GET"], endpoint="app_launch")
 def applaunch_page():
-	return render_template("/app_launch.html")
+	return render_template("/app_launch/app_launch.html")
+
+
+@app.route("/app_launch/local_apps", methods=["GET", "POST"], endpoint="app_launch.local_apps")
+def applaunch_localapps_page():
+	"""if request.method == "POST" and request.form["action"] == "wireshark":
+		# Open Wireshark
+		try:
+			subprocess.Popen("wireshark")
+		except Exception as e:
+			print("Cannot find Wireshark: {}".format(e))
+			return render_template("/app_launch/local_apps.html", message="Wireshark")
+
+	elif request.method == "POST" and request.form["action"] == "filezilla":
+		# Open Filezilla
+		try:
+			subprocess.Popen("filezilla")
+		except Exception as e:
+			print("Cannot find FileZilla: {}".format(e))
+			return render_template("/app_launch/local_apps.html", message="FileZilla")"""
+
+	app_list = ["wireshark", "filezilla"]#, "wireshark", "filezilla", "wireshark", "filezilla", "wireshark", "filezilla"]
+	button_style = ["info", "primary", "success", "danger", "warning"]
+	if request.method == "POST":
+		# Open application
+		try:
+			subprocess.Popen(request.form["action"])
+		except Exception as e:
+			print("Cannot find {}: {}".format(request.form["action"], e))
+			return render_template("/app_launch/local_apps.html", message=request.form["action"], app_list=app_list, style=button_style)
+	return render_template("/app_launch/local_apps.html", app_list=app_list, style=button_style)
+
+
+@app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
+def applaunch_arkimefilters_page():
+	return render_template("/app_launch/arkime.html")
 
 
 @app.route("/help", methods=["GET"], endpoint="help")

@@ -13,7 +13,8 @@ def retrieve_glob_var():
 		"debian_ip": os.environ["DEBIAN_IP"],
 		"ftp_user": os.environ["FTP_USER"],
 		"ftp_pw": os.environ["FTP_PW"],
-		"cron_user": os.environ["CRON_USER"]}
+		"cron_user": os.environ["CRON_USER"],
+		"app_list": os.environ["APP_LIST"]}
 
 
 ########### END Global Variables ###########

@@ -150,3 +150,14 @@ class AdminConfig_Form(Form):
 		"Host Username",
 		validators=[
 			InputRequired()])
+
+	new_app = StringField(
+		"New",
+		validators=[
+			InputRequired()])
+
+	app_list = SelectField(
+		"Applications",
+		choices=[""],
+		validators=[
+			InputRequired()])

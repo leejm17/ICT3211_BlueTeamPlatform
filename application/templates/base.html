@@ -44,7 +44,7 @@
 	<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>-->
 
-    <title>Flask application</title>
+	<title>Flask application</title>
 </head>
 
 <style>
@@ -54,33 +54,38 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 
 <!-- Responsive navbar-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-        <a class="navbar-brand" href="/">SCFAMI Dashboard v0.1</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            	<li class="nav-item"><a
-		        	{% if request.endpoint=="home" %}class="nav-link active" aria-current="page"
-		        	{% else %}class="nav-link"{% endif %} href="/">Home</a></li>
+	<div class="container">
+		<a class="navbar-brand" href="/">SCFAMI Dashboard v0.1</a>
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+		<div class="collapse navbar-collapse" id="navbarSupportedContent">
+			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+				<li class="nav-item"><a
+					{% if request.endpoint=="home" %}class="nav-link active" aria-current="page"
+					{% else %}class="nav-link"{% endif %} href="/">Home</a></li>
 
-        	    <li class="nav-item dropdown">
-                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="admin" or request.endpoint=="honeypot" or request.endpoint=="spyder" or request.endpoint=="admin.data_transfer" or request.endpoint=="machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
+				<li class="nav-item dropdown">
+					<a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="admin" or request.endpoint=="admin.honeypot" or request.endpoint=="admin.spyder" or request.endpoint=="admin.data_transfer" or request.endpoint=="admin.app_launch" or request.endpoint=="admin.machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
 						{% else %}class="nav-link dropdown-toggle"{% endif %}>
 						Admin</a>
 
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
- 	                   <li><a
+					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+						<li><a
 							{% if request.endpoint=="admin" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin">
 							Admin Config</a></li>
 
-	                    <li><hr class="dropdown-divider" /></li>
+						<li><hr class="dropdown-divider" /></li>
 
-                        <li><a
+						<li><a
 							{% if request.endpoint=="admin.data_transfer" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/data_transfer">
 							Data Transfer</a></li>
+
+						<li><a
+							{% if request.endpoint=="admin.app_launch" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/admin/app_launch">
+							App Launch</a></li>
 
 						<li><a
 							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
@@ -96,24 +101,24 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/machine_learning">
 							Machine Learning</a></li>-->
-                    </ul>
-                </li>
-        	    
-        	    <li class="nav-item dropdown">
-                    <a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+					</ul>
+				</li>
+
+				<li class="nav-item dropdown">
+					<a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
 						{% if request.endpoint=="data_transfer" or request.endpoint=="data_transfer.smart_meter" or request.endpoint=="data_transfer.network" or request.endpoint=="data_transfer.manage_jobs" %}class="nav-link dropdown-toggle active" aria-current="page"
 						{% else %}class="nav-link dropdown-toggle"{% endif %}>
 						Data Transfer</a>
 
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-					    <li><a
+					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+						<li><a
 							{% if request.endpoint=="data_transfer" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/data_transfer">
 							Data Transfer</a></li>
 
 						<li><hr class="dropdown-divider" /></li>
 
-                        <li><a
+						<li><a
 							{% if request.endpoint=="data_transfer.smart_meter" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/smart_meter">
 							Smart Meter (Windows)</a></li>
@@ -129,21 +134,42 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							{% if request.endpoint=="data_transfer.manage_jobs" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/data_transfer/manage_jobs">
 							Manage Jobs</a></li>
-                    </ul>
-                </li>
+					</ul>
+				</li>
 
-            	<li class="nav-item"><a
-		        	{% if request.endpoint=="app_launch" %}class="nav-link active" aria-current="page"
-		        	{% else %}class="nav-link"{% endif %} href="/app_launch">
-		        	App Launch</a></li>
-                
+				<li class="nav-item dropdown">
+					<a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="app_launch" or request.endpoint=="app_launch.local_apps" or request.endpoint=="app_launch.arkime" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% else %}class="nav-link dropdown-toggle"{% endif %}>
+						App Launch</a>
+
+					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+						<li><a
+							{% if request.endpoint=="app_launch" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/app_launch">
+							App Launch</a></li>
+
+						<li><hr class="dropdown-divider" /></li>
+
+						<li><a
+							{% if request.endpoint=="app_launch.local_apps" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/app_launch/local_apps">
+							Local Applications</a></li>
+
+						<li><a
+							{% if request.endpoint=="app_launch.arkime" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/app_launch/arkime">
+							Arkime Filters</a></li>
+					</ul>
+				</li>
+
 				<li class="nav-item"><a
 					{% if request.endpoint=="help" %}class="nav-link active" aria-current="page"
 					{% else %}class="nav-link"{% endif %} href="/help">
 					Help</a></li>
-            </ul>
-        </div>
-    </div>
+			</ul>
+		</div>
+	</div>
 </nav>
 
 <body onload="retrieve_global_var(); current_datetime();">

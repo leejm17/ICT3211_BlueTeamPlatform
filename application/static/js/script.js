@@ -183,6 +183,15 @@ function retrieve_global_var() {
 			document.getElementById("ftp_user").defaultValue = resp.ftp_user;
 			document.getElementById("ftp_pw").defaultValue = resp.ftp_pw;
 			document.getElementById("cron_user").defaultValue = resp.cron_user;
+		},
+		success: function(resp) {
+			let app_list = document.getElementById("app_list");
+			let data = resp.app_list.substr(1, resp.app_list.length-2).split(",");
+			for (let i=0; i<app_list.length; i++) {
+				let app = data[i].substr(1, data[i].length-2);
+				app_list[i].text = app.charAt(0).toUpperCase() + app.slice(1);
+				app_list[i].value = app;
+			}
 		}
 	});
 }
