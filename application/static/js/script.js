@@ -183,7 +183,11 @@ function retrieve_global_var() {
 			document.getElementById("ftp_user").defaultValue = resp.ftp_user;
 			document.getElementById("ftp_pw").defaultValue = resp.ftp_pw;
 			document.getElementById("cron_user").defaultValue = resp.cron_user;
-		},
+		}
+	});
+
+	$.ajax({
+		url:"/global_var",
 		success: function(resp) {
 			let app_list = document.getElementById("app_list");
 			let data = resp.app_list.substr(1, resp.app_list.length-2).split(",");
@@ -191,6 +195,21 @@ function retrieve_global_var() {
 				let app = data[i].substr(1, data[i].length-2);
 				app_list[i].text = app.charAt(0).toUpperCase() + app.slice(1);
 				app_list[i].value = app;
+			}
+		}
+	});
+
+	$.ajax({
+		url:"/arkime_var",
+		success: function(resp) {
+			let arkime_filters = document.getElementById("arkime_filters");
+			let i=0;
+			// Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+			for (const [filter, url] of Object.entries(resp)) {
+				arkime_filters[i].text = filter;
+				arkime_filters[i].value = filter;
+				//console.log(`${filter}: ${url}`);
+				i++;
 			}
 		}
 	});

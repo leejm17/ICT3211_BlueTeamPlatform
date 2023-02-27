@@ -152,12 +152,28 @@ class AdminConfig_Form(Form):
 			InputRequired()])
 
 	new_app = StringField(
-		"New",
+		"New Application",
 		validators=[
 			InputRequired()])
 
 	app_list = SelectField(
 		"Applications",
+		choices=[""],
+		validators=[
+			InputRequired()])
+
+	new_filter_name = StringField(
+		"Filter Name",
+		validators=[
+			InputRequired()])
+
+	new_filter_url = StringField(
+		"Filter URL",
+		validators=[
+			InputRequired()])
+
+	arkime_filters = SelectField(
+		"Filters",
 		choices=[""],
 		validators=[
 			InputRequired()])

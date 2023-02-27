@@ -11,35 +11,51 @@
 	<h1>Configure Applications To Launch</h1>
 
 	<div class="mb-3">
-		<h5 class="form-label">Configure your admin settings for App Launch here!</h5>
-		<form action="/admin/app_launch" method="POST">
-			<div>
-				{{ form.new_app.label }}: {{ form.new_app }}
-				<button class="btn btn-success" type="submit" name="action" value="new">Add App</button>
-			</div>
-		</form>
-		<form action="/admin/app_launch" method="POST">
-			<div>
-				<label>Applications:</label>
-				<select id="app_list" required>
-				{% for n in range(apps_len) %}
-					<option value=""></option>
-				{% endfor %}
-				</select>
-				<button class="btn btn-danger" type="submit" name="action" value="remove">Remove App</button>
-			</div>
-		</form>
+		<h4 class="form-label">Configure your admin settings for App Launch here!</h4>
 
-		<form action="/admin/app_launch" method="POST">
-			<div>Filter Name
-			</div>
-			<div>URL
-			<div>
-		</form>
-		<form action="/admin/app_launch" method="POST">
-			<div>List of Filters
-			</div>
-		</form>
+		<h5>Local Applications</h5>
+		<div>
+			<form action="/admin/app_launch" method="POST">
+				<div>
+					{{ form.new_app.label }}: {{ form.new_app }}
+					<button class="btn btn-success" type="submit" name="action" value="new_app">Add App</button>
+				</div>
+			</form>
+			<form action="/admin/app_launch" method="POST">
+				<div>
+					<label>Applications:</label>
+					<select id="app_list" name="app" required>
+					{% for n in range(apps_len) %}
+						<option value=""></option>
+					{% endfor %}
+					</select>
+					<button class="btn btn-danger" type="submit" name="action" value="remove_app">Remove App</button>
+				</div>
+			</form>
+		</div>
+
+		<h5>Arkime Filters</h5>
+		<div>
+			<form action="/admin/app_launch" method="POST">
+				<div>
+					{{ form.new_filter_name.label }}: {{ form.new_filter_name }}
+					{{ form.new_filter_url.label }}: {{ form.new_filter_url }}
+					<button class="btn btn-success" type="submit" name="action" value="new_filter">Add Filter</button>
+				</div>
+			</form>
+			<form action="/admin/app_launch" method="POST">
+				<div>
+					<label>Filters:</label>
+					<select id="arkime_filters" name="filter" required>
+					{% for n in range(filters_len) %}
+						<option value=""></option>
+					{% endfor %}
+					</select>
+					<button class="btn btn-danger" type="submit" name="action" value="remove_filter">Remove Filter</button>
+					<p id="arkime_url">Hello world</p>
+				</div>
+			</form>
+		</div>
 	</div>
 </div>
 

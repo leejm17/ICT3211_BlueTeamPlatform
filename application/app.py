@@ -4,7 +4,7 @@ import dotenv, ast
 
 # Import Local Files
 from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
-from admin import retrieve_glob_var, update_env
+from admin import retrieve_glob_var, retrieve_arkime_var, update_env, add_filter, remove_filter
 from forms import DataTransfer_Form, AdminConfig_Form
 
 
@@ -27,6 +27,12 @@ def admin_page():
 def global_var():
 	glob_dict = retrieve_glob_var()
 	return glob_dict
+
+
+@app.route("/arkime_var", methods=["GET"])
+def arkime_var():
+	arkime_filters = retrieve_arkime_var()
+	return arkime_filters
 
 
 @app.route("/admin/honeypot", methods=["GET"], endpoint="admin.honeypot")
@@ -52,14 +58,20 @@ def admin_datatransfer_page():
 def admin_applaunch_page():
 	form = AdminConfig_Form(request.form)
 	if request.method == "POST":
-		if request.form["action"] == "new":
+		if request.form["action"] == "new_app":
 			print("Insert New App")
-		elif request.form["action"] == "remove":
+		elif request.form["action"] == "remove_app":
 			print("Remove Existing App")
-			print(request.form.get("app_list"))
-		#updated_configs = update_env(form)
-		return render_template("/admin/config_success.html", form=form)#, configs=updated_configs)
-	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")))
+			print(request.form["app"])
+		elif request.form["action"] == "new_filter":
+			print("Insert New Filter")
+			update = add_filter(form)
+		elif request.form["action"] == "remove_filter":
+			print("Remove Existing Filter")
+			update = remove_filter(request.form["filter"])
+
+		return render_template("/admin/config_success.html", form=form, update=update)
+	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")), filters_len=len(retrieve_arkime_var()))
 
 
 @app.route("/admin/machine_learning", methods=["GET"], endpoint="admin.machine_learning")
@@ -165,9 +177,8 @@ def applaunch_localapps_page():
 
 @app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
 def applaunch_arkimefilters_page():
-	dotenv_file = dotenv.find_dotenv(".arkimefilter")
-	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .env
-	arkime_filters = ast.literal_eval(os.environ["ARKIME_FILTERS"])
+	arkime_filters = retrieve_arkime_var()
+	print(type(arkime_filters),arkime_filters)
 	button_style = ["info", "primary", "success", "danger", "warning"]
 	return render_template("/app_launch/arkime.html", arkime_filters=arkime_filters, style=button_style)
 
