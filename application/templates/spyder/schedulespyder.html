@@ -1,0 +1,59 @@
+<head>
+	<title>Spyder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type = "text/JavaScript" src = " https://MomentJS.com/downloads/moment.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            // var now = new Date();
+            // console.log(now);
+            // now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            // var nownow = now.toISOString().substring(0,16);
+
+            // console.log(nownow);
+
+
+
+            var nownow = moment(new Date()).format('YYYY-MM-DDTHH:mm')
+            console.log(nownow);
+
+        });
+
+    </script>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+
+	<h1 class="title">Schdeule a Spyder URLs</h1>
+
+    <form  action="/spyder2" method="POST">
+      {{ form.csrf_token }}
+      {{ form.gitHubUrl_1.label }} 
+      {{ form.gitHubUrl_1(class="form-control") }}
+      
+      {% if form.gitHubUrl_1.errors %}
+        <ul class="errors">
+        {% for error in form.gitHubUrl_1.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+
+      <label for="meeting-time">Choose a time for your appointment:</label>
+      <input type="datetime-local" id="meeting-time"
+       name="meeting-time" value="nownow" min="nownow" max="nownow">
+
+       {{form.scrapingDepth()}}
+      
+       <p>
+        <input class="btn btn-primary" type="submit" value="Submit">
+      </p>
+    </form>
+</div>
+
+{% endblock %}

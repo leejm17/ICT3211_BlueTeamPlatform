@@ -16,3 +16,7 @@ python-magic==0.4.27	# python magic
 
 Flask-WTF==1.0.1
 WTForms==3.0.1
+#Flask Flask-SQLAlchemy
+#pip install flask-mysql
+
+

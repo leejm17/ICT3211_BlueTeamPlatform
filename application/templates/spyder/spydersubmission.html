@@ -1,0 +1,74 @@
+<head>
+	<title>Spyder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.0.4/socket.io.js" integrity="sha512-aMGMvNYu8Ue4G+fHa359jcPb1u+ytAF+P2SCb+PxrjCdO3n3ZTxJ30zuH39rimUggmTwmh2u7wvQsDTHESnmfQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+            //var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+            $('form#github').submit(function(event) {
+                console.log("NYE");
+
+                valid = true
+
+                var values = [];
+                $('form input:text').each(
+                    function() {
+                    if (values.indexOf(this.value) >= 0) {
+                        $(this).css("border-color", "red");
+                        // console.log(this.after('<p>Phone number has to be 10 digits long.</p>'));
+                        this.after('Duplicate values exists.')
+                        //div.classList.remove("hide");
+                        valid = false;
+                        return valid;
+                    } else {
+                        $(this).css("border-color", ""); //clears since last check
+                        values.push(this.value);
+                    }
+                    }
+                );
+                return valid;
+            });
+        });
+
+    </script>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+
+	<h1 class="title">Submit Github URLs</h1>
+
+    <form  action="/spydersubmission" method="POST">
+      {{ form.csrf_token }}
+      {{ form.githubUrl.label }} 
+      {{ form.githubUrl(class="form-control") }}
+      
+      {% if form.githubUrl.errors %}
+        <ul class="errors">
+        {% for error in form.githubUrl.errors %}
+            <li>{{ error }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+
+      <p>
+      {{form.scrapingDepth.label()}}
+      {{form.scrapingDepth()}}
+      </p>
+      
+      <p>
+      {{form.spyderChoice.label()}}
+      {{form.spyderChoice()}}
+      </p>
+
+      <p>
+        <input class="btn btn-primary" type="submit" value="Submit">
+      </p>
+    </form>
+</div>
+
+{% endblock %}
