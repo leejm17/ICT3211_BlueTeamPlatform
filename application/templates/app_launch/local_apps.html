@@ -11,7 +11,8 @@
 	<h1>Local Applications</h1>
 
 	<div class="mb-3">
-		<label for="formFileLg" class="form-label">Choose to open a local application below.</label><br />
+		{% if app_list %}
+		<label for="formFileLg" class="form-label">Choose to open a user-installed application below.</label><br />
 		<form action="/app_launch/local_apps" method="POST">
 			{% for app in app_list %}
 			<button class="btn btn-{{ style[loop.index%5] }}" type="submit" name="action" value="{{ app }}">{{ app|title }}</button>
@@ -20,6 +21,9 @@
 			<!--<button class="btn btn-primary" type="submit" name="action" value="wireshark">Wireshark</button>
 			<button class="btn btn-danger" type="submit" name="action" value="filezilla">FileZilla Client</button>-->
 		</form>
+		{% else %}
+		<label for="formFileLg" class="form-label">No user-installed application has been detected.</label><br />
+		{% endif %}
 		{% if message %}
 		<p>Cannot find <span style="color:red;">{{ message|title }}</span>. Is it installed?</p>
 		{% endif %}

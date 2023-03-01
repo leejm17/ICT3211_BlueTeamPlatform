@@ -203,7 +203,7 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 			else:
 				filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 			# Filter .csv filename if date is same
-			if start_date == end_date:
+			if start_date == end_date == filtered_date_file:
 				# Store .csv filename if Start time <= filtered range <= End time
 				if (start_time <= filtered_time_file) and (filtered_time_file <= end_time):
 					##print("{} <= {} <= {}".format(start_time, filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
@@ -238,6 +238,7 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 		ftps.prot_p()		# Set up secure connection
 		current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+		import time
 		for directory in file_dict:
 			if len(file_dict[directory]) == 0:
 				continue
@@ -251,13 +252,15 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 				os.makedirs(download_dir)
 			os.chdir(download_dir)		# Change Download directory
 
-			print("Downloading files for {}".format(directory))
+			print("Downloading files for {}.".format(directory))
+			start_dur = time.time()
 			for csv_file in file_dict[directory]:	# Download every selected file from this FTP directory
 				with open(csv_file, "wb") as f:
 					# Command for Downloading the file "RETR csv_file"
 					ftps.retrbinary(f"RETR {csv_file}", f.write)
 					download_cnt += 1
-			print("Downloaded {} files so far".format(download_cnt))
+			end_dur = time.time()
+			print("Downloaded {} files so far in {} seconds.".format(download_cnt, end_dur-start_dur))
 			directory_cnt += 1
 			os.chdir(current_dir)		# Revert to CWD
 
@@ -496,7 +499,19 @@ def action_cronjobs(action_jobid):
 
 
 ########## START App Launch ##########
-# Code Here
+
+def list_of_local_apps():
+	system_apps = ["pipewire", "enchant-2", "gnome-todo", "im-config", "man", "mousetweaks", "file-roller", "gnome-shell", "gnome-system-monitor", "unattended-upgrades", "m2300w", "totem", "ucf", "debconf", "os-prober", "libreoffice", "info", "update-manager", "orca", "gnome-control-center", "pnm2ppa", "eog", "system-config-printer", "gnome-session", "speech-dispatcher", "rygel", "apturl", "npm", "perl", "brltty", "evince", "file", "systemd", "dconf", "remmina", "rsync", "distro-info", "gcc", "gettext", "locale", "plymouth", "gedit", "gnome-logs", "ibus", "pulseaudio", "nodejs", "tracker3", "lftp", "nano", "groff", "seahorse", "foo2qpdl", "update-notifier", "aspell", "ghostscript", "p11-kit", "dpkg", "python3", "session-migration", "gdb", "foo2zjs", "rhythmbox", "zenity", "nautilus", "yelp"]
+	share_path = "/usr/share"
+	bin_path = "/usr/bin"
+	app_list = []
+
+	for path in os.listdir(share_path):
+		if os.path.os.path.isfile(os.path.join(bin_path, path)) and path not in system_apps:
+			app_list.append(path)
+	return app_list
+
+
 ########### END App Launch ###########
 
 

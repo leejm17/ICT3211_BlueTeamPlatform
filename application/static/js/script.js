@@ -219,6 +219,7 @@ function retrieve_global_var() {
 // Source: https://www.technipages.com/how-to-auto-refresh-chrome-tabs-without-an-extension
 function open_arkime_filter(filter) {
 	console.log(filter.value);	// Replace below URL with filter.value
-	//new_tab = window.open("http://localhost:5000/data_transfer");
-	//timed = setInterval(function() {new_tab.location.href="http://localhost:5000/data_transfer"}, 5*1000);
+	const seconds = 30;
+	//new_tab = window.open(filter.value);
+	//timed = setInterval(function() {new_tab.location.href=filter.value}, seconds*1000);
 }

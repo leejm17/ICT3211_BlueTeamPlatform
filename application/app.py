@@ -3,7 +3,7 @@ import os, subprocess
 import dotenv, ast
 
 # Import Local Files
-from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
+from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs, list_of_local_apps
 from admin import retrieve_glob_var, retrieve_arkime_var, update_env, add_filter, remove_filter
 from forms import DataTransfer_Form, AdminConfig_Form
 
@@ -53,7 +53,7 @@ def admin_datatransfer_page():
 		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
 	return render_template("/admin/config_data_transfer.html", form=form)
 
-
+"""
 @app.route("/admin/app_launch", methods=["GET", "POST"], endpoint="admin.app_launch")
 def admin_applaunch_page():
 	form = AdminConfig_Form(request.form)
@@ -71,8 +71,9 @@ def admin_applaunch_page():
 			update = remove_filter(request.form["filter"])
 
 		return render_template("/admin/config_success.html", form=form, update=update)
-	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")), filters_len=len(retrieve_arkime_var()))
 
+	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")), filters_len=len(retrieve_arkime_var()))
+"""
 
 @app.route("/admin/machine_learning", methods=["GET"], endpoint="admin.machine_learning")
 def admin_machinelearning_page():
@@ -124,7 +125,7 @@ def datatransfer_smartmeter_page():
 @app.route("/data_transfer/network", methods=["GET", "POST"], endpoint="data_transfer.network")
 def datatransfer_network_page():
 	if request.method == "POST" and request.form["action"] == "browse":
-		filepath = "{}/FTP_Downloads".format("/".join(os.getcwd().split("/")[:-2]))
+		filepath = "{}/pcapFiles".format("/".join(os.getcwd().split("/")[:-2]))
 		subprocess.Popen(["xdg-open", filepath])
 	return render_template("/data_transfer/network_capture.html")
 
@@ -147,23 +148,7 @@ def applaunch_page():
 
 @app.route("/app_launch/local_apps", methods=["GET", "POST"], endpoint="app_launch.local_apps")
 def applaunch_localapps_page():
-	"""if request.method == "POST" and request.form["action"] == "wireshark":
-		# Open Wireshark
-		try:
-			subprocess.Popen("wireshark")
-		except Exception as e:
-			print("Cannot find Wireshark: {}".format(e))
-			return render_template("/app_launch/local_apps.html", message="Wireshark")
-
-	elif request.method == "POST" and request.form["action"] == "filezilla":
-		# Open Filezilla
-		try:
-			subprocess.Popen("filezilla")
-		except Exception as e:
-			print("Cannot find FileZilla: {}".format(e))
-			return render_template("/app_launch/local_apps.html", message="FileZilla")"""
-
-	app_list = ["wireshark", "filezilla"]#, "wireshark", "filezilla", "wireshark", "filezilla", "wireshark", "filezilla"]
+	app_list = list_of_local_apps()
 	button_style = ["info", "primary", "success", "danger", "warning"]
 	if request.method == "POST":
 		# Open application
