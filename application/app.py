@@ -3,13 +3,16 @@ import os, subprocess
 import dotenv, ast
 
 # Import Local Files
-from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs, list_of_local_apps
-from admin import retrieve_glob_var, retrieve_arkime_var, update_env, add_filter, remove_filter
+from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
+from main import list_of_local_apps, retrieve_arkime_views
+from admin import retrieve_glob_var, retrieve_arkime_var, update_env
 from forms import DataTransfer_Form, AdminConfig_Form
 
 
 # Create Flask App
 app = Flask(__name__)
+#app.config.from_object("config")
+#app.config["DEBUG"] = True
 
 
 # App routes
@@ -161,13 +164,21 @@ def applaunch_localapps_page():
 
 
 @app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
-def applaunch_arkimefilters_page():
-	arkime_filters = retrieve_arkime_var()
-	print(type(arkime_filters),arkime_filters)
+def applaunch_arkimeviews_page():
+	arkime_views = {}
+	for view in retrieve_arkime_views():
+		arkime_views[view["name"]] = "https://{}/sessions?view={}".format(request.remote_addr, view["id"])
+
 	button_style = ["info", "primary", "success", "danger", "warning"]
-	return render_template("/app_launch/arkime.html", arkime_filters=arkime_filters, style=button_style)
+	return render_template("/app_launch/arkime.html", arkime_views=arkime_views, style=button_style)
 
 
 @app.route("/help", methods=["GET"], endpoint="help")
 def help_page():
 	return render_template("/help.html")
+
+"""
+if __name__ == "__main__":
+	app.run(host="0.0.0.0", port=6065)
+	app.run(Debug=True)
+"""

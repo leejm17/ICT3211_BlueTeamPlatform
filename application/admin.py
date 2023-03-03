@@ -59,7 +59,7 @@ def update_env(form):
 
 
 ########## START App Launch Config ##########
-
+"""
 def add_filter(form):
 	dotenv_file = dotenv.find_dotenv(".arkimefilter")
 	dotenv.load_dotenv(dotenv_file)
@@ -82,6 +82,6 @@ def remove_filter(filter_name):
 	del arkime_filters[filter_name]
 	dotenv.set_key(dotenv_file, "ARKIME_FILTERS", str(arkime_filters))
 	print(arkime_filters)
-
+"""
 
 ########### END App Launch Config ###########

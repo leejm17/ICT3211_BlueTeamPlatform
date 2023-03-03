@@ -512,6 +512,33 @@ def list_of_local_apps():
 	return app_list
 
 
+def retrieve_arkime_views():
+	# Call http://192.168.1.1:8005/api/views to return a dict similar to arkime_views
+	arkime_views = {
+	  "data": [
+	    {
+	      "name": "Data Threshold",#	!!!
+	      "users": "",
+	      "roles": [],
+	      "expression": "hello world",
+	      "user": "admin",
+	      "id": "wS6UpoYBGn4LK_J3keiF"#	!!!
+	    },
+	    {
+	      "name": "Test View 1",#		!!!
+	      "users": "",
+	      "roles": [],
+	      "expression": "src.ip == 192.168.1.10",
+	      "user": "admin",
+	      "id": "py6JpoYBGn4LK_J3nOgw"#	!!!
+	    }
+	  ],
+	  "recordsTotal": 2,
+	  "recordsFiltered": 2
+	}
+	return arkime_views["data"]
+
+
 ########### END App Launch ###########
 
 

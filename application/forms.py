@@ -161,19 +161,3 @@ class AdminConfig_Form(Form):
 		choices=[""],
 		validators=[
 			InputRequired()])
-
-	new_filter_name = StringField(
-		"Filter Name",
-		validators=[
-			InputRequired()])
-
-	new_filter_url = StringField(
-		"Filter URL",
-		validators=[
-			InputRequired()])
-
-	arkime_filters = SelectField(
-		"Filters",
-		choices=[""],
-		validators=[
-			InputRequired()])
