@@ -11,11 +11,15 @@
 	<h1>Arkime Views</h1>
 
 	<div class="mb-3">
-		<label for="formFileLg" class="form-label">Launch <b>Arkime Views</b> here.</label><br />
+		{% if arkime_views is string %}
+		<h5>{{ arkime_views }}</h5>
+		{% else %}
+		<h5>Launch <b>Arkime Views</b> here.</h5>
 		{% for view,url in arkime_views.items() %}
 		<button class="btn btn-{{ style[loop.index%5] }}" onclick="open_arkime_view(this)" value="{{url}}">{{view|title}}</button>			
 		{% if loop.index%5 == 0 %}<br /><br />{% endif %}
 		{% endfor %}
+		{% endif %}
 	</div>
 </div>
 

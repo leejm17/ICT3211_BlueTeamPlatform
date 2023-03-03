@@ -19,10 +19,12 @@ def retrieve_glob_var():
 
 def retrieve_arkime_var():
 	# Global Variables
-	dotenv_file = dotenv.find_dotenv(".arkimefilter")
+	dotenv_file = dotenv.find_dotenv(".arkime")
 	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .env
 
-	return ast.literal_eval(os.environ["ARKIME_FILTERS"])
+	return {
+		"user": os.environ["USER"],
+		"password": os.environ["PASSWORD"]}
 
 
 ########### END Global Variables ###########

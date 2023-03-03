@@ -5,9 +5,11 @@ import os
 import ftplib, ssl
 import magic
 import ast
+import requests
+from requests.auth import HTTPDigestAuth
 
 # Import Local Files
-from admin import retrieve_glob_var
+from admin import retrieve_glob_var, retrieve_arkime_var
 
 
 ########## START Data Transfer (Smart Meter): Initiate FTP ##########
@@ -513,30 +515,20 @@ def list_of_local_apps():
 
 
 def retrieve_arkime_views():
-	# Call http://192.168.1.1:8005/api/views to return a dict similar to arkime_views
-	arkime_views = {
-	  "data": [
-	    {
-	      "name": "Data Threshold",#	!!!
-	      "users": "",
-	      "roles": [],
-	      "expression": "hello world",
-	      "user": "admin",
-	      "id": "wS6UpoYBGn4LK_J3keiF"#	!!!
-	    },
-	    {
-	      "name": "Test View 1",#		!!!
-	      "users": "",
-	      "roles": [],
-	      "expression": "src.ip == 192.168.1.10",
-	      "user": "admin",
-	      "id": "py6JpoYBGn4LK_J3nOgw"#	!!!
-	    }
-	  ],
-	  "recordsTotal": 2,
-	  "recordsFiltered": 2
-	}
-	return arkime_views["data"]
+	# Call http://<arkime>:8005/api/views to return a dict similar to arkime_views
+	arkime_cred = retrieve_arkime_var()
+	try:
+		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
+						auth=HTTPDigestAuth(arkime_cred["user"], arkime_cred["password"]))
+		if request_views.status_code == 401:
+			message = "Unable to authenticate. Are the credentials correct?"
+			print(message)
+			return 0, message
+		views_dict = ast.literal_eval(request_views.text)
+	except Exception as e:
+		print("Unable to GET /api/views: {}".format(e))
+		return 0, e
+	return 1, views_dict["data"]
 
 
 ########### END App Launch ###########

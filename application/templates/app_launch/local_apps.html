@@ -12,7 +12,7 @@
 
 	<div class="mb-3">
 		{% if app_list %}
-		<label for="formFileLg" class="form-label">Choose to open a user-installed application below.</label><br />
+		<h5>Choose to open a user-installed application below.</h5>
 		<form action="/app_launch/local_apps" method="POST">
 			{% for app in app_list %}
 			<button class="btn btn-{{ style[loop.index%5] }}" type="submit" name="action" value="{{ app }}">{{ app|title }}</button>

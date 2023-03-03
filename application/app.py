@@ -166,8 +166,12 @@ def applaunch_localapps_page():
 @app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
 def applaunch_arkimeviews_page():
 	arkime_views = {}
-	for view in retrieve_arkime_views():
-		arkime_views[view["name"]] = "https://{}/sessions?view={}".format(request.remote_addr, view["id"])
+	success, views = retrieve_arkime_views()
+	if success:
+		for view in views:
+			arkime_views[view["name"]] = "https://{}/sessions?view={}".format(request.remote_addr, view["id"])
+	else:
+		return render_template("/app_launch/arkime.html", arkime_views=views)
 
 	button_style = ["info", "primary", "success", "danger", "warning"]
 	return render_template("/app_launch/arkime.html", arkime_views=arkime_views, style=button_style)
