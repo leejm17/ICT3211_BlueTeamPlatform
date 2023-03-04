@@ -124,7 +124,7 @@ class DataTransfer_Form(Form):
 	submit = SubmitField("Data Transfer", render_kw={"id": "div_btn"})
 
 
-class AdminConfig_Form(Form):
+class AdminConfig_DataTransfer_Form(Form):
 
 	windows_ip = StringField(
 		"Windows IP",
@@ -151,13 +151,14 @@ class AdminConfig_Form(Form):
 		validators=[
 			InputRequired()])
 
-	new_app = StringField(
-		"New Application",
+
+class AdminConfig_AppLaunch_Form(Form):
+	arkime_user = StringField(
+		"Arkime Username",
 		validators=[
 			InputRequired()])
 
-	app_list = SelectField(
-		"Applications",
-		choices=[""],
+	arkime_password = StringField(
+		"Arkime Password",
 		validators=[
 			InputRequired()])

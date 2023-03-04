@@ -10,14 +10,21 @@
 <div class="container mt-5">
 	{% if not configs %}
 	<h1>Config not updated.</h1>
-	<p>No variable is updated.<br />
+	<p>
+		No variable is updated.<br />
 	{% else %}
 	<h1>Updated Config!</h1>
 	<p>
 		Configs updated:
 		<b>{{ configs|join(", ") }}</b>.<br />
 	{% endif %}
-	Click here to <a href="/admin/data_transfer">modify config settings</a> again.</p>
+	{% if request.referrer.split("/")[-1] == "app_launch" %}
+	{% set href = "app_launch" %}
+	{% else %}
+	{% set href = "data_transfer" %}
+	{% endif %}
+		Click here to <a href="/admin/{{ href }}">modify config settings</a> again.
+	</p>
 </div>
 
 {% endblock %}

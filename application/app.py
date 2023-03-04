@@ -6,7 +6,7 @@ import dotenv, ast
 from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
 from main import list_of_local_apps, retrieve_arkime_views
 from admin import retrieve_glob_var, retrieve_arkime_var, update_env
-from forms import DataTransfer_Form, AdminConfig_Form
+from forms import DataTransfer_Form, AdminConfig_DataTransfer_Form, AdminConfig_AppLaunch_Form
 
 
 # Create Flask App
@@ -50,33 +50,21 @@ def admin_spyder_page():
 
 @app.route("/admin/data_transfer", methods=["GET", "POST"], endpoint="admin.data_transfer")
 def admin_datatransfer_page():
-	form = AdminConfig_Form(request.form)
+	form = AdminConfig_DataTransfer_Form(request.form)
 	if request.method == "POST":
-		updated_configs = update_env(form)
+		updated_configs = update_env("datatransfer", form)
 		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
 	return render_template("/admin/config_data_transfer.html", form=form)
 
-"""
+
 @app.route("/admin/app_launch", methods=["GET", "POST"], endpoint="admin.app_launch")
 def admin_applaunch_page():
-	form = AdminConfig_Form(request.form)
+	form = AdminConfig_AppLaunch_Form(request.form)
 	if request.method == "POST":
-		if request.form["action"] == "new_app":
-			print("Insert New App")
-		elif request.form["action"] == "remove_app":
-			print("Remove Existing App")
-			print(request.form["app"])
-		elif request.form["action"] == "new_filter":
-			print("Insert New Filter")
-			update = add_filter(form)
-		elif request.form["action"] == "remove_filter":
-			print("Remove Existing Filter")
-			update = remove_filter(request.form["filter"])
+		updated_configs = update_env("arkime", form)
+		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
+	return render_template("/admin/config_app_launch.html", form=form)
 
-		return render_template("/admin/config_success.html", form=form, update=update)
-
-	return render_template("/admin/config_app_launch.html", form=form, apps_len=len(retrieve_glob_var()["app_list"].split(",")), filters_len=len(retrieve_arkime_var()))
-"""
 
 @app.route("/admin/machine_learning", methods=["GET"], endpoint="admin.machine_learning")
 def admin_machinelearning_page():
@@ -99,7 +87,7 @@ def datatransfer_smartmeter_page():
 				success, dir_list = initiate_ftp(request.form["submit"])
 				form.data_source.data = request.form["submit"]
 				days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-				global_dict = retrieve_glob_var()
+				global_dict = global_var()
 				if success:
 					return render_template("/data_transfer/smart_meter.html", ip=global_dict["windows_ip"], form=form, dir_list=dir_list, meters=dir_list, days_of_week=days_of_week)
 				else:
@@ -121,7 +109,7 @@ def datatransfer_smartmeter_page():
 					else:
 						return render_template("/data_transfer/jobs/cronjob_failure.html", cron_message=cron, job_message=job)
 
-	global_dict = retrieve_glob_var()
+	global_dict = global_var()
 	return render_template("/data_transfer/smart_meter.html", ip=global_dict["windows_ip"], form=form)
 
 

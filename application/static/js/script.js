@@ -175,6 +175,7 @@ function sort_jobs_table(n) {
 
 
 function retrieve_global_var() {
+	// admin_datatransfer_page()
 	$.ajax({
 		url:"/global_var",
 		success: function(resp) {
@@ -186,7 +187,16 @@ function retrieve_global_var() {
 		}
 	});
 
+	// admin_applaunch_page()
 	$.ajax({
+		url:"/arkime_var",
+		success: function(resp) {
+			document.getElementById("arkime_user").defaultValue = resp.arkime_user;
+			document.getElementById("arkime_password").defaultValue = resp.arkime_password;
+		}
+	});
+
+	/*$.ajax({
 		url:"/global_var",
 		success: function(resp) {
 			let app_list = document.getElementById("app_list");
@@ -212,7 +222,7 @@ function retrieve_global_var() {
 				i++;
 			}
 		}
-	});
+	});*/
 }
 
 
