@@ -18,12 +18,7 @@
 		Configs updated:
 		<b>{{ configs|join(", ") }}</b>.<br />
 	{% endif %}
-	{% if request.referrer.split("/")[-1] == "app_launch" %}
-	{% set href = "app_launch" %}
-	{% else %}
-	{% set href = "data_transfer" %}
-	{% endif %}
-		Click here to <a href="/admin/{{ href }}">modify config settings</a> again.
+		Click here to <a href="/admin/{{ request.referrer.split('/')[-1] }}">modify config settings</a> again.
 	</p>
 </div>
 
