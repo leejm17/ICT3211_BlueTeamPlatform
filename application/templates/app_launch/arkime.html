@@ -11,8 +11,11 @@
 	<h1>Arkime Views</h1>
 
 	<div class="mb-3">
-		{% if arkime_views is string %}
+		{% if "authenticate" in arkime_views %}
 		<h5>{{ arkime_views }}</h5>
+		Click here to <a href="/admin/app_launch">modify config settings</a>.
+		{% elif "Connection refused" in arkime_views %}
+		<h5>A connection to Arkime cannot be established. Is Arkime available?</h5>
 		{% else %}
 		<h5>Launch <b>Arkime Views</b> here.</h5>
 		{% for view,url in arkime_views.items() %}

@@ -519,15 +519,15 @@ def retrieve_arkime_views():
 	arkime_cred = retrieve_arkime_var()
 	try:
 		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
-						auth=HTTPDigestAuth(arkime_cred["user"], arkime_cred["password"]))
-		if request_views.status_code == 401:
+						auth=HTTPDigestAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]))
+		if request_views.status_code != 200:
 			message = "Unable to authenticate. Are the credentials correct?"
 			print(message)
 			return 0, message
 		views_dict = ast.literal_eval(request_views.text)
 	except Exception as e:
 		print("Unable to GET /api/views: {}".format(e))
-		return 0, e
+		return 0, str(e)
 	return 1, views_dict["data"]
 
 

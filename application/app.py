@@ -11,8 +11,8 @@ from forms import DataTransfer_Form, AdminConfig_DataTransfer_Form, AdminConfig_
 
 # Create Flask App
 app = Flask(__name__)
-#app.config.from_object("config")
-#app.config["DEBUG"] = True
+app.config.from_object('config.DevConfig')	# Using a development configuration
+##app.config.from_object('config.ProdConfig')	# Using a production configuration
 
 
 # App routes
@@ -116,8 +116,9 @@ def datatransfer_smartmeter_page():
 @app.route("/data_transfer/network", methods=["GET", "POST"], endpoint="data_transfer.network")
 def datatransfer_network_page():
 	if request.method == "POST" and request.form["action"] == "browse":
-		filepath = "{}/pcapFiles".format("/".join(os.getcwd().split("/")[:-2]))
-		subprocess.Popen(["xdg-open", filepath])
+		cwd = app.config["DIRECTORY"]
+		filepath = "{}/pcapFiles".format("/".join(cwd.split("/")[:-2]))
+		subprocess.Popen(["/usr/bin/xdg-open", filepath])
 	return render_template("/data_transfer/network_capture.html")
 
 
@@ -144,7 +145,7 @@ def applaunch_localapps_page():
 	if request.method == "POST":
 		# Open application
 		try:
-			subprocess.Popen(request.form["action"])
+			subprocess.Popen(["/usr/bin/{}".format(request.form["action"])])
 		except Exception as e:
 			print("Cannot find {}: {}".format(request.form["action"], e))
 			return render_template("/app_launch/local_apps.html", message=request.form["action"], app_list=app_list, style=button_style)
@@ -159,6 +160,7 @@ def applaunch_arkimeviews_page():
 		for view in views:
 			arkime_views[view["name"]] = "https://{}/sessions?view={}".format(request.remote_addr, view["id"])
 	else:
+		print(success, type(views))
 		return render_template("/app_launch/arkime.html", arkime_views=views)
 
 	button_style = ["info", "primary", "success", "danger", "warning"]
@@ -169,8 +171,6 @@ def applaunch_arkimeviews_page():
 def help_page():
 	return render_template("/help.html")
 
-"""
+
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", port=6065)
-	app.run(Debug=True)
-"""
+	app.run(host="localhost", port=6065)
