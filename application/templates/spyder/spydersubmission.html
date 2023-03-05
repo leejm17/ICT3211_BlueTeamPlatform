@@ -37,8 +37,24 @@
 
 {% block body %}
 
+
+
+
 <!--Page content-->
 <div class="container mt-5">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+            <span>{{message}}</span> 
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
 
 	<h1 class="title">Submit Github URLs</h1>
 
@@ -54,6 +70,10 @@
         {% endfor %}
         </ul>
       {% endif %}
+
+      <p> Number of running spiders are:
+        {{ runningJobs }} 
+     </p>
 
       <p>
       {{form.scrapingDepth.label()}}

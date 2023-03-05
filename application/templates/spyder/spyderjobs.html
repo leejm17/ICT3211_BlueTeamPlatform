@@ -16,6 +16,10 @@
         tr:nth-child(even) {
           background-color: #dddddd;
         }
+
+        .table-responsive {
+          max-height:300px;
+        }
     </style>
 
 </head>
@@ -28,62 +32,53 @@
 <div class="container mt-5">
 
 	<h1 class="title">Spyder Details </h1>
-  <h2 class="title">Pending </h2>
-  <table>
-      <tr>
-          <th>Project</th>
-          <th>Spider</th>
-          <th>ID</th>
-          <th>URL</th>
-          <th>Schdeuled Time</th>
-      </tr>
-      {% for running in runningDict %}
-          <tr>
-              <td>{{ running.project }}</td>
-              <td>{{ running.spider }}</td>
-              <td>{{ running.id }}</td>
-          </tr>
-      {% endfor %}  
-
-  </table>
   
   <h2 class="title">Running </h2>
-  <table>
+
+  <div class="table-responsive">
+    <table class="table">
       <tr>
-          <th>Project</th>
-          <th>Spider</th>
-          <th>ID</th>
-          <th>URL</th>
-          <th>Schdeuled Time</th>
+        <th>Project</th>
+        <th>Spider</th>
+        <th>ID</th>
+        <th>Depth</th>
+        <th>URL</th>
       </tr>
       {% for running in runningDict %}
-          <tr>
-              <td>{{ running.project }}</td>
-              <td>{{ running.spider }}</td>
-              <td>{{ running.id }}</td>
-          </tr>
+      <tr>
+        <td>{{ running.project }}</td>
+        <td>{{ running.spyder }}</td>
+        <td>{{ running.jobid }}</td>
+        <td>{{ running.depth }}</td>
+        <td>{{ running.url }}</td>
+      </tr>
       {% endfor %}  
-
     </table>
+  </div>
 
   <h2 class="title">Completed </h2>
 
-  <table>
-      <tr>
+  <div class="table-responsive">
+    <table class="table">
+        <tr>
           <th>Project</th>
           <th>Spider</th>
           <th>ID</th>
+          <th>Depth</th>
           <th>URL</th>
-      </tr>  
-      {% for finished in finishedDict %}
+        </tr>  
+        {% for finished in finishedDict %}
           <tr>
               <td>{{ finished.project }}</td>
-              <td>{{ finished.spider }}</td>
-              <td>{{ finished.id }}</td>
+              <td>{{ finished.spyder }}</td>
+              <td>{{ finished.jobid }}</td>
+              <td>{{ finished.depth }}</td>
+              <td>{{ finished.url }}</td>
           </tr>
-      {% endfor %}
-    </table>
-    
+        {% endfor %}
+      </table>
+  </div>
+
 </div>
 
 {% endblock %}

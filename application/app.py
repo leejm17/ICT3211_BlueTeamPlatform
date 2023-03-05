@@ -1,6 +1,7 @@
-from flask import Flask, render_template, redirect, url_for, request
+from flask import Flask, render_template, redirect, url_for, request, flash
 from dotenv import load_dotenv, find_dotenv
 import os
+import dotenv
 
 # Import Other Files
 from main import windows_ftp_process
@@ -18,6 +19,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from flaskext.mysql import MySQL
 
+dotenv_file = dotenv.find_dotenv('.env')
+dotenv.load_dotenv(dotenv_file, override=False)
 
 # Global Variables
 load_dotenv(find_dotenv())   # Take environment variables from .env
@@ -26,25 +29,23 @@ debian_ip = os.getenv("debian_ip")
 ftp_user = os.getenv("ftp_user")
 ftp_pw = os.getenv("ftp_pw")
 
+db_pwd = os.environ["db_pwd"]
+db_user = os.environ["db_user"]
+database_db = os.environ["database_db"]
+db_host = os.environ["db_host"]
+
 # Create Flask App
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'the random string'
 
 PROJECT_NAME =  'yara_scrapy'
 # Flask DB Config
-# db_user = os.environ.get("db_user")
-# db_pw = os.getenv("db_pw")
-# db_key = os.getenv("db_key")
-
-# db_key = "JLKJJJO3IURYoiouolnojojouuoo=5y9y9youjuy952oohhbafdnoglhoho"
-# db_username = "mysql+pymysql://root:@localhost:3306/scfami-spyder"
-# db_pwd = "P@ssw0rdpsBenU7Wka"
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql:///' + os.path.join(basedir, 'scfami-spyder.db')
 #db = SQLAlchemy(app)    
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'P@ssw0rdpsBenU7Wka'
-app.config['MYSQL_DATABASE_DB'] = 'scfami_spyder'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+app.config['MYSQL_DATABASE_USER'] = db_user
+app.config['MYSQL_DATABASE_PASSWORD'] = db_pwd
+app.config['MYSQL_DATABASE_DB'] = database_db
+app.config['MYSQL_DATABASE_HOST'] = db_host
 mysql = MySQL(app)
 
 
@@ -136,7 +137,7 @@ def spyder_submission_page():
 
 @app.route('/spydersubmission', methods = ['POST', 'GET'])
 def spyder_submission_page_2():
-	form = SpyderForm() 
+	form = SpyderForm()
 	if form.validate_on_submit():
 		values = form.data
 		for key, value in values.items():
@@ -147,31 +148,20 @@ def spyder_submission_page_2():
 			if key == "spyderChoice":
 				spyder = value
 		
-		# check if more than 5 curent running spiders 
-		# do not allow user to continue with submission and return error message  
-		statuses  = requests.get('http://localhost:6800/daemonstatus.json').json()
-		for status, value in statuses.items():
-			if (status == "running") and (value >= 5):
-				print(status, value)
-				print(type(status), type(value))
-
-				return render_template('/spyder/spyder2.html', form = form)
-	
-		# for current url, check if its status is "running" in DB and get its jobid
 		conn = mysql.connect()
 		cursor = conn.cursor()
 		
+		# for current url, check if its status is "running" in DB and get its jobid
 		query = "SELECT jobid from spyderjobs WHERE url = %s AND spyder = %s AND status = 'running'"
 		cursor.execute(query, (url, spyder))
 		jobid = cursor.fetchone()
 		print (jobid)
-		# if url does not have a running job, allow user to submit job
+
+		# if url does not exist in DB and does not have a running job, allow user to submit job
 		if jobid == None:
-			print("Empty")
-			# if url does not have a running job, allow user to submit job
+			print("URL does not exist in DB and does not have a running job")
 			generatedJobid = scrapyd.schedule(PROJECT_NAME, spyder, url=url, depth = depth)
 			setStatus = 'running'
-			
 			# insert url, jobid and other details into the database
 			query = "INSERT INTO `scfami_spyder`.`spyderjobs` \
 					(`project`,`spyder`,`jobid`,`url`,`depth`,`status`)\
@@ -180,15 +170,18 @@ def spyder_submission_page_2():
 			conn.commit()
 			print("Insert Query executed")
 
+			flash(u'URL has been submitted for crawling', 'success')
+
 		else:
 			# if url is tagged as running in DB 
-			# check if its still running in scrapyd
+			# check if its still running  or finished in scrapyd
 			if jobid is not None:
 				jobid = jobid[0]
 				jobstatus = scrapyd.job_status(PROJECT_NAME, jobid)
-				if jobstatus == 'running':
-					# return render_template('/spyder/spyder2.html', form = form)
-					print("")
+				# jobstatus = 'running'
+
+				if jobstatus == 'running' or jobstatus == 'pending':
+					flash(u'URL and its respective Spyder is currently queued or running', 'danger')
 
 				if jobstatus == 'finished':
 					print("finished")
@@ -208,11 +201,23 @@ def spyder_submission_page_2():
 					cursor.execute(query, (PROJECT_NAME, spyder, generatedJobid, url, depth, setStatus))
 					conn.commit()
 					print("Insert Query executed")
+					flash(u'URL has been submitted for crawling', 'success')
 			
 		cursor.close()
 		conn.close()
+	
+	statuses  = requests.get('http://localhost:6800/daemonstatus.json').json()
+	runningJobs = 0
+	finishedJobs = 0
+	for status, value in statuses.items():
+		if (status == "running") :
+			runningJobs += value
+		if (status == "pending"):
+			runningJobs += value
+		if (status == "finished") :
+			finishedJobs += value
 				
-	return render_template('/spyder/spydersubmission.html', form = form)
+	return render_template('/spyder/spydersubmission.html', form = form, runningJobs = runningJobs)
 
 
 # @app.route('/schedulespyder', methods = ['POST', 'GET'])
@@ -226,35 +231,32 @@ def spyder_submission_page_2():
 
 @app.route('/spyderjobs', methods = ['POST', 'GET'])
 def spyder_jobs_deatails():
-	
-	# conn = mysql.connect()
-	# cursor = conn.cursor()
-	# cursor.execute("SELECT * from spyderjobs")
-	# data = cursor.fetchone()
-	# print(data)
-	jobs = scrapyd.list_jobs(PROJECT_NAME)
-	status  = requests.get('http://localhost:6800/daemonstatus.json').json()
+	conn = mysql.connect()
+	cursor = conn.cursor()
 
-	print (status)
+	inputTuple_1 = ('project', 'spyder', 'jobid', 'url', 'depth', 'status')
 
-	for status, v  in jobs.items():
-		if status == "pending":
-			pendingDict = v
-			for values in v:
-				print (values)
+	# if status equal running 
+	cursor.execute("SELECT * from spyderjobs WHERE status = 'running' ")
+	runningDataTuple = cursor.fetchall()
+	runningDict = []
+	for rows in runningDataTuple:
+		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
+		runningDict.append(resultDictionary)
 
-		if status == "running":
-			runningDict = v
-			for values in v:
-				print (values)
-		
-		if status == "finished":
-			finishedDict = v
-			for values in v:
-				# print (values)
-				print ("\n")
+	# if status equal finished
+	cursor.execute("SELECT * from spyderjobs WHERE status = 'finished' ")
+	finishedDataTuple = cursor.fetchall()
+	finishedDict = []
+	for rows in finishedDataTuple:
+		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
+		finishedDict.append(resultDictionary)
 
-	return render_template('/spyder/spyderjobs.html', finishedDict=finishedDict, runningDict=runningDict, pendingDict=pendingDict)
+	cursor.close()
+	conn.close()
+
+	return render_template('/spyder/spyderjobs.html', finishedDict=finishedDict, runningDict=runningDict)
+
 	
 @app.route('/submit', methods = ['POST', 'GET'])
 def spyder_submission_detail_page():
