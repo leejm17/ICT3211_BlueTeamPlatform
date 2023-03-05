@@ -498,8 +498,6 @@ def action_cronjobs(action_jobid):
 
 
 ########## END Data Transfer (Smart Meter): Manage Schedules ##########
-
-
 ########## START App Launch ##########
 
 def list_of_local_apps():
@@ -532,8 +530,6 @@ def retrieve_arkime_views():
 
 
 ########### END App Launch ###########
-
-
 ########## START Help ##########
 # Code Here
 ########### END Help ###########
