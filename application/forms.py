@@ -13,6 +13,7 @@ from wtforms.validators import NumberRange, InputRequired
 from datetime import datetime
 
 
+"""Form for Smart Meter (Windows) Page"""
 class DataTransfer_Form(Form):
 
 	#### Transfer Type: Both Now & Schedule ####
@@ -124,6 +125,7 @@ class DataTransfer_Form(Form):
 	submit = SubmitField("Data Transfer", render_kw={"id": "div_btn"})
 
 
+"""Form for Admin Data Transfer Page"""
 class AdminConfig_DataTransfer_Form(Form):
 
 	windows_ip = StringField(
@@ -152,6 +154,7 @@ class AdminConfig_DataTransfer_Form(Form):
 			InputRequired()])
 
 
+"""Form for Admin App Launch Page"""
 class AdminConfig_AppLaunch_Form(Form):
 	arkime_user = StringField(
 		"Arkime Username",

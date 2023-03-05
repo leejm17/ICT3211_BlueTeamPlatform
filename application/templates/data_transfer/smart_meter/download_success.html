@@ -15,9 +15,9 @@
 	<h1>Download Success!</h1>
 	<p>
 		{% if message[0] == 1 %}
-		<b>1 file</b> is downloaded to <b>{{ message[2] }}</b>.
+		<b>1 file</b> is downloaded to <b>{{ message[1] }}</b>.
 		{% else %}
-			<b>{{ message[0] }} files</b> are downloaded to a folder named "<b>{{ message[1] }}</b>" in <b>{{ message[2] }}</b>.
+			<b>{{ message[0] }} files</b> are downloaded to a folder named <b>{{ message[1] }}</b>.
 		{% endif %}
 	</p>
 	{% endif %}

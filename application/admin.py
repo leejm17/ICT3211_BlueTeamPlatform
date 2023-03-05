@@ -3,8 +3,8 @@ import os, dotenv
 
 ########## START Global Variables ##########
 
+"""Data Transfer Variables"""
 def retrieve_glob_var():
-	# Global Variables
 	dotenv_file = dotenv.find_dotenv(".datatransfer")
 	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .datatransfer
 
@@ -16,8 +16,8 @@ def retrieve_glob_var():
 		"cron_user": os.environ["CRON_USER"]}
 
 
+"""Arkime Variables"""
 def retrieve_arkime_var():
-	# Global Variables
 	dotenv_file = dotenv.find_dotenv(".arkime")
 	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .arkime
 
@@ -26,8 +26,8 @@ def retrieve_arkime_var():
 		"arkime_password": os.environ["ARKIME_PASSWORD"]}
 
 
+"""Network Capture Variables"""
 def retrieve_networkcapture_var():
-	# Global Variables
 	dotenv_file = dotenv.find_dotenv(".networkcapture")
 	dotenv.load_dotenv(dotenv_file, override=True)	# Take environment variables from .networkcapture
 
@@ -38,9 +38,10 @@ def retrieve_networkcapture_var():
 ########### END Global Variables ###########
 ########## START .datatransfer / .arkime / .networkcapture Config ##########
 
+"""Update Specified Environment File (or .env)"""
 # Source: https://stackoverflow.com/questions/63837315/change-environment-variables-saved-in-env-file-with-python-and-dotenv
 def update_env(env, form):
-	# Load the specified environment file (or .env)
+	# Load .env file
 	dotenv_file = dotenv.find_dotenv(".{}".format(env))
 	dotenv.load_dotenv(dotenv_file)
 

@@ -28,21 +28,9 @@ class MyFTP_TLS(ftplib.FTP_TLS):
 
 
 def initiate_ftp(ftp_dir):
-	endpoint = request.referrer.split("/")[-1]
-	if endpoint == "smart_meter":
-		# Initiate FTP for Smart Meter
-		print("Initiate FTP for Smart Meter")
-		success, dir_list = windows_ftp_start(ftp_dir)
-	elif endpoint == "t_pot":
-		# Initiate FTP for T-Pot
-		files = ""
-		print("Initiate FTP for T-Pot")
-	else:
-		files = ""
-	
-	if not success:
-		return False, dir_list
-	return True, dir_list
+	"""Initiate FTP for Smart Meter"""
+	print("Initiate FTP for Smart Meter")
+	return windows_ftp_start(ftp_dir)
 
 
 def windows_ftp_start(ftp_dir):
@@ -128,9 +116,6 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 	ftps.prot_p()		# Set up secure connection
 	for root_dir in ftp_dir:
 		try:
-			#global_dict = retrieve_glob_var()
-			#ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-			#ftps.prot_p()		# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
 			if root_dir == "WiresharkData":
 				file_dict[root_dir] = []
@@ -240,6 +225,7 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 		ftps.prot_p()		# Set up secure connection
 		current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+		from __main__ import app
 		import time
 		for directory in file_dict:
 			if len(file_dict[directory]) == 0:
@@ -247,9 +233,9 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 			ftps.cwd("/"+directory)		# Change FTP directory
 			current_dir = os.getcwd()
 			if job_name is not None:	# job_name taken from Job Schedule
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
+				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
 			else:
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(current_dir.split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
+				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
 			if not os.path.isdir(download_dir):		# Mkdir if Download directory does not exist
 				os.makedirs(download_dir)
 			os.chdir(download_dir)		# Change Download directory
@@ -271,10 +257,8 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 		return False, e
 
 	ftps.quit()
-	download_folder = download_dir.split("/")[-1]
 	download_path = "/".join(download_dir.split("/")[:-1])	# Re-store the Download directory
-	#message = [download_cnt, directory_cnt, "/".join(download_dir.split("/")[:-1])]
-	message = [download_cnt, download_folder, download_path]
+	message = [download_cnt, download_path]
 	return True, message
 
 

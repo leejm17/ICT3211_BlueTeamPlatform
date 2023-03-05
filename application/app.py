@@ -30,7 +30,7 @@ def admin_page():
 def admin_datatransfer_page():
 	form = AdminConfig_DataTransfer_Form(request.form)
 	if request.method == "POST":
-		# Update .datatransfer with new values
+		"""Update .datatransfer with new values"""
 		updated_configs = update_env("datatransfer", form)
 		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
 
@@ -41,7 +41,7 @@ def admin_datatransfer_page():
 def admin_applaunch_page():
 	form = AdminConfig_AppLaunch_Form(request.form)
 	if request.method == "POST":
-		# Update .arkime with new values
+		"""Update .arkime with new values"""
 		updated_configs = update_env("arkime", form)
 		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
 
@@ -77,9 +77,9 @@ def datatransfer_smartmeter_page():
 	if request.method == "POST":
 		if request.form:
 
-			# Initiate FTP Process
 			ftp_dir = ["SmartMeterData", "WiresharkData"]
 			if request.form["submit"] in ftp_dir:
+				"""Initiate FTP Process"""
 				success, dir_list = initiate_ftp(request.form["submit"])
 				form.data_source.data = request.form["submit"]
 				days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -91,8 +91,8 @@ def datatransfer_smartmeter_page():
 				else:
 					return render_template("/data_transfer/connection_failure.html", ip=global_var()["windows_ip"], message=dir_list)
 
-			# Data Transfer Process
 			else:
+				"""Data Transfer Process"""
 				# If Transfer Type is Now
 				if form.transfer_type.data == "Now":
 					# Perform Data Transfer Now
@@ -117,7 +117,7 @@ def datatransfer_smartmeter_page():
 @app.route("/data_transfer/network", methods=["GET", "POST"], endpoint="data_transfer.network")
 def datatransfer_network_page():
 	if request.method == "POST" and request.form["action"] == "browse":
-		# Open Files application
+		"""Open Files application"""
 		filepath = "{}/pcapFiles".format("/".join(app.config["APP_DIR"].split("/")[:-2]))
 		subprocess.Popen(["xdg-open", filepath])
 		#subprocess.Popen(["xdg-open", networkcapture_var()["capture_path"]])
@@ -132,7 +132,7 @@ def datatransfer_managejobs_page():
 			# Perform one of Action: Enable, Disable, Delete job
 			action_cronjobs(request.form["action"])
 
-	# Retrieve list of dictionary-per-job from CronTab
+	# Return of dictionary-per-job from CronTab
 	return render_template("/data_transfer/manage_jobs.html", job_list=retrieve_cronjobs())
 
 
@@ -146,7 +146,7 @@ def applaunch_page():
 
 @app.route("/app_launch/local_apps", methods=["GET", "POST"], endpoint="app_launch.local_apps")
 def applaunch_localapps_page():
-	# Retrieve list of user-installed local applications
+	"""Retrieve list of user-installed local applications"""
 	app_list = list_of_local_apps()
 	button_style = ["info", "primary", "success", "danger", "warning"]
 
@@ -164,7 +164,7 @@ def applaunch_localapps_page():
 
 @app.route("/app_launch/arkime", methods=["GET"], endpoint="app_launch.arkime")
 def applaunch_arkimeviews_page():
-	# Retrieve list of dictionary-per-view from Arkime /api/views
+	"""Retrieve list of dictionary-per-view from Arkime /api/views"""
 	success, views = retrieve_arkime_views()
 	
 	# If /api/views returns a valid list
