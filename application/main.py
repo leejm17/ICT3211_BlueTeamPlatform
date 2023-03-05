@@ -27,129 +27,171 @@ class MyFTP_TLS(ftplib.FTP_TLS):
 		return conn, size
 
 
-def initiate_ftp(ftp_dir):
-	"""Initiate FTP for Smart Meter"""
-	print("Initiate FTP for Smart Meter")
-	return windows_ftp_start(ftp_dir)
-
-
+"""Initiate FTP for Smart Meter"""
 def windows_ftp_start(ftp_dir):
+	print("Initiate FTP for Smart Meter")
+
+	# If SmartMeterData, then ftp_dir has two folders
 	if ftp_dir == "SmartMeterData":
 		ftp_dir = ["SmartMeterData", "Archive_SmartMeterData"]
+	# Else WiresharkData, then ftp_dir has only one folder
 	else:
 		ftp_dir = [ftp_dir]
 
-	dir_list = []		# Store Dir & corresponding Filenames
+	# List to store Dir & corresponding Folder Names
+	dir_list = []
+
+	"""Iterate ftp_dir folders"""
 	for root_dir in ftp_dir:
 		try:
+			"""Initialise FTP Connection"""
 			global_dict = retrieve_glob_var()
 			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-			ftps.prot_p()		# Set up secure connection
+			ftps.prot_p()				# Set up secure connection
 			root = ftps.mlsd(root_dir)	# FTP Root directory
+			# Return immediately if WiresharkData is established"""
 			if root_dir == "WiresharkData":
 				ftps.quit()
 				return True, "Wireshark"
 		except Exception as e:
 			try:
+				# Exit connection if any error
 				ftps.quit()
 			except Exception as econn:
+				# If unable to exit connection, then machine is NOT online
 				print("Smart Meter Windows machine is NOT online.")
 				return False, e
 			print("FTP Connection Error: {}".format(e))
 			return False, e
 
 		try:
+			"""Iterate all files/folders in FTP Root directory"""
 			for dir_name in root:
-				# dir_name[0] = dir/filename
-				# dir_name[1] = dir/file data
+				"""
+				dir_name[0] = dir/filename
+				dir_name[1] = dir/file's metadata
 				##print("Dir: {}".format(dir_list[0]))		# Print Dir
+				"""
+				# Append foldername if file's metadata reveals a folder, and it is not in dir_list
 				if dir_name[1]["type"] == "dir":
 					if dir_name[0] not in dir_list:
 						dir_list.append(dir_name[0])
 			ftps.quit()
 		except Exception as e:
+			# FTP directory has Permissions Error iterating files
 			ftps.quit()
 			print("File Permissions Error: {}".format(e))
-			##print("Dict: {}".format(dir_list))	# Print stored list
+			print("Dict: {}".format(dir_list))	# Print stored list so far
 			return False, e
 
-	print("List: {}".format(dir_list))	# Print stored list
 	return True, dir_list
 
 
 ########## END Data Transfer (Smart Meter): Initiate FTP ##########
 ########## START Data Transfer (Smart Meter): Transfer Data ##########
 
+"""Data Transfer Process"""
 def windows_ftp_process(form):
-	print("data_source: {}".format(form.data_source.data))
-	print("meters: {}".format(form.meters.data))
-	#print("file_type: {}".format(form["file_type"]))
+	print("Smart Meter Data Transfer Process")
+
+	"""
+	Initiate FTP for Data Transfer Process
+	:return file_dict: Full list of {FTP Directory: Filenames} based on data_source, meters
+	"""
+	print("\tdata_source: {}".format(form.data_source.data))
+	print("\tmeters: {}".format(form.meters.data))
 	success, file_dict = windows_ftp_initiate(form.data_source.data, form.meters.data, form.wireshark_source.data)
 	if not success:
 		return success, file_dict
 
-	print("date: {}".format(form.date.data))
-	print("start_time: {}".format(form.start_time.data))
-	print("end_time: {}".format(form.end_time.data))
+	"""Filter Files for Data Transfer Process
+	:return file_dict: Filtered list of {FTP Directory: Filenames} based on date, start_time, end_time
+	"""
+	print("\tdate: {}".format(form.date.data))
+	print("\tstart_time (utc): {}".format(form.start_time.data))
+	print("\tend_time (utc): {}".format(form.end_time.data))
 	success, file_dict = windows_ftp_filter_datetime(form.data_source.data, form.date.data, form.start_time.data, form.end_time.data, file_dict)
 	if not success:
 		return success, file_dict
 
+	"""Download filtered files from file_dict via FTP"""
 	success, message = windows_ftp_transfer(form.data_source.data, file_dict)
 
-	#print("export_name: {}".format(form["export_name"]))
 	return success, message
 
 
+"""Initiate FTP for Data Transfer Process"""
 def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
-	file_dict = {}		# Store Dir & corresponding Filenames
+	print("Initiate FTP for Data Transfer Process")
 
+	# Dict to store Dir & corresponding File Names
+	file_dict = {}
+
+	# If SmartMeterData, then ftp_dir has two folders
 	if ftp_dir == "SmartMeterData":
 		ftp_dir = ["SmartMeterData", "Archive_SmartMeterData"]
+	# Else WiresharkData, then ftp_dir has only one folder
 	else:
 		ftp_dir = [ftp_dir]
 
+	# Calculate Time taken to iterate and store FTP Directories and Files
 	import time
-	start = time.time()
+	start_dur = time.time()
+
+	"""Initialise FTP Connection"""
 	global_dict = retrieve_glob_var()
 	ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 	ftps.prot_p()		# Set up secure connection
+
+	"""Iterate ftp_dir folders and store files"""
 	for root_dir in ftp_dir:
 		try:
 			root = ftps.mlsd(root_dir)	# FTP Root directory
+			# WiresharkData folder has no sub-directories
 			if root_dir == "WiresharkData":
 				file_dict[root_dir] = []
 		except Exception as e:
 			try:
+				# Exit connection if any error
 				ftps.quit()
 			except Exception as econn:
+				# If unable to exit connection, then machine is NOT online
 				print("Smart Meter Windows machine is NOT online.")
 				return False, e
 			print("FTP Connection Error: {}".format(e))
 			return False, e
 
 		try:
+			"""Iterate all files/folders in FTP Root directory"""
 			for dir_list in root:
+				"""
+				dir_list[0] = dir/filename
+				dir_list[1] = dir/file's metadata
+				##print("Dir: {}".format(dir_list[0]))		# Print Dir
+				"""
+				# WiresharkData folder contains filenames in a specific format
 				if root_dir == "WiresharkData":
 					print(dir_list[0])
 					if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
 						file_dict[root_dir] += [dir_list[0]]
+
+				# If filename is a meter name
 				elif dir_list[0] in meters:
-					# dir_list[0] = dir/filename
-					# dir_list[1] = dir/file data
-					##print("Dir: {}".format(dir_list[0]))		# Print Dir
+					# If file's metadata reveals a folder, then it is a meter folder
 					if dir_list[1]["type"] == "dir":
 						directory = root_dir + "/" + dir_list[0]
-						file_dict[directory] = []
+
+						"""Iterate and append all files in meter folder"""
 						file_list = ftps.mlsd(directory)
+						file_dict[directory] = []
 						for data in file_list:
 							##print("File: {}".format(data[0]))	# Print Filename
 							file_dict[directory] += [data[0]]
-			#ftps.quit()
 		except Exception as e:
+			# FTP directory has Permissions Error iterating files
 			ftps.quit()
 			print("File Permissions Error: {}".format(e))
-			##print("Dict: {}".format(file_dict))	# Print stored dictionary
+			##print("Dict: {}".format(file_dict))	# Print stored dictionary so far
 			return False, e
 	try:
 		ftps.quit()
@@ -157,52 +199,70 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 		print("Unable to end FTP connection gracefully: {}".format(e))
 		return False, e
 
-	end = time.time()
-	print(end-start)
-	##print("Dict: {}".format(file_dict))	# Print stored dictionary
+	# Print Time taken to iterate and store FTP Directories and Files
+	end_dur = time.time()
+	print("Storing of FTP Directories and Files in {} seconds.".format(end_dur-start_dur))
+
 	return True, file_dict
 
 
+"""Filter Files for Data Transfer Process"""
 def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_dict):
+	# Dict to store Dir & filtered File Names based on date, start_time, end_time
 	filtered_dict = {}
+
+	# Format date and time
 	start_datetime = datetime.combine(date, start_time) - timedelta(hours=8)
 	start_date = start_datetime.strftime("%Y%m%d")
 	start_time = int(start_datetime.strftime("%H%M%S"))
 	end_datetime = datetime.combine(date, end_time) - timedelta(hours=8)
 	end_date = end_datetime.strftime("%Y%m%d")
 	end_time = int(end_datetime.strftime("%H%M%S"))
+
+	# Return user input error
 	if end_datetime < start_datetime:
 		return False, "Start Datetime cannot be later than End Datetime"
 
-	print("start_date: {}".format(start_date))
-	print("start_time: {}".format(start_time))
-	print("end_date: {}".format(end_date))
-	print("end_time: {}".format(end_time))
+	print("Filter Files for Data Transfer Process")
+	print("\tstart_date: {}".format(start_date))
+	print("\tstart_time: {} (gmt+8)".format(start_time))
+	print("\tend_date: {}".format(end_date))
+	print("\tend_time: {} (gmt+8)".format(end_time))
 
+	"""Iterate folders in file_dict"""
 	for meter in file_dict:
 		filtered_dict[meter] = []
+		
+		"""Iterate all files in folder"""
 		for csv_file in file_dict[meter]:
 			filtered_date_file = csv_file.split("_")[0]
 			##print(start_date, filtered_date_file)	# Print Filtered Date & Date of selected .csv file
 
+			# WiresharkData filenames are of a specific time format
 			if data_source == "WiresharkData":
 				filtered_time_file = int("{}00".format(csv_file.split("_")[1].split(".")[0]))
+			# SmartMeterData filenames are of a different time format
 			else:
 				filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
-			# Filter .csv filename if date is same
+
 			if start_date == end_date == filtered_date_file:
+				"""Append .csv filename if start, end dates and time are same"""
 				# Store .csv filename if Start time <= filtered range <= End time
 				if (start_time <= filtered_time_file) and (filtered_time_file <= end_time):
 					##print("{} <= {} <= {}".format(start_time, filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
 					filtered_dict[meter] += [csv_file]
+
 			else:
+				"""Compare start & end dates if dates are NOT same"""
 				if filtered_date_file == start_date:
+					"""Append .csv filename if same as START date & time"""
 					# Store .csv filename if Start time <= filtered range <= 235959
 					if (start_time <= filtered_time_file) and (filtered_time_file <= 235959):
 						##print("{} <= {} <= 235959".format(start_time, filtered_time_file))	# Print Filtered Start-End times & Time of selected .csv file
 						filtered_dict[meter] += [csv_file]
 
 				elif filtered_date_file == end_date:
+					"""Append .csv filename if same as END date & time"""
 					# Store .csv filename if 000000 <= filtered range <= End time
 					if (000000 <= filtered_time_file) and (filtered_time_file <= end_time):
 						##print("000000 <= {} <= {}".format(filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
@@ -211,97 +271,142 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 	return True, filtered_dict
 
 
-# Download filtered files from file_dict via FTP
+"""Download filtered files from file_dict via FTP"""
 def windows_ftp_transfer(data_source, file_dict, job_name=None):
-	download_dir = ""
+	#download_dir = ""
 	download_cnt = 0	# Count number of files downloaded
 	directory_cnt = 0	# Count number of directories downloaded into
+	print("Download filtered files from file_dict via FTP")
 	##print("file_dict: {}".format(file_dict))
 
 	try:
-		# Download files via FTPS
+		"""Initialise FTP Connection"""
 		global_dict = retrieve_glob_var()
 		ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 		ftps.prot_p()		# Set up secure connection
 		current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-		from __main__ import app
+		# Calculate Time taken to iterate and download all files
 		import time
+		start_all = time.time()
+
+		"""Iterate folders in filtered file_dict"""
+		from __main__ import app
 		for directory in file_dict:
+			# If folder contains no file, skip to next folder
 			if len(file_dict[directory]) == 0:
 				continue
+
+			"""Set up Download Directory"""
 			ftps.cwd("/"+directory)		# Change FTP directory
-			current_dir = os.getcwd()
-			if job_name is not None:	# job_name taken from Job Schedule
+			if job_name is not None:
+				# :param job_name: Only exists for Job Schedule
 				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
 			else:
 				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
-			if not os.path.isdir(download_dir):		# Mkdir if Download directory does not exist
-				os.makedirs(download_dir)
-			os.chdir(download_dir)		# Change Download directory
 
-			print("Downloading files for {}.".format(directory))
+			# Mkdir if Download directory does NOT exist
+			if not os.path.isdir(download_dir):
+				os.makedirs(download_dir)
+
+			# Store and change Download directory
+			current_dir = os.getcwd()
+			os.chdir(download_dir)
+
+			# Calculate Time taken to iterate and download files from this directory
+			print("\tDownloading files for {}:".format(directory))
 			start_dur = time.time()
-			for csv_file in file_dict[directory]:	# Download every selected file from this FTP directory
+
+			"""Download filtered files from this folder (FTP directory)"""
+			for csv_file in file_dict[directory]:
 				with open(csv_file, "wb") as f:
 					# Command for Downloading the file "RETR csv_file"
 					ftps.retrbinary(f"RETR {csv_file}", f.write)
 					download_cnt += 1
+
+			# Print Time taken to iterate and download files from this directory
 			end_dur = time.time()
-			print("Downloaded {} files so far in {} seconds.".format(download_cnt, end_dur-start_dur))
+			print("\t\tDownloaded {} files so far in {} seconds.".format(download_cnt, end_dur-start_dur))
 			directory_cnt += 1
-			os.chdir(current_dir)		# Revert to CWD
+
+			# Revert to CWD
+			os.chdir(current_dir)
 
 	except Exception as e:
 		print("Error Downloading File: {}".format(e))
 		return False, e
 
 	ftps.quit()
-	download_path = "/".join(download_dir.split("/")[:-1])	# Re-store the Download directory
+
+	# Print Time taken to iterate and download all files
+	end_all = time.time()
+	print("{} files in {} seconds.\n".format(download_cnt, end_all-start_all))
+
+	# Return message containing files downloaded & download directory
+	download_path = "/".join(download_dir.split("/")[:-1])
 	message = [download_cnt, download_path]
+
 	return True, message
 
 
 ########## END Data Transfer (Smart Meter): Transfer Data ##########
 ########## START Data Transfer (Smart Meter): Schedule Transfer ##########
 
+"""Initialise the Scheduling of Data Transfer Process"""
 def windows_ftp_automate(form):
-	print("data_source: {}".format(form.data_source.data))
-	print("meters: {}".format(form.meters.data))
-	print("start_time: {}".format(form.start_time.data))
-	print("transfer_dur: +{} minutes".format(form.transfer_dur.data))	# end_time = start_time + transfer_dur
+	print("Initialise the Scheduling of Data Transfer Process")
+	print("\tdata_source: {}".format(form.data_source.data))
+	print("\tmeters: {}".format(form.meters.data))
+	print("\tstart_time: {}".format(form.start_time.data))
+	print("\ttransfer_dur: +{} minutes".format(form.transfer_dur.data))	# end_time = start_time + transfer_dur
 	end_time = (datetime.combine(form.date.data, form.start_time.data) + timedelta(minutes=int(form.transfer_dur.data))).strftime("%H:%M:%S")
-	print("end_time: {}".format(end_time))
-	print("job_name: {}".format(form.job_name.data))
+	print("\tend_time: {}".format(end_time))
+	print("\tjob_name: {}".format(form.job_name.data))
+	print("\ttransfer_freq: {}".format(form.transfer_freq.data))	# For Cron
 
-	#print("date: {}".format(form.date.data))	# Cron should not have date as it is an ongoing basis. If no date specified, default param should be today's date.
+	"""
+	Cron Params: schedule, command, comment
+	1. schedule: freq, week/month, scheduled_time
+	2. command: data_source, meters, start_time, end_time
+	3. comment: job_name
+	"""
 
-	# Cron Params: schedule, command, comment
-	## schedule: freq, week/month, scheduled_time
-	## command: data_source, meters, start_time, end_time
-	## comment: job_name
-
-	print("transfer_freq: {}".format(form.transfer_freq.data))	# For Cron
 	if form.transfer_freq.data == "Daily":
-		print("transfer_freq_time: {}".format(form.transfer_freq_time.data))
+		"""
+		:param week_month: None
+		:param sched_time: time
+		"""
+		print("\ttransfer_freq_time: {}\n".format(form.transfer_freq_time.data))
 		success, cron, job = cronjob_format(
 			"daily", None, form.transfer_freq_time.data, form.job_name.data,
 			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+
 	elif form.transfer_freq.data == "Weekly":
-		print("transfer_freq_week: {}".format(form.transfer_freq_week.data))
-		print("transfer_freq_week_time: {}".format(form.transfer_freq_week_time.data))
+		"""
+		:param week_month: week
+		:param sched_time: week_time
+		"""
+		print("\ttransfer_freq_week: {}".format(form.transfer_freq_week.data))
+		print("\ttransfer_freq_week_time: {}\n".format(form.transfer_freq_week_time.data))
 		if not form.transfer_freq_week.data:
 			return False, "Unspecified Parameters", "Please ensure your parameters are selected."
 		success, cron, job = cronjob_format(
 			"weekly", form.transfer_freq_week.data, form.transfer_freq_week_time.data, form.job_name.data,
 			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+
 	elif form.transfer_freq.data == "Monthly":
-		print("transfer_freq_month: {}".format(form.transfer_freq_month.data))
-		print("transfer_freq_month_time: {}".format(form.transfer_freq_month_time.data))
+		"""
+		:param week_month: month
+		:param sched_time: month_time
+		"""
+		print("\ttransfer_freq_month: {}".format(form.transfer_freq_month.data))
+		print("\ttransfer_freq_month_time: {}\n".format(form.transfer_freq_month_time.data))
 		success, cron, job = cronjob_format(
 			"monthly", form.transfer_freq_month.data, form.transfer_freq_month_time.data, form.job_name.data,
 			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+
 	else:
+		"""Frequency is NOT recognised"""
 		return False, "Unspecified Parameters", "Please ensure your parameters are selected."
 
 	return success, cron, "{}-Duration of Data To Collect: {} minutes".format(job, form.transfer_dur.data)
@@ -313,27 +418,29 @@ https://crontab.guru/
 sudo cat /var/spool/cron/crontabs/user
 date
 crontab -l"""
+"""Schedule Job (Data Transfer Process)"""
 def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, start_time, end_time):
 	# Every job requires: frequency, week/month, scheduled_time, job_name, data_source, meters, start_time, end_time
 	sched_time = str(sched_time)
 
-	# Initialise Cron
+	"""Initialise Cron"""
 	root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
-	##root_cron.remove_all()
-	##root_cron.write()
 
-	# Creating a new job
-	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(os.getcwd(), data_source, meters, start_time, end_time, os.getcwd()), comment=job_name)
+	"""Create New Job"""
+	from __main__ import app
+	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(app.config["APP_DIR"], data_source, meters, start_time, end_time, app.config["APP_DIR"]), comment=job_name)
 
+	"""Craft Display Message"""
 	if data_source == "SmartMeterData":
 		job_message = "Job Name: {}-Data Source: {}-Meters: {}-Data Start Time: {}-Data End Time: {}".format(job_name, data_source, meters, start_time, end_time)
 	else:
 		job_message = "Job Name: {}-Data Source: {}-Data Start Time: {}-Data End Time: {}".format(job_name, data_source, start_time, end_time)
 
+	# Format Time
 	hour = sched_time.split(":")[0]
 	minute = sched_time.split(":")[1]
 
-	# Setting up restrictions for the job
+	"""Setting Job Restrictions (Schedule) based on Form Data (Frequency)"""
 	match freq:
 		case "daily":
 			# The job takes place at x time every day
@@ -353,13 +460,11 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 			job.dom.on(week_month)
 			cron_message = "{}:{}H on every {} day of the month".format(hour, minute, week_month)
 
-	# Clearing the restrictions of a job
-	##job.clear()
-	##root_cron.remove_all()
-
 	try:
+		# Execute Job Creation
 		root_cron.write()
 	except Exception as e:
+		# Job Creation cannot be executed
 		print("Error writing Cron job: {}\nJob: {}".format(e, job))
 		job.clear()
 		return False, e, job_message
@@ -367,6 +472,7 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 	return True, cron_message, job_message
 
 
+"""Method to call for scheduled jobs (Data Transfer process)"""
 def cronjob_process(data_source, meters, start_time, end_time):
 	# Data1: 'WiresharkData', [], '07:00:00', '12:00:00'	>> 2 files downloaded
 	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('WiresharkData', [], '07:00:00', '12:00:00')"
@@ -374,23 +480,26 @@ def cronjob_process(data_source, meters, start_time, end_time):
 	# Data2: 'SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00'	>> 4 files downloaded
 	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00')"
 
-	# Artificially-inserted value for "date" parameter
+	# Today's date (i.e. Current date of Job)
 	from datetime import date
-	date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
-	
 	##date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
-	
+	date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
+
+	# Format Time
 	start_time = datetime.strptime(start_time, "%H:%M:%S").time()
 	end_time = datetime.strptime(end_time, "%H:%M:%S").time()
 
+	"""Initiate FTP for Data Transfer Process"""
 	success, file_dict = windows_ftp_initiate(data_source, meters)
 	if not success:
 		print("Cron unable to initiate FTP: {}".format(file_dict))
 
+	"""Filter Files for Data Transfer Process"""
 	success, file_dict = windows_ftp_filter_datetime(date, start_time, end_time, file_dict)
 	if not success:
 		print("Cron unable to download files: {}".format(file_dict))
 
+	"""Download filtered files from file_dict via FTP"""
 	success, message = windows_ftp_transfer(data_source, file_dict)
 	print("Cron Job Success: {}".format(message))
 
@@ -398,19 +507,21 @@ def cronjob_process(data_source, meters, start_time, end_time):
 ########## END Data Transfer (Smart Meter): Schedule Transfer ##########
 ########## START Data Transfer (Smart Meter): Manage Schedules ##########
 
+"""Retrieve Scheduled Jobs (Data Transfers)"""
 def retrieve_cronjobs():
 	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "start_time": "12:00", "end_time": "12:30"}]
 
 	cron_list = []
 	job_id = 0
 
+	"""Initialise Cron"""
 	try:
-		# Initialise Cron
 		root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
 	except Exception as e:
 		print("Cron User Error: {}".format(e))
 		return "Cron User Error"
 
+	"""Iterate every Cron Job and format jobs for display"""
 	for job in root_cron:
 		job_id += 1
 		try:
@@ -420,12 +531,14 @@ def retrieve_cronjobs():
 			continue
 		job_enabled = str(job)[0]
 
+		# Format Meters
 		meters = parameters[1].strip("\"()' ")
 		if meters == "[]":
 			meters = "-"
 		meter_list = ast.literal_eval(meters)
 		meters = ", ".join(meter_list)
 
+		# Retrieve Schedule
 		sched = str(job).split(" cd ")[0].split(" ")
 		if job_enabled == "#":
 			sched.pop(0)
@@ -433,7 +546,8 @@ def retrieve_cronjobs():
 		hour = sched[1]
 		day_of_month = sched[2]
 		day_of_week = sched[4]
-		
+
+		# Format Time
 		try:
 			if int(minute) < 10:
 				minute = "0{}".format(minute)
@@ -442,6 +556,7 @@ def retrieve_cronjobs():
 		except:
 			pass
 
+		# Format Schedule
 		if minute != "*" and hour != "*" and day_of_month != "*":
 			sched_desc = "{}:{}H on every {} day of the month.".format(hour, minute, day_of_month)
 		elif minute != "*" and hour != "*" and day_of_week != "*":
@@ -449,19 +564,23 @@ def retrieve_cronjobs():
 		elif minute != "*" and hour != "*":
 			sched_desc = "{}:{}H every day.".format(hour, minute)
 
+		# Putting Schedule, Meters, Time, etc together
 		cron_dict = {"id": job_id, "name": job.comment, "sched_desc": sched_desc, "data_source": parameters[0].strip("\"()' "), "meters": meters, "start_time": ":".join(parameters[2].strip("\"()' ").split(":")[0:2]), "end_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2]), "enabled": job_enabled}
 		cron_list.append(cron_dict)
 
 	return cron_list
 
 
+"""Action to take on scheduled jobs: Enable, Disable, Delete"""
 def action_cronjobs(action_jobid):
 	action = action_jobid.split("_")[0]
 	job_id = int(action_jobid.split("_")[1])
-
 	job_cnt = 0
-	# Initialise Cron
+
+	"""Initialise Cron"""
 	root_cron = CronTab(user=retrieve_glob_var()["cron_user"])
+
+	"""Iterate every Cron Job and perform Action"""
 	for job in root_cron:
 		job_cnt += 1
 		if job_cnt == job_id:
@@ -475,8 +594,10 @@ def action_cronjobs(action_jobid):
 				print("Unable to ascertain Job {} action for Job ID: {}.".format(action, job_id))
 
 	try:
+		# Execute Action on the identified Cron Job
 		root_cron.write()
 	except Exception as e:
+		# Action cannot be executed on the identified Cron Job
 		print("Error Enabling/Disabling Cron job: {}\nJob: {}".format(e, job))
 		root_cron.clear()
 
@@ -484,32 +605,44 @@ def action_cronjobs(action_jobid):
 ########## END Data Transfer (Smart Meter): Manage Schedules ##########
 ########## START App Launch ##########
 
+"""Retrieve Local Applications"""
 def list_of_local_apps():
+	"""Blacklist system-installed local apps"""
 	system_apps = ["pipewire", "enchant-2", "gnome-todo", "im-config", "man", "mousetweaks", "file-roller", "gnome-shell", "gnome-system-monitor", "unattended-upgrades", "m2300w", "totem", "ucf", "debconf", "os-prober", "libreoffice", "info", "update-manager", "orca", "gnome-control-center", "pnm2ppa", "eog", "system-config-printer", "gnome-session", "speech-dispatcher", "rygel", "apturl", "npm", "perl", "brltty", "evince", "file", "systemd", "dconf", "remmina", "rsync", "distro-info", "gcc", "gettext", "locale", "plymouth", "gedit", "gnome-logs", "ibus", "pulseaudio", "nodejs", "tracker3", "lftp", "nano", "groff", "seahorse", "foo2qpdl", "update-notifier", "aspell", "ghostscript", "p11-kit", "dpkg", "python3", "session-migration", "gdb", "foo2zjs", "rhythmbox", "zenity", "nautilus", "yelp"]
+
+	"""Local apps are found in these two paths"""
 	share_path = "/usr/share"
 	bin_path = "/usr/bin"
-	app_list = []
 
+	app_list = []
+	# Return apps that are NOT found in both paths & NOT blacklisted local apps
 	for path in os.listdir(share_path):
 		if os.path.os.path.isfile(os.path.join(bin_path, path)) and path not in system_apps:
 			app_list.append(path)
+
 	return app_list
 
 
+"""Retrieve Arkime Views' ID from /api/views"""
 def retrieve_arkime_views():
-	# Call http://<arkime>:8005/api/views to return a dict similar to arkime_views
 	arkime_cred = retrieve_arkime_var()
 	try:
+		# Call http://<arkime>:8005/api/views to return a dict similar to arkime_views
 		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
 						auth=HTTPDigestAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]))
+
+		# If Arkime is online but unable to fetch data, might be due to authentication issue
 		if request_views.status_code != 200:
 			message = "Unable to authenticate. Are the credentials correct?"
 			print(message)
 			return 0, message
 		views_dict = ast.literal_eval(request_views.text)
+
 	except Exception as e:
+		# Arkime is not accessible/online
 		print("Unable to GET /api/views: {}".format(e))
 		return 0, str(e)
+
 	return 1, views_dict["data"]
 
 

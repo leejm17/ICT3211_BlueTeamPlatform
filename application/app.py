@@ -1,7 +1,7 @@
 from flask import Flask, render_template, redirect, url_for, request
 
 # Import Local Files
-from main import initiate_ftp, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
+from main import windows_ftp_start, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
 from main import list_of_local_apps, retrieve_arkime_views
 from admin import retrieve_glob_var, retrieve_arkime_var, retrieve_networkcapture_var, update_env
 from forms import DataTransfer_Form, AdminConfig_DataTransfer_Form, AdminConfig_AppLaunch_Form#, AdminConfig_NetworkCapture_Form
@@ -80,7 +80,7 @@ def datatransfer_smartmeter_page():
 			ftp_dir = ["SmartMeterData", "WiresharkData"]
 			if request.form["submit"] in ftp_dir:
 				"""Initiate FTP Process"""
-				success, dir_list = initiate_ftp(request.form["submit"])
+				success, dir_list = windows_ftp_start(request.form["submit"])
 				form.data_source.data = request.form["submit"]
 				days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 				
