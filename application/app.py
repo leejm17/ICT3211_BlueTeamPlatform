@@ -1,11 +1,11 @@
 from flask import Flask, render_template, redirect, url_for, request
-import subprocess
+import os, subprocess
 
 # Import Local Files
 from main import windows_ftp_start, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
 from main import list_of_local_apps, retrieve_arkime_views
 from admin import retrieve_glob_var, retrieve_arkime_var, retrieve_networkcapture_var, update_env
-from forms import DataTransfer_Form, AdminConfig_DataTransfer_Form, AdminConfig_AppLaunch_Form#, AdminConfig_NetworkCapture_Form
+from forms import DataTransfer_Form, AdminConfig_DataTransfer_Form, AdminConfig_AppLaunch_Form, AdminConfig_NetworkCapture_Form
 
 
 # Create Flask App
@@ -49,9 +49,15 @@ def admin_applaunch_page():
 	return render_template("/admin/config_app_launch.html", form=form)
 
 
-@app.route("/admin/honeypot", methods=["GET"], endpoint="admin.honeypot")
-def admin_honeypot_page():
-	return render_template("/admin/honeypot.html")
+@app.route("/admin/networkcapture", methods=["GET", "POST"], endpoint="admin.networkcapture")
+def admin_networkcapture_page():
+	form = AdminConfig_NetworkCapture_Form(request.form)
+	if request.method == "POST":
+		"""Update .networkcapture with new values"""
+		updated_configs = update_env("networkcapture", form)
+		return render_template("/admin/config_success.html", form=form, configs=updated_configs)
+
+	return render_template("/admin/config_networkcapture.html", form=form)
 
 
 @app.route("/admin/spyder", methods=["GET"], endpoint="admin.spyder")
@@ -118,10 +124,13 @@ def datatransfer_smartmeter_page():
 @app.route("/data_transfer/network", methods=["GET", "POST"], endpoint="data_transfer.network")
 def datatransfer_network_page():
 	if request.method == "POST" and request.form["action"] == "browse":
-		"""Open Files application"""
-		filepath = "{}/pcapFiles".format("/".join(app.config["APP_DIR"].split("/")[:-2]))
-		subprocess.Popen(["xdg-open", filepath])
-		#subprocess.Popen(["xdg-open", networkcapture_var()["capture_path"]])
+		"""Open Files application if filepath exists"""
+		filepath = networkcapture_var()["capture_path"]
+		if os.path.isdir(filepath):
+			print(filepath)
+			subprocess.Popen(["xdg-open", filepath])
+		else:
+			return render_template("/data_transfer/network_capture.html", message=filepath)
 
 	return render_template("/data_transfer/network_capture.html")
 

@@ -165,3 +165,11 @@ class AdminConfig_AppLaunch_Form(Form):
 		"Arkime Password",
 		validators=[
 			InputRequired()])
+
+
+"""Form for Admin Network Capture Page"""
+class AdminConfig_NetworkCapture_Form(Form):
+	capture_path = StringField(
+		"PCAP File Path",
+		validators=[
+			InputRequired()])

@@ -15,6 +15,12 @@
 		<form action="/data_transfer/network" method="POST">
 			<button class="btn btn-primary" type="submit" name="action" value="browse">Browse Files</button>
 		</form>
+		{% if message %}
+		<p>
+			Cannot open <span style="color:red;">{{ message }}</span>.<br />
+			Click here to <a href="/admin/networkcapture">modify config settings</a>.
+		</p>
+		{% endif %}
 	</div>
 </div>
 

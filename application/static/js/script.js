@@ -196,6 +196,14 @@ function retrieve_global_var() {
 		}
 	});
 
+	// admin_networkcapture_page()
+	$.ajax({
+		url:"/networkcapture_var",
+		success: function(resp) {
+			document.getElementById("capture_path").defaultValue = resp.capture_path;
+		}
+	});
+
 	/*$.ajax({
 		url:"/global_var",
 		success: function(resp) {
@@ -232,4 +240,11 @@ function open_arkime_view(view) {
 	const seconds = 30;
 	//new_tab = window.open(view.value);
 	//timed = setInterval(function() {new_tab.location.href=view.value}, seconds*1000);
+}
+
+
+// ViolentMonkey Extension: If "/sessions?view=", then refresh every 30s
+if (window.location.href.indexOf("/sessions?view=") > -1) {
+	const seconds = 30;
+	window.setTimeout(function() {window.location.reload();}, seconds*1000);
 }

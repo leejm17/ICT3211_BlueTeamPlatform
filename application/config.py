@@ -4,7 +4,7 @@ import getpass
 
 """Global Configs"""
 class Config:
-	APP_IP = "localhost"
+	APP_IP = "localhost"	# "172.16.2.6"
 	APP_PORT = 6065
 	APP_DIR = "/home/{}/Documents/ICT3211_BlueTeamPlatform/application".format(getpass.getuser())
 

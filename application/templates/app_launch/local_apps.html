@@ -22,7 +22,7 @@
 			<button class="btn btn-danger" type="submit" name="action" value="filezilla">FileZilla Client</button>-->
 		</form>
 		{% else %}
-		<label for="formFileLg" class="form-label">No user-installed application has been detected.</label><br />
+		<h5>No user-installed application has been detected.</h5><br />
 		{% endif %}
 		{% if message %}
 		<p>Cannot find <span style="color:red;">{{ message|title }}</span>. Is it installed?</p>

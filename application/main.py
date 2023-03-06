@@ -6,7 +6,7 @@ import ftplib, ssl
 import magic
 import ast
 import requests
-from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPBasicAuth
 
 # Import Local Files
 from admin import retrieve_glob_var, retrieve_arkime_var
@@ -334,6 +334,9 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 
 	except Exception as e:
 		print("Error Downloading File: {}".format(e))
+		# Print Time taken to iterate and download all files
+		end_all = time.time()
+		print("\tDownloaded {} files out of {} in {} seconds.".format(download_cnt, len(file_dict), end_all-start_all))
 		return False, e
 
 	ftps.quit()
@@ -627,9 +630,10 @@ def list_of_local_apps():
 def retrieve_arkime_views():
 	arkime_cred = retrieve_arkime_var()
 	try:
-		# Call http://<arkime>:8005/api/views to return a dict similar to arkime_views
-		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
-						auth=HTTPDigestAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]))
+		# Call https://<arkime>/api/views to return a dict similar to arkime_views
+		request_views = requests.get("https://{}/api/views".format(request.remote_addr),
+						auth=HTTPBasicAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
+						verify=False)
 
 		# If Arkime is online but unable to fetch data, might be due to authentication issue
 		if request_views.status_code != 200:

@@ -16,6 +16,8 @@
 		Click here to <a href="/admin/app_launch">modify config settings</a>.
 		{% elif "Connection refused" in arkime_views %}
 		<h5>A connection to Arkime cannot be established. Is Arkime available?</h5>
+		{% elif "certificate verify failed" in arkime_views %}
+		<h5>Unable to verify HTTPS Certificate. Did you change the HTTP authentication mechanism?</h5>
 		{% else %}
 		<h5>Launch <b>Arkime Views</b> here.</h5>
 		{% for view,url in arkime_views.items() %}
