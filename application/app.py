@@ -8,7 +8,6 @@ from main import windows_ftp_process
 #from main import initiate_ftp, windows_ftp_transfer
 from forms import DataTransfer_Form, SpyderForm
 
-
 # Import Library for commmunication with scapyd scraper
 from scrapyd_api import ScrapydAPI
 scrapyd = ScrapydAPI('http://localhost:6800')
@@ -244,14 +243,18 @@ def spyder_jobs_deatails():
 		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
 		runningDict.append(resultDictionary)
 
+	if request.method == "POST":
+		print(request.form["filter"])
+
 	# if status equal finished
-	cursor.execute("SELECT * from spyderjobs WHERE status = 'finished' ")
+	cursor.execute("SELECT DISTINCT URL from spyderjobs WHERE status = 'finished' ")
 	finishedDataTuple = cursor.fetchall()
 	finishedDict = []
 	for rows in finishedDataTuple:
 		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
 		finishedDict.append(resultDictionary)
 
+	print(finishedDict)
 	cursor.close()
 	conn.close()
 

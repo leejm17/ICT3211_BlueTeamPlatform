@@ -18,5 +18,7 @@ Flask-WTF==1.0.1
 WTForms==3.0.1
 #Flask Flask-SQLAlchemy
 #pip install flask-mysql
+#pip install python-scrapyd-api 2.1.2
+
 
 
