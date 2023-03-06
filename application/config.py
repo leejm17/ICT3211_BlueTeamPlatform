@@ -1,12 +1,12 @@
 """ Flask Configurations """
-import os
+import getpass
 
 
 """Global Configs"""
 class Config:
 	APP_IP = "localhost"
 	APP_PORT = 6065
-	APP_DIR = "/home/{}/Documents/ICT3211_BlueTeamPlatform/application".format(os.getlogin())
+	APP_DIR = "/home/{}/Documents/ICT3211_BlueTeamPlatform/application".format(getpass.getuser())
 
 
 """Development Configuration"""
