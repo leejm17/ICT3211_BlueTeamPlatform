@@ -17,7 +17,10 @@
 		{% if message[0] == 1 %}
 		<b>1 file</b> is downloaded to <b>{{ message[1] }}</b>.
 		{% else %}
+		<form action="/data_transfer/smart_meter" method="POST">
 			<b>{{ message[0] }} files</b> are downloaded to a folder named <b>{{ message[1] }}</b>.
+			<button class="btn btn-primary" type="submit" name="submit" value="browse--{{ message }}">Browse Here</button>
+		</form>
 		{% endif %}
 	</p>
 	{% endif %}

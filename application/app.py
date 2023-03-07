@@ -1,5 +1,5 @@
 from flask import Flask, render_template, redirect, url_for, request
-import os, subprocess
+import os, subprocess, ast
 
 # Import Local Files
 from main import windows_ftp_start, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
@@ -81,42 +81,47 @@ def datatransfer_page():
 @app.route("/data_transfer/smart_meter", methods=["GET", "POST"], endpoint="data_transfer.smart_meter")
 def datatransfer_smartmeter_page():
 	form = DataTransfer_Form(request.form)
-	if request.method == "POST":
-		if request.form:
+	if request.method == "POST" and request.form:
+		ftp_dir = ["SmartMeterData", "WiresharkData"]
 
-			ftp_dir = ["SmartMeterData", "WiresharkData"]
-			if request.form["submit"] in ftp_dir:
-				"""Initiate FTP Process"""
-				success, dir_list = windows_ftp_start(request.form["submit"])
-				form.data_source.data = request.form["submit"]
-				days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
-				
-				# If FTP Connection Established
-				if success:
-					return render_template("/data_transfer/smart_meter.html", ip=global_var()["windows_ip"], form=form, dir_list=dir_list, meters=dir_list, days_of_week=days_of_week)
-				# Else FTP Connection NOT Established
-				else:
-					return render_template("/data_transfer/connection_failure.html", ip=global_var()["windows_ip"], message=dir_list)
+		if "browse" in request.form["submit"]:
+			"""Open FTP_Downloads folder with Files application"""
+			message = ast.literal_eval(request.form["submit"].split("--")[1])
+			subprocess.Popen(["xdg-open", message[1]])
+			return render_template("/data_transfer/smart_meter/download_success.html", message=message)
 
+		elif request.form["submit"] in ftp_dir:
+			"""Initiate FTP Process"""
+			success, dir_list = windows_ftp_start(request.form["submit"])
+			form.data_source.data = request.form["submit"]
+			days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+			
+			# If FTP Connection Established
+			if success:
+				return render_template("/data_transfer/smart_meter.html", ip=global_var()["windows_ip"], form=form, dir_list=dir_list, meters=dir_list, days_of_week=days_of_week)
+			# Else FTP Connection NOT Established
 			else:
-				"""Data Transfer Process"""
-				# If Transfer Type is Now
-				if form.transfer_type.data == "Now":
-					# Perform Data Transfer Now
-					success, message = windows_ftp_process(form)
-					if success:
-						return render_template("/data_transfer/smart_meter/download_success.html", message=message)
-					else:
-						return render_template("/data_transfer/smart_meter/download_failure.html", message=message)
+				return render_template("/data_transfer/connection_failure.html", ip=global_var()["windows_ip"], message=dir_list)
 
-				# Else Transfer Type is Scheduled
+		else:
+			"""Data Transfer Process"""
+			# If Transfer Type is Now
+			if form.transfer_type.data == "Now":
+				# Perform Data Transfer Now
+				success, message = windows_ftp_process(form)
+				if success:
+					return render_template("/data_transfer/smart_meter/download_success.html", message=message)
 				else:
-					# Schedule Data Transfer based on Form Data
-					success, cron, job = windows_ftp_automate(form)
-					if success:
-						return render_template("/data_transfer/jobs/cronjob_success.html", cron_message=cron, job_message=job)
-					else:
-						return render_template("/data_transfer/jobs/cronjob_failure.html", cron_message=cron, job_message=job)
+					return render_template("/data_transfer/smart_meter/download_failure.html", message=message)
+
+			# Else Transfer Type is Scheduled
+			else:
+				# Schedule Data Transfer based on Form Data
+				success, cron, job = windows_ftp_automate(form)
+				if success:
+					return render_template("/data_transfer/jobs/cronjob_success.html", cron_message=cron, job_message=job)
+				else:
+					return render_template("/data_transfer/jobs/cronjob_failure.html", cron_message=cron, job_message=job)
 
 	return render_template("/data_transfer/smart_meter.html", ip=global_var()["windows_ip"], form=form)
 
@@ -193,6 +198,24 @@ def applaunch_arkimeviews_page():
 
 
 ########## END App Launch Pages ##########
+########## START Spider Pages ##########
+
+@app.route("/spider", methods=["GET"], endpoint="spider")
+def spider_page():
+	return render_template("/spider/spider.html")
+
+
+@app.route("/spider/submit_job", methods=["GET", "POST"], endpoint="spider.submit_job")
+def spider_submitjob_page():
+	return render_template("/spider/submit_job.html")
+
+
+@app.route("/spider/manage_jobs", methods=["GET"], endpoint="spider.manage_jobs")
+def spider_managejobs_page():
+	return render_template("/spider/manage_jobs.html")
+
+
+########## END Spider Pages ##########
 
 @app.route("/help", methods=["GET"], endpoint="help")
 def help_page():

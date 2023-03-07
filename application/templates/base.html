@@ -55,7 +55,8 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 <!-- Responsive navbar-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 	<div class="container">
-		<a class="navbar-brand" href="/">SCFAMI Dashboard v0.1</a>
+		<!--SCFAMI Version 0.2: 07 March 2023-->
+		<a class="navbar-brand" href="/">SCFAMI Dashboard v0.2</a>
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -87,10 +88,10 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							{% else %}class="dropdown-item"{% endif %} href="/admin/app_launch">
 							App Launch</a></li>
 
-						<li><a
+						<!--<li><a
 							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/spyder">
-							Spyder</a></li>
+							Spyder</a></li>-->
 
 						<li><a
 							{% if request.endpoint=="networkcapture" %}class="dropdown-item active" aria-current="page"
@@ -160,6 +161,32 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							{% if request.endpoint=="app_launch.arkime" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/app_launch/arkime">
 							Arkime Views</a></li>
+					</ul>
+				</li>
+
+				<li class="nav-item dropdown">
+					<a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+						{% if request.endpoint=="spider" or request.endpoint=="spider.submit_job" or request.endpoint=="spider.manage_jobs" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% else %}class="nav-link dropdown-toggle"{% endif %}>
+						Spider</a>
+
+					<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+						<li><a
+							{% if request.endpoint=="spider" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/spider">
+							Spider</a></li>
+
+						<li><hr class="dropdown-divider" /></li>
+
+						<li><a
+							{% if request.endpoint=="spider.submit_job" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/spider/submit_job">
+							Submit Job</a></li>
+
+						<li><a
+							{% if request.endpoint=="spider.manage_jobs" %}class="dropdown-item active" aria-current="page"
+							{% else %}class="dropdown-item"{% endif %} href="/spider/manage_jobs">
+							Manage Jobs</a></li>
 					</ul>
 				</li>
 

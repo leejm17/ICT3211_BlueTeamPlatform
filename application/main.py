@@ -319,10 +319,13 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 
 			"""Download filtered files from this folder (FTP directory)"""
 			for csv_file in file_dict[directory]:
-				with open(csv_file, "wb") as f:
-					# Command for Downloading the file "RETR csv_file"
-					ftps.retrbinary(f"RETR {csv_file}", f.write)
-					download_cnt += 1
+				try:
+					with open(csv_file, "wb") as f:
+						# Command for Downloading the file "RETR csv_file"
+						ftps.retrbinary(f"RETR {csv_file}", f.write)
+						download_cnt += 1
+				except Exception as e:
+					continue
 
 			# Print Time taken to iterate and download files from this directory
 			end_dur = time.time()
@@ -650,7 +653,13 @@ def retrieve_arkime_views():
 	return 1, views_dict["data"]
 
 
-########### END App Launch ###########
+########## END App Launch ##########
+########## START Spider ##########
+
+# Code Here
+
+
+########## END Spider ##########
 ########## START Help ##########
 # Code Here
-########### END Help ###########
+########## END Help ##########

@@ -35,7 +35,7 @@ def retrieve_networkcapture_var():
 		"capture_path": os.environ["CAPTURE_PATH"]}
 
 
-########### END Global Variables ###########
+########## END Global Variables ##########
 ########## START .datatransfer / .arkime / .networkcapture Config ##########
 
 """Update Specified Environment File (or .env)"""
@@ -56,7 +56,7 @@ def update_env(env, form):
 	return updated_configs
 
 
-########### END .datatransfer / .arkime / .networkcapture Config ###########
-########## START Spyder Config ##########
+########## END .datatransfer / .arkime / .networkcapture Config ##########
+########## START Spider Config ##########
 # Code Here
-########### END Spyder Config ###########
+########## END Spider Config ##########

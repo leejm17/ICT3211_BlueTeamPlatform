@@ -120,7 +120,6 @@ function search_jobs_table() {
 function sort_jobs_table(n) {
 	var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
 	table = document.getElementById("jobs_table");
-	console.log(table)
 	switching = true;
 	//Set the sorting direction to ascending:
 	dir = "asc"; 

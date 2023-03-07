@@ -1,0 +1,30 @@
+<head>
+	<title>Spider</title>
+</head>
+
+{% extends "base.html" %}
+
+{% block body %}
+
+<!--Page content-->
+<div class="container mt-5">
+	<h1>Which action to perform?</h1>
+
+	<!-- Features section-->
+	<div class="container px-5 my-5">
+		<div class="row gx-5">
+			<div class="col-lg-6">
+				<a href="/spider/submit_job"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="fas fa-spider"></i></div></a>
+				<h2 class="h4 fw-bolder">Submit Job</h2>
+				<p>Select a Spider and submit a URL to crawl for YARA rules.</p>
+			</div>
+			<div class="col-lg-6">
+				<a href="/spider/manage_jobs"><div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="fas fa-table"></i></div></a>
+				<h2 class="h4 fw-bolder">Manage Jobs</h2>
+				<p>View all your Spider jobs.</p>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% endblock %}
