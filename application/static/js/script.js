@@ -235,17 +235,8 @@ function retrieve_global_var() {
 
 // Source: https://www.technipages.com/how-to-auto-refresh-chrome-tabs-without-an-extension
 function open_arkime_view(view) {
-	console.log(view.value);	// Replace below URL with filter.value
 	const seconds = 30;
-	//new_tab = window.open(view.value);
-	//timed = setInterval(function() {new_tab.location.href=view.value}, seconds*1000);
-}
-
-
-// ViolentMonkey Extension: If "/sessions?view=", then refresh every 30s
-if (window.location.href.indexOf("/sessions?view=") > -1) {
-	const seconds = 30;
-	window.setTimeout(function() {window.location.reload();}, seconds*1000);
+	window.open(view.value);
 }
 
 

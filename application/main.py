@@ -634,9 +634,13 @@ def retrieve_arkime_views():
 	arkime_cred = retrieve_arkime_var()
 	try:
 		# Call https://<arkime>/api/views to return a dict similar to arkime_views
-		request_views = requests.get("https://{}/api/views".format(request.remote_addr),
-						auth=HTTPBasicAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
+		from requests.auth import HTTPDigestAuth
+		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
+						auth=HTTPDigestAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
 						verify=False)
+		"""request_views = requests.get("https://{}/api/views".format(request.remote_addr),
+						auth=HTTPBasicAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
+						verify=False)"""
 
 		# If Arkime is online but unable to fetch data, might be due to authentication issue
 		if request_views.status_code != 200:

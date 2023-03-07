@@ -69,7 +69,7 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 
 				<li class="nav-item dropdown">
 					<a id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-						{% if request.endpoint=="admin" or request.endpoint=="admin.networkcapture" or request.endpoint=="admin.spyder" or request.endpoint=="admin.data_transfer" or request.endpoint=="admin.app_launch" or request.endpoint=="admin.machine_learning" %}class="nav-link dropdown-toggle active" aria-current="page"
+						{% if request.endpoint=="admin" or request.endpoint=="admin.data_transfer" or request.endpoint=="admin.app_launch" or request.endpoint=="admin.networkcapture" %}class="nav-link dropdown-toggle active" aria-current="page"
 						{% else %}class="nav-link dropdown-toggle"{% endif %}>
 						Admin</a>
 
@@ -91,20 +91,10 @@ table, th, td { border: 1px solid black; border-collapse: collapse;}
 							{% else %}class="dropdown-item"{% endif %} href="/admin/app_launch">
 							App Launch</a></li>
 
-						<!--<li><a
-							{% if request.endpoint=="spyder" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/admin/spyder">
-							Spyder</a></li>-->
-
 						<li><a
-							{% if request.endpoint=="networkcapture" %}class="dropdown-item active" aria-current="page"
+							{% if request.endpoint=="admin.networkcapture" %}class="dropdown-item active" aria-current="page"
 							{% else %}class="dropdown-item"{% endif %} href="/admin/networkcapture">
 							Network Captures</a></li>
-
-						<!--<li><a
-							{% if request.endpoint=="machine_learning" %}class="dropdown-item active" aria-current="page"
-							{% else %}class="dropdown-item"{% endif %} href="/admin/machine_learning">
-							Machine Learning</a></li>-->
 					</ul>
 				</li>
 

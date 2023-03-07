@@ -21,7 +21,7 @@
 		{% else %}
 		<h5>Launch <b>Arkime Views</b> here.</h5>
 		{% for view,url in arkime_views.items() %}
-		<button class="btn btn-{{ style[loop.index%5] }}" onclick="open_arkime_view(this)" value="{{url}}">{{view|title}}</button>			
+		<button class="btn btn-{{ style[loop.index%5] }}" onclick="open_arkime_view(this)" value="{{ url }}">{{view|title}}</button>			
 		{% if loop.index%5 == 0 %}<br /><br />{% endif %}
 		{% endfor %}
 		{% endif %}
