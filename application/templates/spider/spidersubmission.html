@@ -58,7 +58,7 @@
 
 	<h1 class="title">Submit Github URLs</h1>
 
-    <form  action="/spydersubmission" method="POST">
+    <form  action="/spidersubmission" method="POST">
       {{ form.csrf_token }}
       {{ form.githubUrl.label }} 
       {{ form.githubUrl(class="form-control") }}
@@ -81,8 +81,8 @@
       </p>
       
       <p>
-      {{form.spyderChoice.label()}}
-      {{form.spyderChoice()}}
+      {{form.spiderChoice.label()}}
+      {{form.spiderChoice()}}
       </p>
 
       <p>

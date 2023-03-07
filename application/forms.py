@@ -28,7 +28,7 @@ class SpyderForm(FlaskForm):
     githubUrl = StringField(label='Github URL 1:', validators=[DataRequired(), url_check])
     submit = SubmitField(label='Submit URL')
     scrapingDepth = SelectField(u'Scraping Depth: ', choices=[('0', '0'), ('1', '1'), ('2', '2')])
-    spyderChoice = SelectField(u'Spyder: ', choices=[('github', 'github')])
+    spiderChoice = SelectField(u'Spyder: ', choices=[('github', 'github')])
     
 
 	

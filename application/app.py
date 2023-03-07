@@ -129,12 +129,12 @@ def help_page():
 
 
 
-@app.route('/spyder', methods = ['POST', 'GET'])
+@app.route('/spider', methods = ['POST', 'GET'])
 def spyder_submission_page():      
     return render_template('/spyder/spyder.html')
 	  
 
-@app.route('/spydersubmission', methods = ['POST', 'GET'])
+@app.route('/spidersubmission', methods = ['POST', 'GET'])
 def spyder_submission_page_2():
 	form = SpyderForm()
 	if form.validate_on_submit():
@@ -144,28 +144,28 @@ def spyder_submission_page_2():
 				url = value
 			if key == "scrapingDepth":
 				depth = int(value)
-			if key == "spyderChoice":
-				spyder = value
+			if key == "spiderChoice":
+				spider = value
 		
 		conn = mysql.connect()
 		cursor = conn.cursor()
 		
 		# for current url, check if its status is "running" in DB and get its jobid
-		query = "SELECT jobid from spyderjobs WHERE url = %s AND spyder = %s AND status = 'running'"
-		cursor.execute(query, (url, spyder))
+		query = "SELECT jobid from spiderjobs WHERE url = %s AND spider = %s AND status = 'running'"
+		cursor.execute(query, (url, spider))
 		jobid = cursor.fetchone()
 		print (jobid)
 
 		# if url does not exist in DB and does not have a running job, allow user to submit job
 		if jobid == None:
 			print("URL does not exist in DB and does not have a running job")
-			generatedJobid = scrapyd.schedule(PROJECT_NAME, spyder, url=url, depth = depth)
+			generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth = depth)
 			setStatus = 'running'
 			# insert url, jobid and other details into the database
-			query = "INSERT INTO `scfami_spyder`.`spyderjobs` \
-					(`project`,`spyder`,`jobid`,`url`,`depth`,`status`)\
+			query = "INSERT INTO `scfami_spider`.`spiderjobs` \
+					(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
 						VALUES (%s,%s,%s,%s, %s, %s);"
-			cursor.execute(query, (PROJECT_NAME, spyder, generatedJobid, url, depth, setStatus))
+			cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
 			conn.commit()
 			print("Insert Query executed")
 
@@ -180,24 +180,24 @@ def spyder_submission_page_2():
 				# jobstatus = 'running'
 
 				if jobstatus == 'running' or jobstatus == 'pending':
-					flash(u'URL and its respective Spyder is currently queued or running', 'danger')
+					flash(u'URL and its respective Spider is currently queued or running', 'danger')
 
 				if jobstatus == 'finished':
 					print("finished")
 					print("Old Job ID is: " , jobid)
-					query = "UPDATE spyderjobs SET status = 'finished' WHERE jobid = %s"
+					query = "UPDATE spiderjobs SET status = 'finished' WHERE jobid = %s"
 					cursor.execute(query, (jobid,))
 					conn.commit()
 					print("Update Query executed")
 
-					generatedJobid = scrapyd.schedule(PROJECT_NAME, spyder, url=url, depth = depth)
+					generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth = depth)
 					print("New Job ID is: " , generatedJobid)
-					query = "INSERT INTO `scfami_spyder`.`spyderjobs` \
-					(`project`,`spyder`,`jobid`,`url`,`depth`,`status`)\
+					query = "INSERT INTO `scfami_spider`.`spiderjobs` \
+					(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
 						VALUES (%s,%s,%s,%s, %s, %s);"
 					setStatus = 'running'
 					print(setStatus)
-					cursor.execute(query, (PROJECT_NAME, spyder, generatedJobid, url, depth, setStatus))
+					cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
 					conn.commit()
 					print("Insert Query executed")
 					flash(u'URL has been submitted for crawling', 'success')
@@ -216,7 +216,7 @@ def spyder_submission_page_2():
 		if (status == "finished") :
 			finishedJobs += value
 				
-	return render_template('/spyder/spydersubmission.html', form = form, runningJobs = runningJobs)
+	return render_template('/spider/spidersubmission.html', form = form, runningJobs = runningJobs)
 
 
 # @app.route('/schedulespyder', methods = ['POST', 'GET'])
@@ -228,26 +228,27 @@ def spyder_submission_page_2():
 # 	return render_template('/spyder/schedulespyder.html', form = form)
 
 
-@app.route('/spyderjobs', methods = ['POST', 'GET'])
+@app.route('/spiderjobs', methods = ['POST', 'GET'])
 def spyder_jobs_deatails():
 	conn = mysql.connect()
 	cursor = conn.cursor()
 
-	inputTuple_1 = ('project', 'spyder', 'jobid', 'url', 'depth', 'status')
+	inputTuple_1 = ('project', 'spider', 'jobid', 'url', 'depth', 'status')
 
 	# if status equal running 
-	cursor.execute("SELECT * from spyderjobs WHERE status = 'running' ")
+	cursor.execute("SELECT * from spiderjobs WHERE status = 'running' ")
 	runningDataTuple = cursor.fetchall()
 	runningDict = []
 	for rows in runningDataTuple:
 		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
 		runningDict.append(resultDictionary)
+	print(runningDict)
 
 	if request.method == "POST":
 		print(request.form["filter"])
 
 	# if status equal finished
-	cursor.execute("SELECT DISTINCT URL from spyderjobs WHERE status = 'finished' ")
+	cursor.execute("SELECT DISTINCT URL from spiderjobs WHERE status = 'finished' ")
 	finishedDataTuple = cursor.fetchall()
 	finishedDict = []
 	for rows in finishedDataTuple:
@@ -258,7 +259,7 @@ def spyder_jobs_deatails():
 	cursor.close()
 	conn.close()
 
-	return render_template('/spyder/spyderjobs.html', finishedDict=finishedDict, runningDict=runningDict)
+	return render_template('/spider/spiderjobs.html', finishedDict=finishedDict, runningDict=runningDict)
 
 	
 @app.route('/submit', methods = ['POST', 'GET'])
