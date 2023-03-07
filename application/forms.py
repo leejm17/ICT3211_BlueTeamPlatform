@@ -151,8 +151,8 @@ class Spider_Form(FlaskForm):
 		"Scraping Depth: ",
 		choices=[("0", "0"), ("1", "1"), ("2", "2")])
 
-	spyderChoice = SelectField(
-		"Spyder: ",
+	spiderChoice = SelectField(
+		"Spider: ",
 		choices=[("github", "github")])
 
 	submit = SubmitField(
