@@ -9,27 +9,34 @@ from wtforms import (
 	SelectField,
 	SubmitField
 )
-from wtforms.validators import NumberRange, InputRequired
+from wtforms.validators import (
+	NumberRange,
+	InputRequired,
+	ValidationError
+)
+from flask_wtf import FlaskForm
 from datetime import datetime
 
+
+########## START Data Transfer Forms ##########
 
 """Form for Smart Meter (Windows) Page"""
 class DataTransfer_Form(Form):
 
 	#### Transfer Type: Both Now & Schedule ####
 	data_source = StringField(
-		"Data Source",
+		label="Data Source",
 		validators=[
 			InputRequired()],
 		render_kw={"disabled": ""})
 
 	meters = SelectMultipleField(
-		"Meters",
+		label="Meters",
 		validators=[
 			InputRequired()])
 
 	transfer_type = RadioField(
-		"Transfer Type",
+		label="Transfer Type",
 		choices=["Now", "Schedule"],
 		default="Now",
 		validators=[
@@ -37,7 +44,7 @@ class DataTransfer_Form(Form):
 		render_kw={"onclick": "toggle_transfer_type(this.id)"})
 
 	start_time = TimeField(
-		"Data Start Time",
+		label="Data Start Time",
 		format="%H:%M:%S",
 		default=datetime(2023, 1, 1, hour=12),
 		validators=[
@@ -47,20 +54,20 @@ class DataTransfer_Form(Form):
 
 	#### Wireshark Data: WiresharkData only ####
 	wireshark_source = RadioField(
-		"Wireshark Source",
+		label="Wireshark Source",
 		choices=["Ethernet", "WiFi"],
 		default="Ethernet")
 
 
 	#### Transfer Type: Now only ####
 	date = DateField(
-		"Date",
+		label="Date",
 		validators=[
 			InputRequired()],
 		default=datetime(2023, 1, 1))
 
 	end_time = TimeField(
-		"Data End Time",
+		label="Data End Time",
 		format="%H:%M:%S",
 		default=datetime(2023, 1, 1, hour=12),
 		validators=[
@@ -70,45 +77,44 @@ class DataTransfer_Form(Form):
 
 	#### Transfer Type: Schedule only ####
 	transfer_freq = RadioField(
-		"Transfer Frequency",
-		#choices=["Minute", "Hourly", "Daily", "Weekly", "Monthly"],
+		label="Transfer Frequency",
 		choices=["Daily", "Weekly", "Monthly"],
 		render_kw={"onclick": "toggle_transfer_freq(this.id)"})
 
 	transfer_freq_time = TimeField(
-		"At",
+		label="At",
 		format="%H:%M",
 		default=datetime(2023, 1, 1, hour=12),
 		validators=[
 			InputRequired()])
 
 	transfer_freq_week = SelectMultipleField(
-		"on a",
+		label="on a",
 		validators=[
 			InputRequired()])
 	transfer_freq_week_time = TimeField(
-		"At",
+		label="At",
 		format="%H:%M",
 		default=datetime(2023, 1, 1, hour=12),
 		validators=[
 			InputRequired()])
 
 	transfer_freq_month = IntegerField(
-		"on the",
+		label="on the",
 		default=1,
 		validators=[
 			InputRequired(),
 			NumberRange(min=1, max=31, message="Invalid day of month")],
 		render_kw={"style": "width:50px; margin: 0px 5px 0px 0px"})
 	transfer_freq_month_time = TimeField(
-		"At",
+		label="At",
 		format="%H:%M",
 		default=datetime(2023, 1, 1, hour=12),
 		validators=[
 			InputRequired()])
 
 	transfer_dur = SelectField(
-		"Data to Download",
+		label="Data to Download",
 		choices=[1, 5, 10, 15, 30],
 		default=5,
 		validators=[
@@ -116,7 +122,7 @@ class DataTransfer_Form(Form):
 		render_kw={"style": "width:45px; margin: 0px 5px 0px 0px"})
 
 	job_name = StringField(
-		"Job Name",
+		label="Job Name",
 		default="New Job",
 		validators=[
 			InputRequired()],
@@ -124,6 +130,37 @@ class DataTransfer_Form(Form):
 
 	submit = SubmitField("Data Transfer", render_kw={"id": "div_btn"})
 
+
+########## END Data Transfer Forms ##########
+########## START Spider Forms ##########
+
+"""Form for Spider Submit Job Page"""
+def url_check(form, field):
+	if "https://github.com/" not in field.data:
+		raise ValidationError("A github repository link must be provided")
+
+class Spider_Form(FlaskForm):
+
+	githubUrl = StringField(
+		label="Github URL 1:",
+		validators=[
+			InputRequired(),
+			url_check])
+
+	scrapingDepth = SelectField(
+		"Scraping Depth: ",
+		choices=[("0", "0"), ("1", "1"), ("2", "2")])
+
+	spyderChoice = SelectField(
+		"Spyder: ",
+		choices=[("github", "github")])
+
+	submit = SubmitField(
+		label="Submit URL")
+
+
+########## END Spider Forms ##########
+########## START Admin Forms ##########
 
 """Form for Admin Data Transfer Page"""
 class AdminConfig_DataTransfer_Form(Form):
@@ -173,3 +210,6 @@ class AdminConfig_NetworkCapture_Form(Form):
 		"PCAP File Path",
 		validators=[
 			InputRequired()])
+
+
+########## END Admin Forms ##########

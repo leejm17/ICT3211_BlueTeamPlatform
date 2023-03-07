@@ -8,10 +8,55 @@
 
 <!--Page content-->
 <div class="container mt-5">
-	<h1>Submit Job</h1>
+	{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		{% for category, message in messages %}
+		<div class="alert alert-{{category}} alert-dismissible fade show" role="alert">
+			<span>{{message}}</span> 
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		{% endfor %}
+	{% endif %}
+	{% endwith %}
+
+	<h1>Submit GitHub URL</h1>
 
 	<div class="mb-3">
-		<h5>Submit a URL for a Spider crawl for YARA rules here.</h5>
+		<h5>Submit a URL for a Spider to crawl for YARA rules here.</h5>
+		<form action="/spider/submit_job" method="POST">
+			{{ form.csrf_token }}
+			{{ form.githubUrl.label }} 
+			{{ form.githubUrl(class="form-control") }}
+
+			{% if form.githubUrl.errors %}
+				<ul class="errors">
+				{% for error in form.githubUrl.errors %}
+					<li>{{ error }}</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+
+			<p>
+			Number of running spiders are:
+			{{ runningJobs }} 
+			</p>
+
+			<p>
+			{{form.scrapingDepth.label()}}
+			{{form.scrapingDepth()}}
+			</p>
+
+			<p>
+			{{form.spyderChoice.label()}}
+			{{form.spyderChoice()}}
+			</p>
+
+			<p>
+			<input class="btn btn-primary" type="submit" value="Submit">
+		  </p>
+		</form>
 	</div>
 </div>
 

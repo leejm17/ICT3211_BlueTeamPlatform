@@ -1,6 +1,5 @@
 import os, dotenv
 
-
 ########## START Global Variables ##########
 
 """Data Transfer Variables"""
@@ -33,6 +32,19 @@ def retrieve_networkcapture_var():
 
 	return {
 		"capture_path": os.environ["CAPTURE_PATH"]}
+
+
+"""Database Variables"""
+def retrieve_database_var():
+	dotenv_file = dotenv.find_dotenv(".database")
+	dotenv.load_dotenv(dotenv_file, override=False)	# Take environment variables from .database
+
+	return {
+		"db_host": os.environ["DB_HOST"],
+		"database_db": os.environ["DATABASE_DB"],
+		"db_user": os.environ["DB_USER"],
+		"db_pwd": os.environ["DB_PWD"],
+		"secret": os.environ["SECRET_KEY"]}
 
 
 ########## END Global Variables ##########

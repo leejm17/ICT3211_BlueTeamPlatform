@@ -247,3 +247,31 @@ if (window.location.href.indexOf("/sessions?view=") > -1) {
 	const seconds = 30;
 	window.setTimeout(function() {window.location.reload();}, seconds*1000);
 }
+
+
+$(document).ready(function(){
+	//var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
+	$("form#github").submit(function(event) {
+		console.log("NYE");
+
+		valid = true
+
+		var values = [];
+		$("form input:text").each(
+			function() {
+				if (values.indexOf(this.value) >= 0) {
+					$(this).css("border-color", "red");
+					// console.log(this.after('<p>Phone number has to be 10 digits long.</p>'));
+					this.after("Duplicate values exists.")
+					//div.classList.remove("hide");
+					valid = false;
+					return valid;
+				} else {
+					$(this).css("border-color", ""); //clears since last check
+					values.push(this.value);
+				}
+			}
+		);
+		return valid;
+	});
+});

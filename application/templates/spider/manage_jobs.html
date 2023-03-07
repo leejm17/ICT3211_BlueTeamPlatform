@@ -1,5 +1,26 @@
 <head>
 	<title>Manage Jobs</title>
+	<style>
+		table {
+			font-family: arial, sans-serif;
+			border-collapse: collapse;
+			width: 100%;
+		}
+
+		td, th {
+			border: 1px solid #dddddd;
+			text-align: left;
+			padding: 8px;
+		}
+
+		tr:nth-child(even) {
+			background-color: #dddddd;
+		}
+
+		.table-responsive {
+			max-height:300px;
+		}
+	</style>
 </head>
 
 {% extends "base.html" %}
@@ -12,6 +33,63 @@
 
 	<div class="mb-3">
 		<h5>Manage your Spider jobs here.</h5>
+		<p class="title">To get more infomation regarding the jobid's as well as its logs
+		, click <a href="http://localhost:6800/jobs" target="http://localhost:6800/jobs">here.</a> </p>
+
+		<h2 class="title">Running </h2>
+
+		<div class="table-responsive">
+			<table class="table">
+				<tr>
+					<th>Project</th>
+					<th>Spider</th>
+					<th>ID</th>
+					<th>Depth</th>
+					<th>URL</th>
+				</tr>
+				{% for running in runningDict %}
+				<tr>
+					<td>{{ running.project }}</td>
+					<td>{{ running.spyder }}</td>
+					<td>{{ running.jobid }}</td>
+					<td>{{ running.depth }}</td>
+					<td>{{ running.url }}</td>
+				</tr>
+				{% endfor %} 
+			</table>
+		</div>
+
+		<h2 class="title">Completed </h2>
+
+		<div class="table-responsive">
+			<table class="table">
+					<tr>
+						<th>Project</th>
+						<th>Spider</th>
+						<th>ID</th>
+						<th>Depth</th>
+						<th>URL</th>
+					</tr>	
+					{% for finished in finishedDict %}
+						<tr>
+								<td>{{ finished.project }}</td>
+								<td>{{ finished.spider }}</td>
+								<td>{{ finished.jobid }}</td>
+								<td>{{ finished.depth }}</td>
+								<td>{{ finished.url }}</td>
+						</tr>
+					{% endfor %}
+				</table>
+		</div>
+		<form action="/manage_jobs" method="POST">
+			<select name="filter">
+				<option value="all">All</option>
+				{% for finished in finishedDict %}
+				<option value="{{finished}}">{{finished}}</option>
+				{% endfor %}
+			</select>
+			<button type="submit">Filter</button>
+		</form>
 	</div>
 </div>
 
