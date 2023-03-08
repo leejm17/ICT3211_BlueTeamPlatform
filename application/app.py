@@ -211,7 +211,7 @@ def spider_page():
 @app.route("/spider/submit_job", methods=["GET", "POST"], endpoint="spider.submit_job")
 def spider_submitjob_page():
 	form = Spider_Form(request.form)
-	form.spiderChoice.choices = retrieve_spiders(app)
+	form.spiderChoice.choices = retrieve_spiders()
 
 	update_spider_db(mysql)	# Update Job status
 	if request.method == "POST" and form.validate_on_submit():

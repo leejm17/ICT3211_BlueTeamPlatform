@@ -30,14 +30,6 @@
 			{{ form.url.label }} 
 			{{ form.url(class="form-control") }}
 
-			{% if form.url.errors %}
-				<ul>
-				{% for error in form.url.errors %}
-					<li>{{ error }}</li>
-				{% endfor %}
-				</ul>
-			{% endif %}
-
 			<p>
 			Number of running spiders are:
 			{{ runningJobs }} 

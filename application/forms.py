@@ -15,8 +15,9 @@ from wtforms.validators import (
 	ValidationError
 )
 from flask_wtf import FlaskForm
-import requests
+from flask import flash
 from datetime import datetime
+import requests
 
 
 ########## START Data Transfer Forms ##########
@@ -141,9 +142,17 @@ def url_check(form, field):
 		if requests.get(field.data).status_code != 200:
 			raise
 	except:
-		raise ValidationError("A valid HTTP/S link must be provided: {}".format(field.data))
-	if "github.com" not in field.data:
-		raise ValidationError("A GitHub repository link must be provided")
+		message = "A valid HTTP/S link must be provided: {}".format(field.data)
+		flash(message, "danger")
+		raise ValidationError(message)
+	if form.spiderChoice.data == "github" and "github.com" not in field.data:
+		message = "A GitHub repository link must be provided"
+		flash(message, "danger")
+		raise ValidationError(message)
+	elif form.spiderChoice.data == "stackoverflow" and "stackoverflow.com" not in field.data:
+		message = "A valid StackOverFlow link must be provided"
+		flash(message, "danger")
+		raise ValidationError(message)
 
 class Spider_Form(FlaskForm):
 

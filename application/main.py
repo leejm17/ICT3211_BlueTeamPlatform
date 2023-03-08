@@ -693,7 +693,8 @@ def update_spider_db(mysql):
 
 
 """Return a list of available Spiders from Scrapyd"""
-def retrieve_spiders(app):
+def retrieve_spiders():
+	from __main__ import app
 	list_spiders = requests.get("http://{}:6800/listspiders.json?project={}".format(app.config["APP_IP"], PROJECT_NAME))
 	return ast.literal_eval(list_spiders.text)["spiders"]
 
