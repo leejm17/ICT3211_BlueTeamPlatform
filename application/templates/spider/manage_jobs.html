@@ -41,19 +41,19 @@
 		<div class="table-responsive">
 			<table class="table">
 				<tr>
-					<th>Project</th>
-					<th>Spider</th>
-					<th>ID</th>
-					<th>Depth</th>
-					<th>URL</th>
+					<th>Initiation Date</th>
+						<th>Spider</th>
+						<th>URL</th>
+						<th>Depth</th>
+						<th>ID</th>
 				</tr>
 				{% for running in runningDict %}
 				<tr>
-					<td>{{ running.project }}</td>
+					<td>{{ running.datetime }}</td>
 					<td>{{ running.spider }}</td>
-					<td>{{ running.jobid }}</td>
-					<td>{{ running.depth }}</td>
 					<td>{{ running.url }}</td>
+					<td>{{ running.depth }}</td>
+					<td>{{ running.jobid }}</td>
 				</tr>
 				{% endfor %} 
 			</table>
@@ -63,23 +63,23 @@
 
 		<div class="table-responsive">
 			<table class="table">
-					<tr>
-						<th>Project</th>
-						<th>Spider</th>
-						<th>ID</th>
-						<th>Depth</th>
-						<th>URL</th>
-					</tr>	
-					{% for finished in finishedDict %}
-						<tr>
-								<td>{{ finished.project }}</td>
-								<td>{{ finished.spider }}</td>
-								<td>{{ finished.jobid }}</td>
-								<td>{{ finished.depth }}</td>
-								<td>{{ finished.url }}</td>
-						</tr>
-					{% endfor %}
-				</table>
+				<tr>
+					<th>Initiation Date</th>
+					<th>Spider</th>
+					<th>URL</th>
+					<th>Depth</th>
+					<th>ID</th>
+				</tr>
+				{% for finished in finishedDict %}
+				<tr>
+					<td>{{ finished.datetime }}</td>
+					<td>{{ finished.spider }}</td>
+					<td>{{ finished.url }}</td>
+					<td>{{ finished.depth }}</td>
+					<td>{{ finished.jobid }}</td>
+				</tr>
+				{% endfor %}
+			</table>
 		</div>
 		<form action="/manage_jobs" method="POST">
 			<select name="filter">

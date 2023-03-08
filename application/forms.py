@@ -142,8 +142,8 @@ def url_check(form, field):
 			raise
 	except:
 		raise ValidationError("A valid HTTP/S link must be provided: {}".format(field.data))
-	#if "https://github.com/" not in field.data:
-	#	raise ValidationError("A github repository link must be provided")
+	if "github.com" not in field.data:
+		raise ValidationError("A GitHub repository link must be provided")
 
 class Spider_Form(FlaskForm):
 

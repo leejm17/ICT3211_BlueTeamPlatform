@@ -215,6 +215,17 @@ def spider_submitjob_page():
 	if request.method == "POST" and form.validate_on_submit():
 		runningJobs = submit_job(mysql, form.data)
 
+	statuses = requests.get("http://{}:6800/daemonstatus.json".format(app.config["APP_IP"])).json()
+	runningJobs = 0
+	finishedJobs = 0
+	for status, value in statuses.items():
+		if (status == "running") :
+			runningJobs += value
+		if (status == "pending"):
+			runningJobs += value
+		if (status == "finished"):
+			finishedJobs += value
+
 	return render_template("/spider/submit_job.html", form=form, runningJobs=runningJobs)
 
 
