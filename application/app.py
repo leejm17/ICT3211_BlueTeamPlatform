@@ -1,29 +1,29 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request
+from flaskext.mysql import MySQL
 import os, subprocess, ast
 import requests, json
 
-# Import Local Files
+""" Import Local Files """
+# Data Transfer
 from main import windows_ftp_start, windows_ftp_process, windows_ftp_automate, retrieve_cronjobs, action_cronjobs
+# App Launch
 from main import list_of_local_apps, retrieve_arkime_views
+# Spider
+from main import submit_job, retrieve_spider_jobs, update_spider_db
 
 from admin import retrieve_glob_var, retrieve_arkime_var, retrieve_networkcapture_var, update_env
 
+# Main Forms
 from forms import DataTransfer_Form, Spider_Form
+# Admin Config
 from forms import AdminConfig_DataTransfer_Form, AdminConfig_AppLaunch_Form, AdminConfig_NetworkCapture_Form
 
-# Import Library for commmunication with scapyd scraper
-from scrapyd_api import ScrapydAPI
-scrapyd = ScrapydAPI("http://localhost:6800")
-from flaskext.mysql import MySQL
-
-
-# Create Flask App
+""" Create Flask App """
 app = Flask(__name__)
 app.config.from_object("config.DevConfig")	# Using a development configuration
 ##app.config.from_object("config.ProdConfig")	# Using a production configuration
 
 mysql = MySQL(app)	# Initialise MySQL Database
-PROJECT_NAME =  "yara_scrapy"
 
 
 # App routes
@@ -211,119 +211,17 @@ def spider_page():
 @app.route("/spider/submit_job", methods=["GET", "POST"], endpoint="spider.submit_job")
 def spider_submitjob_page():
 	form = Spider_Form(request.form)
+	update_spider_db(mysql)	# Update Job status
 	if request.method == "POST" and form.validate_on_submit():
-		values = form.data
-		for key, value in values.items():
-			if key == "githubUrl":
-				url = value
-			if key == "scrapingDepth":
-				depth = int(value)
-			if key == "spiderChoice":
-				spider = value
-
-		conn = mysql.connect()
-		cursor = conn.cursor()
-
-		# for current url, check if its status is "running" in DB and get its jobid
-		query = "SELECT jobid from spiderjobs WHERE url = %s AND spider = %s AND status = 'running'"
-		cursor.execute(query, (url, spider))
-		jobid = cursor.fetchone()
-		print("jobid: {}".format(jobid))
-
-		# if url does not exist in DB and does not have a running job, allow user to submit job
-		if jobid == None:
-			print("URL does not exist in DB and does not have a running job")
-			generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth=depth)
-			setStatus = "running"
-			# insert url, jobid and other details into the database
-			query = "INSERT INTO `scfami_spider`.`spiderjobs` \
-					(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
-					VALUES (%s,%s,%s,%s, %s, %s);"
-			cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
-			conn.commit()
-			print("Insert Query executed")
-
-			flash(u"URL has been submitted for crawling", "success")
-
-		else:
-			# if url is tagged as running in DB 
-			# check if its still running or finished in scrapyd
-			if jobid is not None:
-				jobid = jobid[0]
-				jobstatus = scrapyd.job_status(PROJECT_NAME, jobid)
-				print("jobstatus: {}".format(jobstatus))
-				# jobstatus = "running"
-
-				if jobstatus == "running" or jobstatus == "pending":
-					flash(u"URL and its respective Spider is currently queued or running", "danger")
-
-				if jobstatus == "finished":
-					print("finished")
-					print("Old Job ID is: " , jobid)
-					query = "UPDATE spiderjobs SET status = 'finished' WHERE jobid = %s"
-					cursor.execute(query, (jobid,))
-					conn.commit()
-					print("Update Query executed")
-
-					generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth=depth)
-					print("New Job ID is: " , generatedJobid)
-					query = "INSERT INTO `scfami_spider`.`spiderjobs` \
-							(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
-							VALUES (%s,%s,%s,%s, %s, %s);"
-					setStatus = "running"
-					print(setStatus)
-					cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
-					conn.commit()
-					print("Insert Query executed")
-					flash(u"URL has been submitted for crawling", "success")
-
-		cursor.close()
-		conn.close()
-
-	statuses = requests.get("http://localhost:6800/daemonstatus.json").json()
-	runningJobs = 0
-	finishedJobs = 0
-	for status, value in statuses.items():
-		if (status == "running") :
-			runningJobs += value
-		if (status == "pending"):
-			runningJobs += value
-		if (status == "finished"):
-			finishedJobs += value
+		runningJobs = submit_job(mysql, form.data)
 
 	return render_template("/spider/submit_job.html", form=form, runningJobs=runningJobs)
 
 
 @app.route("/spider/manage_jobs", methods=["GET"], endpoint="spider.manage_jobs")
 def spider_managejobs_page():
-	conn = mysql.connect()
-	cursor = conn.cursor()
-
-	inputTuple_1 = ("project", "spider", "jobid", "url", "depth", "status")
-
-	# if status equal running 
-	cursor.execute("SELECT * from spiderjobs WHERE status = 'running'")
-	runningDataTuple = cursor.fetchall()
-	runningDict = []
-	for rows in runningDataTuple:
-		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
-		runningDict.append(resultDictionary)
-
-	print("runningDict: {}".format(runningDict))
-	if request.method == "POST":
-		print(request.form["filter"])
-
-	# if status equal finished
-	cursor.execute("SELECT DISTINCT * from spiderjobs WHERE status = 'finished'")
-	finishedDataTuple = cursor.fetchall()
-	finishedDict = []
-	for rows in finishedDataTuple:
-		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
-		finishedDict.append(resultDictionary)
-
-	print("finishedDict: {}".format(finishedDict))
-	cursor.close()
-	conn.close()
+	update_spider_db(mysql)	# Update Job status
+	finishedDict, runningDict = retrieve_spider_jobs(mysql)
 
 	return render_template("/spider/manage_jobs.html", finishedDict=finishedDict, runningDict=runningDict)
 

@@ -1,4 +1,4 @@
-from flask import request
+from flask import request, flash
 from datetime import datetime, timedelta
 from crontab import CronTab
 import os
@@ -11,6 +11,9 @@ from requests.auth import HTTPBasicAuth
 # Import Local Files
 from admin import retrieve_glob_var, retrieve_arkime_var
 
+# Import Library for commmunication with scapyd scraper
+from scrapyd_api import ScrapydAPI
+PROJECT_NAME =  "yara_scrapy"
 
 ########## START Data Transfer (Smart Meter): Initiate FTP ##########
 
@@ -660,10 +663,161 @@ def retrieve_arkime_views():
 ########## END App Launch ##########
 ########## START Spider ##########
 
-# Code Here
+def init_scrapyd():
+	from __main__ import app
+	return ScrapydAPI("http://{}:6800".format(app.config["APP_IP"]))
+
+
+"""Submit a Job to a user-defined Spider"""
+def submit_job(mysql, form_data):
+	scrapyd = init_scrapyd()
+
+	for key, value in form_data.items():
+		if key == "githubUrl":
+			url = value
+		if key == "scrapingDepth":
+			depth = int(value)
+		if key == "spiderChoice":
+			spider = value
+
+	conn, cursor = start_conn(mysql)
+
+	# for current url, check if its status is "running" in DB and get its jobid
+	query = "SELECT jobid from spiderjobs WHERE url=%s AND spider=%s AND status='running';"
+	cursor.execute(query, (url, spider))
+	jobid = cursor.fetchone()
+	print("jobid: {}".format(jobid))
+
+	# if url does not exist in DB and does not have a running job, allow user to submit job
+	if jobid == None:
+		print("URL does not exist in DB and does not have a running job")
+		generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth=depth)
+		setStatus = "running"
+		# insert url, jobid and other details into the database
+		query = "INSERT INTO `scfami_spider`.`spiderjobs` \
+				(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
+				VALUES (%s,%s,%s,%s, %s, %s);"
+		cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
+		conn.commit()
+		print("Insert Query executed")
+
+		flash(u"URL has been submitted for crawling", "success")
+
+	else:
+		# if url is tagged as running in DB 
+		# check if its still running or finished in scrapyd
+		if jobid is not None:
+			jobid = jobid[0]
+			jobstatus = scrapyd.job_status(PROJECT_NAME, jobid)
+			print("jobstatus: {}".format(jobstatus))
+			# jobstatus = "running"
+
+			if jobstatus == "running" or jobstatus == "pending":
+				flash(u"URL and its respective Spider is currently queued or running", "danger")
+
+			if jobstatus == "finished":
+				print("finished")
+				generatedJobid = scrapyd.schedule(PROJECT_NAME, spider, url=url, depth=depth)
+				print("New Job ID is: " , generatedJobid)
+				query = "INSERT INTO `scfami_spider`.`spiderjobs` \
+						(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
+						VALUES (%s,%s,%s,%s, %s, %s);"
+				setStatus = "running"
+				print(setStatus)
+				cursor.execute(query, (PROJECT_NAME, spider, generatedJobid, url, depth, setStatus))
+				conn.commit()
+				print("Insert Query executed")
+				flash(u"URL has been submitted for crawling", "success")
+
+	end_conn(conn, cursor)
+
+	statuses = requests.get("http://{}:6800/daemonstatus.json".format(app.config["APP_IP"])).json()
+	runningJobs = 0
+	finishedJobs = 0
+	for status, value in statuses.items():
+		if (status == "running") :
+			runningJobs += value
+		if (status == "pending"):
+			runningJobs += value
+		if (status == "finished"):
+			finishedJobs += value
+
+	return runningJobs
+
+
+"""Retrieve all Jobs from all Spiders"""
+def retrieve_spider_jobs(mysql):
+	conn, cursor = start_conn(mysql)
+
+	inputTuple_1 = ("project", "spider", "jobid", "url", "depth", "status")
+
+	# if status equal running 
+	cursor.execute("SELECT * from spiderjobs WHERE status='running';")
+	runningDataTuple = cursor.fetchall()
+	runningDict = []
+	for rows in runningDataTuple:
+		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
+		runningDict.append(resultDictionary)
+
+	print("runningDict: {}".format(runningDict))
+	if request.method == "POST":
+		print(request.form["filter"])
+
+	# if status equal finished
+	cursor.execute("SELECT DISTINCT * from spiderjobs WHERE status='finished';")
+	finishedDataTuple = cursor.fetchall()
+	finishedDict = []
+	for rows in finishedDataTuple:
+		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
+		finishedDict.append(resultDictionary)
+
+	print("finishedDict: {}".format(finishedDict))
+
+	end_conn(conn, cursor)
+
+	return finishedDict, runningDict
+
+
+"""Update DB based on Spider's Job statuses"""
+def update_spider_db(mysql):
+	scrapyd = init_scrapyd()
+	conn, cursor = start_conn(mysql)
+
+	# Query for jobs that are "pending" or "running"
+	query = "SELECT jobid from spiderjobs WHERE status='pending' OR status='running';"
+	cursor.execute(query)
+	jobs = cursor.fetchall()
+
+	"""Iterate all jobs"""
+	for job in jobs:
+		# Get current job status
+		job_status = scrapyd.job_status(PROJECT_NAME, job[0])
+
+		# Update DB based on new job status
+		query = "UPDATE spiderjobs SET status=%s WHERE jobid=%s;"
+		cursor.execute(query, (job_status, job[0]))
+		conn.commit()
+
+	end_conn(conn, cursor)
 
 
 ########## END Spider ##########
+########## START Database ##########
+
+# Source: https://stackoverflow.com/questions/5504340/python-mysqldb-connection-close-vs-cursor-close
+"""Connect MySQL & Return cursor"""
+def start_conn(mysql):
+	conn = mysql.connect()
+	return conn, conn.cursor()	# Create connection & cursor
+
+
+"""Close MySQL Conn"""
+def end_conn(conn, cursor):
+	cursor.close()	# Close the cursor
+	conn.close()	# Close the connection
+
+
+########## END Database ##########
 ########## START Help ##########
 # Code Here
 ########## END Help ##########
