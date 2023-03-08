@@ -228,7 +228,7 @@ def spider_submitjob_page():
 		query = "SELECT jobid from spiderjobs WHERE url = %s AND spider = %s AND status = 'running'"
 		cursor.execute(query, (url, spider))
 		jobid = cursor.fetchone()
-		print(jobid)
+		print("jobid: {}".format(jobid))
 
 		# if url does not exist in DB and does not have a running job, allow user to submit job
 		if jobid == None:
@@ -251,6 +251,7 @@ def spider_submitjob_page():
 			if jobid is not None:
 				jobid = jobid[0]
 				jobstatus = scrapyd.job_status(PROJECT_NAME, jobid)
+				print("jobstatus: {}".format(jobstatus))
 				# jobstatus = "running"
 
 				if jobstatus == "running" or jobstatus == "pending":

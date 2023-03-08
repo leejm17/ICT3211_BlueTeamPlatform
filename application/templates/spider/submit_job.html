@@ -31,7 +31,7 @@
 			{{ form.githubUrl(class="form-control") }}
 
 			{% if form.githubUrl.errors %}
-				<ul class="errors">
+				<ul>
 				{% for error in form.githubUrl.errors %}
 					<li>{{ error }}</li>
 				{% endfor %}

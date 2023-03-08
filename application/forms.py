@@ -15,6 +15,7 @@ from wtforms.validators import (
 	ValidationError
 )
 from flask_wtf import FlaskForm
+import requests
 from datetime import datetime
 
 
@@ -136,13 +137,18 @@ class DataTransfer_Form(Form):
 
 """Form for Spider Submit Job Page"""
 def url_check(form, field):
-	if "https://github.com/" not in field.data:
-		raise ValidationError("A github repository link must be provided")
+	try:
+		if requests.get(field.data).status_code != 200:
+			raise
+	except:
+		raise ValidationError("A valid HTTP/S link must be provided: {}".format(field.data))
+	#if "https://github.com/" not in field.data:
+	#	raise ValidationError("A github repository link must be provided")
 
 class Spider_Form(FlaskForm):
 
 	githubUrl = StringField(
-		label="Github URL 1:",
+		label="Input URL:",
 		validators=[
 			InputRequired(),
 			url_check])
