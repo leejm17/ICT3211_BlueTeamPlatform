@@ -21,18 +21,18 @@
 	{% endif %}
 	{% endwith %}
 
-	<h1>Submit GitHub URL</h1>
+	<h1>Submit URL</h1>
 
 	<div class="mb-3">
 		<h5>Submit a URL for a Spider to crawl for YARA rules here.</h5>
 		<form action="/spider/submit_job" method="POST">
 			{{ form.csrf_token }}
-			{{ form.githubUrl.label }} 
-			{{ form.githubUrl(class="form-control") }}
+			{{ form.url.label }} 
+			{{ form.url(class="form-control") }}
 
-			{% if form.githubUrl.errors %}
+			{% if form.url.errors %}
 				<ul>
-				{% for error in form.githubUrl.errors %}
+				{% for error in form.url.errors %}
 					<li>{{ error }}</li>
 				{% endfor %}
 				</ul>
@@ -44,13 +44,13 @@
 			</p>
 
 			<p>
-			{{form.scrapingDepth.label()}}
-			{{form.scrapingDepth()}}
+			{{ form.scrapingDepth.label() }}
+			{{ form.scrapingDepth() }}
 			</p>
 
 			<p>
-			{{form.spiderChoice.label()}}
-			{{form.spiderChoice()}}
+			{{ form.spiderChoice.label() }}
+			{{ form.spiderChoice() }}
 			</p>
 
 			<p>

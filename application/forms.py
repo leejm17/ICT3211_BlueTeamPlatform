@@ -147,19 +147,21 @@ def url_check(form, field):
 
 class Spider_Form(FlaskForm):
 
-	githubUrl = StringField(
+	url = StringField(
 		label="Input URL:",
 		validators=[
 			InputRequired(),
 			url_check])
 
 	scrapingDepth = SelectField(
-		"Scraping Depth: ",
+		label="Scraping Depth: ",
 		choices=[("0", "0"), ("1", "1"), ("2", "2")])
 
 	spiderChoice = SelectField(
-		"Spider: ",
-		choices=[("github", "github")])
+		label="Spider: ",
+		coerce=str,
+		validators=[
+			InputRequired()])
 
 	submit = SubmitField(
 		label="Submit URL")

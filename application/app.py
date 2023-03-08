@@ -9,7 +9,7 @@ from main import windows_ftp_start, windows_ftp_process, windows_ftp_automate, r
 # App Launch
 from main import list_of_local_apps, retrieve_arkime_views
 # Spider
-from main import submit_job, retrieve_spider_jobs, update_spider_db
+from main import update_spider_db, retrieve_spiders, submit_job, retrieve_spider_jobs
 
 from admin import retrieve_glob_var, retrieve_arkime_var, retrieve_networkcapture_var, update_env
 
@@ -211,19 +211,21 @@ def spider_page():
 @app.route("/spider/submit_job", methods=["GET", "POST"], endpoint="spider.submit_job")
 def spider_submitjob_page():
 	form = Spider_Form(request.form)
+	form.spiderChoice.choices = retrieve_spiders(app)
+
 	update_spider_db(mysql)	# Update Job status
 	if request.method == "POST" and form.validate_on_submit():
-		runningJobs = submit_job(mysql, form.data)
+		runningJobs = submit_job(mysql, form)
 
 	statuses = requests.get("http://{}:6800/daemonstatus.json".format(app.config["APP_IP"])).json()
 	runningJobs = 0
 	finishedJobs = 0
 	for status, value in statuses.items():
-		if (status == "running") :
+		if status == "running":
 			runningJobs += value
-		if (status == "pending"):
+		elif status == "pending":
 			runningJobs += value
-		if (status == "finished"):
+		elif status == "finished":
 			finishedJobs += value
 
 	return render_template("/spider/submit_job.html", form=form, runningJobs=runningJobs)

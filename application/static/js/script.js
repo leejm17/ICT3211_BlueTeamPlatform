@@ -240,7 +240,7 @@ function open_arkime_view(view) {
 }
 
 
-$(document).ready(function(){
+/*$(document).ready(function(){
 	//var socket = io.connect('http://' + document.domain + ':' + location.port + '/test');
 	$("form#github").submit(function(event) {
 		console.log("NYE");
@@ -265,4 +265,4 @@ $(document).ready(function(){
 		);
 		return valid;
 	});
-});
+});*/
