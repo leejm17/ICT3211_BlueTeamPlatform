@@ -32,43 +32,58 @@
 	<h1>Manage Jobs</h1>
 
 	<div class="mb-3">
-		<h5>Manage your Spider jobs here.</h5>
-		<p class="title">To get more infomation regarding the jobid's as well as its logs
-		, click <a href="http://localhost:6800/jobs" target="http://localhost:6800/jobs">here.</a> </p>
+		<h5>Manage your Spider jobs here.</h5><br />
+		<!--<p class="title">To get more infomation regarding the jobid's as well as its logs
+		, click <a href="http://localhost:6800/jobs" target="http://localhost:6800/jobs">here.</a> </p>-->
 
-		<h2 class="title">Running </h2>
-
+		<h3>Pending / Running</h3>
 		<div class="table-responsive">
+			{% if runningDict %}
 			<table class="table">
 				<tr>
+					<th>Status</th>
 					<th>Initiation Date</th>
-						<th>Spider</th>
-						<th>URL</th>
-						<th>Depth</th>
-						<th>ID</th>
+					<th>Spider</th>
+					<th>URL</th>
+					<th>Depth</th>
+					<th>ID</th>
 				</tr>
 				{% for running in runningDict %}
 				<tr>
+					<td>{{ running.status }}</td>
 					<td>{{ running.datetime }}</td>
 					<td>{{ running.spider }}</td>
 					<td>{{ running.url }}</td>
 					<td>{{ running.depth }}</td>
 					<td>{{ running.jobid }}</td>
 				</tr>
-				{% endfor %} 
+				{% endfor %}
 			</table>
+			{% else %}
+			<h5>No jobs are in queue.</h5>
+			{% endif %}
 		</div>
 
-		<h2 class="title">Completed </h2>
+		<hr>
 
+		<h3>Completed</h3>
+		<form action="/spider/manage_jobs" method="POST">
+			<select name="filter">
+				<option value="unique">Unique URL</option>
+				{% for unique in uniqueDict %}
+				<option value="{{ unique.url }}">{{ unique.url }}</option>
+				{% endfor %}
+			</select>
+			<button class="btn btn-primary" type="submit" name="action" value="filter">Filter</button>
+		</form>
 		<div class="table-responsive">
-			<table class="table">
+			<table id="jobs_table">
 				<tr>
-					<th>Initiation Date</th>
-					<th>Spider</th>
-					<th>URL</th>
-					<th>Depth</th>
-					<th>ID</th>
+					<th onclick="sort_jobs_table(0)">Initiation Date</th>
+					<th onclick="sort_jobs_table(1)">Spider</th>
+					<th onclick="sort_jobs_table(2)">URL</th>
+					<th onclick="sort_jobs_table(3)">Depth</th>
+					<th onclick="sort_jobs_table(4)">ID</th>
 				</tr>
 				{% for finished in finishedDict %}
 				<tr>
@@ -81,15 +96,6 @@
 				{% endfor %}
 			</table>
 		</div>
-		<form action="/manage_jobs" method="POST">
-			<select name="filter">
-				<option value="all">All</option>
-				{% for finished in finishedDict %}
-				<option value="{{finished}}">{{finished}}</option>
-				{% endfor %}
-			</select>
-			<button type="submit">Filter</button>
-		</form>
 	</div>
 </div>
 

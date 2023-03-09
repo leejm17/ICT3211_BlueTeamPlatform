@@ -760,35 +760,52 @@ def insert_job(form, scrapyd, mysql, conn, cursor):
 
 
 """Retrieve all Jobs from all Spiders"""
-def retrieve_spider_jobs(mysql):
-	inputTuple_1 = ("project", "spider", "jobid", "url", "depth", "status", "datetime")
+def retrieve_spider_jobs(mysql, filter_url="unique"):
+	db_columns = ("project", "spider", "jobid", "url", "depth", "status", "datetime")
 
-	# if status equal running
+	"""Retrieve Jobs that are pending/running from DB"""
 	conn, cursor = start_conn(mysql)
-	cursor.execute("SELECT * from spiderjobs WHERE status='running';")
+	cursor.execute("SELECT * from spiderjobs WHERE (status='pending' OR status='running');")
 	runningDataTuple = cursor.fetchall()
-	runningDict = []
-	for rows in runningDataTuple:
-		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
-		runningDict.append(resultDictionary)
 
-	#print("runningDict: {}".format(runningDict))
-	if request.method == "POST":
-		print(request.form["filter"])
+	"""Retrieve Jobs that are completed from DB"""
+	query = "SELECT ANY_VALUE(datetime), ANY_VALUE(spider), ANY_VALUE(jobid), ANY_VALUE(url), ANY_VALUE(depth), ANY_VALUE(status), MAX(datetime) FROM spiderjobs WHERE status='finished' GROUP BY url ORDER BY MAX(datetime) DESC;"
 
-	# if status equal finished
-	cursor.execute("SELECT DISTINCT * from spiderjobs WHERE status='finished';")
+	if filter_url == "unique":
+		cursor.execute(query)
+		uniqueDataTuple = None
+	else:
+		cursor.execute(query)
+		uniqueDataTuple = cursor.fetchall()
+
+		query = "SELECT * FROM spiderjobs WHERE (status='finished' AND url=%s) ORDER BY datetime DESC;"
+		cursor.execute(query, (filter_url))
+
 	finishedDataTuple = cursor.fetchall()
-	finishedDict = []
-	for rows in finishedDataTuple:
-		resultDictionary = {inputTuple_1[i] : rows[i] for i, _ in enumerate(rows)}
-		finishedDict.append(resultDictionary)
-
-	#print("finishedDict: {}".format(finishedDict))
-
 	end_conn(conn, cursor)
 
-	return finishedDict, runningDict
+	"""Format & Append pending/running Jobs into a list"""
+	running_list = []
+	for rows in runningDataTuple:
+		formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
+		running_list.append(formatted_row)
+
+	"""Format & Append completed Jobs into a list"""
+	finished_list = []
+	for rows in finishedDataTuple:
+		formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
+		finished_list.append(formatted_row)
+
+	"""Format & Append completed unique Jobs into a list"""
+	if uniqueDataTuple is not None:
+		unique_list = []
+		for rows in uniqueDataTuple:
+			formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
+			unique_list.append(formatted_row)
+	else:
+		unique_list = finished_list
+
+	return running_list, finished_list, unique_list
 
 
 ########## END Spider ##########

@@ -211,32 +211,37 @@ def spider_page():
 @app.route("/spider/submit_job", methods=["GET", "POST"], endpoint="spider.submit_job")
 def spider_submitjob_page():
 	form = Spider_Form(request.form)
-	form.spiderChoice.choices = retrieve_spiders()
+	try:
+		form.spiderChoice.choices = retrieve_spiders()	# Get available spiders from Scrapyd
+	except:
+		print("Spider not online")
+		return render_template("/spider/spider.html")
 
-	update_spider_db(mysql)	# Update Job status
+	"""Update Job Status & Submit New Job"""
+	update_spider_db(mysql)
 	if request.method == "POST" and form.validate_on_submit():
-		runningJobs = submit_job(mysql, form)
+		running_jobs = submit_job(mysql, form)
 
+	"""Count number of pending/running jobs"""
 	statuses = requests.get("http://{}:6800/daemonstatus.json".format(app.config["APP_IP"])).json()
-	runningJobs = 0
-	finishedJobs = 0
+	running_jobs = 0
 	for status, value in statuses.items():
-		if status == "running":
-			runningJobs += value
-		elif status == "pending":
-			runningJobs += value
-		elif status == "finished":
-			finishedJobs += value
+		if status == "running" or status == "pending":
+			running_jobs += value
 
-	return render_template("/spider/submit_job.html", form=form, runningJobs=runningJobs)
+	return render_template("/spider/submit_job.html", form=form, running_jobs=running_jobs)
 
 
-@app.route("/spider/manage_jobs", methods=["GET"], endpoint="spider.manage_jobs")
+@app.route("/spider/manage_jobs", methods=["GET", "POST"], endpoint="spider.manage_jobs")
 def spider_managejobs_page():
-	update_spider_db(mysql)	# Update Job status
-	finishedDict, runningDict = retrieve_spider_jobs(mysql)
+	"""Update Job Status & Retrieve all Jobs"""
+	update_spider_db(mysql)
+	if request.method == "POST":
+		runningDict, finishedDict, uniqueDict = retrieve_spider_jobs(mysql, request.form["filter"])
+	else:
+		runningDict, finishedDict, uniqueDict = retrieve_spider_jobs(mysql)
 
-	return render_template("/spider/manage_jobs.html", finishedDict=finishedDict, runningDict=runningDict)
+	return render_template("/spider/manage_jobs.html", runningDict=runningDict, finishedDict=finishedDict, uniqueDict=uniqueDict)
 
 
 ########## END Spider Pages ##########
