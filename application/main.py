@@ -766,40 +766,40 @@ def retrieve_spider_jobs(mysql, filter_url="unique"):
 	"""Retrieve Jobs that are pending/running from DB"""
 	conn, cursor = start_conn(mysql)
 	cursor.execute("SELECT * from spiderjobs WHERE (status='pending' OR status='running');")
-	runningDataTuple = cursor.fetchall()
+	running_data_tuple = cursor.fetchall()
 
 	"""Retrieve Jobs that are completed from DB"""
 	query = "SELECT ANY_VALUE(datetime), ANY_VALUE(spider), ANY_VALUE(jobid), ANY_VALUE(url), ANY_VALUE(depth), ANY_VALUE(status), MAX(datetime) FROM spiderjobs WHERE status='finished' GROUP BY url ORDER BY MAX(datetime) DESC;"
 
 	if filter_url == "unique":
 		cursor.execute(query)
-		uniqueDataTuple = None
+		unique_data_tuple = None
 	else:
 		cursor.execute(query)
-		uniqueDataTuple = cursor.fetchall()
+		unique_data_tuple = cursor.fetchall()
 
 		query = "SELECT * FROM spiderjobs WHERE (status='finished' AND url=%s) ORDER BY datetime DESC;"
 		cursor.execute(query, (filter_url))
 
-	finishedDataTuple = cursor.fetchall()
+	finished_data_tuple = cursor.fetchall()
 	end_conn(conn, cursor)
 
 	"""Format & Append pending/running Jobs into a list"""
 	running_list = []
-	for rows in runningDataTuple:
+	for rows in running_data_tuple:
 		formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
 		running_list.append(formatted_row)
 
 	"""Format & Append completed Jobs into a list"""
 	finished_list = []
-	for rows in finishedDataTuple:
+	for rows in finished_data_tuple:
 		formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
 		finished_list.append(formatted_row)
 
 	"""Format & Append completed unique Jobs into a list"""
-	if uniqueDataTuple is not None:
+	if unique_data_tuple is not None:
 		unique_list = []
-		for rows in uniqueDataTuple:
+		for rows in unique_data_tuple:
 			formatted_row = {db_columns[i] : rows[i] for i, _ in enumerate(rows)}
 			unique_list.append(formatted_row)
 	else:
