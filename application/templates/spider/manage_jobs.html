@@ -77,6 +77,7 @@
 			<button class="btn btn-primary" type="submit" name="action" value="filter">Filter</button>
 		</form>
 		<div class="table-responsive">
+			{% if finishedDict %}
 			<table id="jobs_table">
 				<tr>
 					<th onclick="sort_jobs_table(0)">Initiation Date</th>
@@ -95,6 +96,9 @@
 				</tr>
 				{% endfor %}
 			</table>
+			{% else %}
+			<h5>No jobs are in queue.</h5>
+			{% endif %}
 		</div>
 	</div>
 </div>
