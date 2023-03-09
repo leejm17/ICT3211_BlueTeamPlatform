@@ -130,8 +130,19 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 	# Calculate Time taken to iterate and store FTP Directories and Files
 	start_dur = time.time()
 
-	"""Initialise FTP Connection"""
-	ftps = init_conn()
+	try:
+		"""Initialise FTP Connection"""
+		ftps = init_conn()
+	except Exception as e:
+		try:
+			# Exit connection if any error
+			ftps.close()
+		except Exception as econn:
+			# If unable to exit connection, then machine is NOT online
+			print("Smart Meter Windows machine is NOT online.")
+			return False, e
+		print("FTP Connection Error: {}".format(e))
+		return False, e
 
 	"""Iterate ftp_dir folders and store files"""
 	for root_dir in ftp_dir:
@@ -264,7 +275,7 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 
 
 """Download filtered files from file_dict via FTP"""
-def windows_ftp_transfer(data_source, file_dict, job_name=None):
+def windows_ftp_transfer(data_source, file_dict, job_name="default"):
 	download_dir = ""
 	download_cnt = 0	# Count number of files downloaded
 	files_cnt = 0		# Count number of files in total
@@ -290,11 +301,7 @@ def windows_ftp_transfer(data_source, file_dict, job_name=None):
 		print("\tNo. of Files in {}: {}".format(directory, dir_cnt))
 
 		"""Set up Download Directory"""
-		if job_name is not None:
-			# :param job_name: Only exists for Job Schedule
-			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
-		else:
-			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/default/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
+		download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
 
 		# Mkdir if Download directory does NOT exist
 		if not os.path.isdir(download_dir):
@@ -497,8 +504,8 @@ def cronjob_process(data_source, meters, start_time, end_time, job_name):
 
 	# Today's date (i.e. Current date of Job)
 	from datetime import date
-	date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
-	#date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
+	##date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
+	date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
 
 	# Format Time
 	start_time = datetime.strptime(start_time, "%H:%M:%S").time()
