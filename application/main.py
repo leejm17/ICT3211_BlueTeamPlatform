@@ -1,34 +1,19 @@
 from flask import request, flash
 from datetime import datetime, timedelta
 from crontab import CronTab
-import os
-import ftplib, ssl
-import magic
-import ast
+import time, os, ast
 import requests
 from requests.auth import HTTPBasicAuth
 
 # Import Local Files
 from admin import retrieve_glob_var, retrieve_arkime_var
+from config import init_conn, download_file
 
 # Import Library for commmunication with scapyd scraper
 from scrapyd_api import ScrapydAPI
 PROJECT_NAME =  "yara_scrapy"
 
 ########## START Data Transfer (Smart Meter): Initiate FTP ##########
-
-# Source: https://stackoverflow.com/questions/48260616/python3-6-ftp-tls-and-session-reuse
-class MyFTP_TLS(ftplib.FTP_TLS):
-	"""Explicit FTPS, with shared TLS session"""
-	def ntransfercmd(self, cmd, rest=None):
-		conn, size = ftplib.FTP.ntransfercmd(self, cmd, rest)
-		if self._prot_p:
-			session = self.sock.session
-			if isinstance(self.sock, ssl.SSLSocket):
-				session = self.sock.session
-			conn = self.context.wrap_socket(conn, server_hostname=self.host, session=session)
-		return conn, size
-
 
 """Initiate FTP for Smart Meter"""
 def windows_ftp_start(ftp_dir):
@@ -44,22 +29,24 @@ def windows_ftp_start(ftp_dir):
 	# List to store Dir & corresponding Folder Names
 	dir_list = []
 
+	# Calculate Time taken to initialise 1st FTP Connection
+	start_dur = time.time()
+
 	"""Iterate ftp_dir folders"""
 	for root_dir in ftp_dir:
 		try:
 			"""Initialise FTP Connection"""
-			global_dict = retrieve_glob_var()
-			ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-			ftps.prot_p()				# Set up secure connection
+			ftps = init_conn()
 			root = ftps.mlsd(root_dir)	# FTP Root directory
-			# Return immediately if WiresharkData is established"""
+
+			# Return immediately if WiresharkData is established
 			if root_dir == "WiresharkData":
 				ftps.quit()
 				return True, "Wireshark"
 		except Exception as e:
 			try:
 				# Exit connection if any error
-				ftps.quit()
+				ftps.close()
 			except Exception as econn:
 				# If unable to exit connection, then machine is NOT online
 				print("Smart Meter Windows machine is NOT online.")
@@ -79,13 +66,16 @@ def windows_ftp_start(ftp_dir):
 				if dir_name[1]["type"] == "dir":
 					if dir_name[0] not in dir_list:
 						dir_list.append(dir_name[0])
-			ftps.quit()
+			ftps.close()
 		except Exception as e:
 			# FTP directory has Permissions Error iterating files
-			ftps.quit()
+			ftps.close()
 			print("File Permissions Error: {}".format(e))
 			print("Dict: {}".format(dir_list))	# Print stored list so far
 			return False, e
+
+	end_dur = time.time()
+	print("\tInitiated FTP in {} seconds".format(end_dur-start_dur))
 
 	return True, dir_list
 
@@ -111,8 +101,8 @@ def windows_ftp_process(form):
 	:return file_dict: Filtered list of {FTP Directory: Filenames} based on date, start_time, end_time
 	"""
 	print("\tdate: {}".format(form.date.data))
-	print("\tstart_time (utc): {}".format(form.start_time.data))
-	print("\tend_time (utc): {}".format(form.end_time.data))
+	print("\tstart_time: {} (gmt+8)".format(form.start_time.data))
+	print("\tend_time: {} (gmt+8)".format(form.end_time.data))
 	success, file_dict = windows_ftp_filter_datetime(form.data_source.data, form.date.data, form.start_time.data, form.end_time.data, file_dict)
 	if not success:
 		return success, file_dict
@@ -124,7 +114,7 @@ def windows_ftp_process(form):
 
 
 """Initiate FTP for Data Transfer Process"""
-def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
+def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 	print("Initiate FTP for Data Transfer Process")
 
 	# Dict to store Dir & corresponding File Names
@@ -138,13 +128,10 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 		ftp_dir = [ftp_dir]
 
 	# Calculate Time taken to iterate and store FTP Directories and Files
-	import time
 	start_dur = time.time()
 
 	"""Initialise FTP Connection"""
-	global_dict = retrieve_glob_var()
-	ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-	ftps.prot_p()		# Set up secure connection
+	ftps = init_conn()
 
 	"""Iterate ftp_dir folders and store files"""
 	for root_dir in ftp_dir:
@@ -156,7 +143,7 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 		except Exception as e:
 			try:
 				# Exit connection if any error
-				ftps.quit()
+				ftps.close()
 			except Exception as econn:
 				# If unable to exit connection, then machine is NOT online
 				print("Smart Meter Windows machine is NOT online.")
@@ -174,7 +161,7 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 				"""
 				# WiresharkData folder contains filenames in a specific format
 				if root_dir == "WiresharkData":
-					print(dir_list[0])
+					print("\tWireshark File: {}".format(dir_list[0]))
 					if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
 						file_dict[root_dir] += [dir_list[0]]
 
@@ -185,6 +172,7 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 						directory = root_dir + "/" + dir_list[0]
 
 						"""Iterate and append all files in meter folder"""
+						print("\tCurrently appending {}: {}".format(root_dir, dir_list[0]))
 						file_list = ftps.mlsd(directory)
 						file_dict[directory] = []
 						for data in file_list:
@@ -192,12 +180,12 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src):
 							file_dict[directory] += [data[0]]
 		except Exception as e:
 			# FTP directory has Permissions Error iterating files
-			ftps.quit()
+			ftps.close()
 			print("File Permissions Error: {}".format(e))
 			##print("Dict: {}".format(file_dict))	# Print stored dictionary so far
 			return False, e
 	try:
-		ftps.quit()
+		ftps.close()
 	except Exception as e:
 		print("Unable to end FTP connection gracefully: {}".format(e))
 		return False, e
@@ -228,9 +216,9 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 
 	print("Filter Files for Data Transfer Process")
 	print("\tstart_date: {}".format(start_date))
-	print("\tstart_time: {} (gmt+8)".format(start_time))
+	print("\tstart_time (utc): {}".format(start_time))
 	print("\tend_date: {}".format(end_date))
-	print("\tend_time: {} (gmt+8)".format(end_time))
+	print("\tend_time (utc): {}".format(end_time))
 
 	"""Iterate folders in file_dict"""
 	for meter in file_dict:
@@ -271,85 +259,103 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 						##print("000000 <= {} <= {}".format(filtered_time_file, end_time))	# Print Filtered Start-End times & Time of selected .csv file
 						filtered_dict[meter] += [csv_file]
 
-	return True, filtered_dict
+	# Return filtered_dict, but remove empty keys
+	return True, {meter: files for meter, files in filtered_dict.items() if files}
 
 
 """Download filtered files from file_dict via FTP"""
 def windows_ftp_transfer(data_source, file_dict, job_name=None):
-	#download_dir = ""
+	download_dir = ""
 	download_cnt = 0	# Count number of files downloaded
-	directory_cnt = 0	# Count number of directories downloaded into
+	files_cnt = 0		# Count number of files in total
 	print("Download filtered files from file_dict via FTP")
 	##print("file_dict: {}".format(file_dict))
 
-	try:
-		"""Initialise FTP Connection"""
-		global_dict = retrieve_glob_var()
-		ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
-		ftps.prot_p()		# Set up secure connection
-		current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+	# Store and change Download directory
+	current_dir = os.getcwd()
 
-		# Calculate Time taken to iterate and download all files
-		import time
-		start_all = time.time()
+	current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-		"""Iterate folders in filtered file_dict"""
-		from __main__ import app
-		for directory in file_dict:
-			# If folder contains no file, skip to next folder
-			if len(file_dict[directory]) == 0:
-				continue
+	# Calculate Time taken to iterate and download all files
+	start_all = time.time()
 
-			"""Set up Download Directory"""
-			ftps.cwd("/"+directory)		# Change FTP directory
-			if job_name is not None:
-				# :param job_name: Only exists for Job Schedule
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
-			else:
-				download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
+	"""Initialise FTP Connection"""
+	ftps = init_conn()
 
-			# Mkdir if Download directory does NOT exist
-			if not os.path.isdir(download_dir):
-				os.makedirs(download_dir)
+	"""Iterate folders in filtered file_dict"""
+	from __main__ import app
+	for directory in file_dict:
+		dir_cnt = len(file_dict[directory])
+		files_cnt += dir_cnt
+		print("\tNo. of Files in {}: {}".format(directory, dir_cnt))
 
-			# Store and change Download directory
-			current_dir = os.getcwd()
-			os.chdir(download_dir)
+		"""Set up Download Directory"""
+		if job_name is not None:
+			# :param job_name: Only exists for Job Schedule
+			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, job_name, current_datetime, directory.split("/")[1])
+		else:
+			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/default/{}/{}".format("/".join(app.config["APP_DIR"].split("/")[:-2]), data_source, current_datetime, directory.split("/")[1])
 
-			# Calculate Time taken to iterate and download files from this directory
-			print("\tDownloading files for {}:".format(directory))
-			start_dur = time.time()
+		# Mkdir if Download directory does NOT exist
+		if not os.path.isdir(download_dir):
+			os.makedirs(download_dir)
+		os.chdir(download_dir)
 
+		# Calculate Time taken to iterate and download files from this directory
+		print("\tDownloading files for {}:".format(directory))
+		start_dur = time.time()
+
+		try:
 			"""Download filtered files from this folder (FTP directory)"""
+			ftps.cwd("/"+directory)		# Change FTP directory
 			for csv_file in file_dict[directory]:
 				try:
-					with open(csv_file, "wb") as f:
-						# Command for Downloading the file "RETR csv_file"
-						ftps.retrbinary(f"RETR {csv_file}", f.write)
-						download_cnt += 1
+					download_cnt += download_file(csv_file, ftps)
 				except Exception as e:
-					continue
+					""" Either of 1 or 2:
+					1. EOF occurred in violation of protocol (_ssl.c: 2396)
+					2. [SSL: Bad Length] bad length (_ssl.c: 2396)
+					Both mean: FileZilla session authentication issue OR Transfer limit reached
+					- FTP session terminated automatically
+					"""
+					ftps.close()		# Close the connection
+					ftps = init_conn()	# Initialise a new FTPS connection to re-authenticate session & reset transfer limit
+					ftps.cwd("/"+directory)		# Change FTP directory
+
+					"""Attempt to download file again"""
+					try:
+						download_cnt += download_file(csv_file, ftps)
+					except Exception as econn:
+						print(e, econn)
+						print("File name: {}".format(csv_file))
 
 			# Print Time taken to iterate and download files from this directory
 			end_dur = time.time()
 			print("\t\tDownloaded {} files so far in {} seconds.".format(download_cnt, end_dur-start_dur))
-			directory_cnt += 1
 
-			# Revert to CWD
-			os.chdir(current_dir)
+		except Exception as e:
+			try:
+				print("Error Downloading File: {}".format(e))
+			except Exception as es:
+				print(es)
+			# Print Time taken to iterate and download all files
+			end_all = time.time()
+			print("\tDownloaded {} files out of {} in {} seconds.".format(download_cnt, files_cnt, end_all-start_all))
+			return False, e
 
+	try:
+		# Exit connection
+		ftps.close()
 	except Exception as e:
-		print("Error Downloading File: {}".format(e))
-		# Print Time taken to iterate and download all files
-		end_all = time.time()
-		print("\tDownloaded {} files out of {} in {} seconds.".format(download_cnt, len(file_dict), end_all-start_all))
-		return False, e
-
-	ftps.quit()
+		# If unable to exit connection, something is wrong
+		print("Unable to end FTP connection gracefully: {}".format(e))
 
 	# Print Time taken to iterate and download all files
 	end_all = time.time()
 	print("{} files in {} seconds.\n".format(download_cnt, end_all-start_all))
+
+	# Revert to CWD
+	os.chdir(current_dir)
 
 	# Return message containing files downloaded & download directory
 	download_path = "/".join(download_dir.split("/")[:-1])
@@ -437,7 +443,7 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 
 	"""Create New Job"""
 	from __main__ import app
-	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(app.config["APP_DIR"], data_source, meters, start_time, end_time, app.config["APP_DIR"]), comment=job_name)
+	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from app import app; from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(app.config["APP_DIR"], data_source, meters, start_time, end_time, job_name, app.config["APP_DIR"]), comment=job_name)
 
 	"""Craft Display Message"""
 	if data_source == "SmartMeterData":
@@ -482,17 +488,17 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 
 
 """Method to call for scheduled jobs (Data Transfer process)"""
-def cronjob_process(data_source, meters, start_time, end_time):
+def cronjob_process(data_source, meters, start_time, end_time, job_name):
 	# Data1: 'WiresharkData', [], '07:00:00', '12:00:00'	>> 2 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('WiresharkData', [], '07:00:00', '12:00:00')"
+	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('WiresharkData', [], '07:00:00', '12:00:00', 'Job Name')"
 
 	# Data2: 'SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00'	>> 4 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00')"
+	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00', 'Job Name')"
 
 	# Today's date (i.e. Current date of Job)
 	from datetime import date
-	##date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
-	date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
+	date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
+	#date = datetime.strptime(date.today().strftime("%Y-%m-%d"), "%Y-%m-%d")
 
 	# Format Time
 	start_time = datetime.strptime(start_time, "%H:%M:%S").time()
@@ -504,13 +510,14 @@ def cronjob_process(data_source, meters, start_time, end_time):
 		print("Cron unable to initiate FTP: {}".format(file_dict))
 
 	"""Filter Files for Data Transfer Process"""
-	success, file_dict = windows_ftp_filter_datetime(date, start_time, end_time, file_dict)
+	success, file_dict = windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_dict)
 	if not success:
 		print("Cron unable to download files: {}".format(file_dict))
 
 	"""Download filtered files from file_dict via FTP"""
-	success, message = windows_ftp_transfer(data_source, file_dict)
+	success, message = windows_ftp_transfer(data_source, file_dict, job_name)
 	print("Cron Job Success: {}".format(message))
+	print("########## ########## ########## ##########")
 
 
 ########## END Data Transfer (Smart Meter): Schedule Transfer ##########

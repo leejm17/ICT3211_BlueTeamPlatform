@@ -16,10 +16,6 @@
 		tr:nth-child(even) {
 			background-color: #dddddd;
 		}
-
-		.table-responsive {
-			max-height:300px;
-		}
 	</style>
 </head>
 
@@ -37,32 +33,30 @@
 		, click <a href="http://localhost:6800/jobs" target="http://localhost:6800/jobs">here.</a> </p>-->
 
 		<h3>Pending / Running</h3>
-		<div class="table-responsive">
-			{% if runningDict %}
-			<table class="table">
-				<tr>
-					<th>Status</th>
-					<th>Initiation Date</th>
-					<th>Spider</th>
-					<th>URL</th>
-					<th>Depth</th>
-					<th>ID</th>
-				</tr>
-				{% for running in runningDict %}
-				<tr>
-					<td>{{ running.status }}</td>
-					<td>{{ running.datetime }}</td>
-					<td>{{ running.spider }}</td>
-					<td>{{ running.url }}</td>
-					<td>{{ running.depth }}</td>
-					<td>{{ running.jobid }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-			<h5>No jobs are in queue.</h5>
-			{% endif %}
-		</div>
+		{% if runningDict %}
+		<table class="table">
+			<tr>
+				<th>Status</th>
+				<th>Initiation Date</th>
+				<th>Spider</th>
+				<th>URL</th>
+				<th>Depth</th>
+				<th>ID</th>
+			</tr>
+			{% for running in runningDict %}
+			<tr>
+				<td>{{ running.status }}</td>
+				<td>{{ running.datetime }}</td>
+				<td>{{ running.spider }}</td>
+				<td>{{ running.url }}</td>
+				<td>{{ running.depth }}</td>
+				<td>{{ running.jobid }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% else %}
+		<h5>No jobs are in queue.</h5>
+		{% endif %}
 
 		<hr>
 
@@ -76,30 +70,28 @@
 			</select>
 			<button class="btn btn-primary" type="submit" name="action" value="filter">Filter</button>
 		</form>
-		<div class="table-responsive">
-			{% if finishedDict %}
-			<table id="jobs_table">
-				<tr>
-					<th onclick="sort_jobs_table(0)">Initiation Date</th>
-					<th onclick="sort_jobs_table(1)">Spider</th>
-					<th onclick="sort_jobs_table(2)">URL</th>
-					<th onclick="sort_jobs_table(3)">Depth</th>
-					<th onclick="sort_jobs_table(4)">ID</th>
-				</tr>
-				{% for finished in finishedDict %}
-				<tr>
-					<td>{{ finished.datetime }}</td>
-					<td>{{ finished.spider }}</td>
-					<td>{{ finished.url }}</td>
-					<td>{{ finished.depth }}</td>
-					<td>{{ finished.jobid }}</td>
-				</tr>
-				{% endfor %}
-			</table>
-			{% else %}
-			<h5>No jobs have been completed.</h5>
-			{% endif %}
-		</div>
+		{% if finishedDict %}
+		<table id="jobs_table">
+			<tr>
+				<th onclick="sort_jobs_table(0)">Initiation Date</th>
+				<th onclick="sort_jobs_table(1)">Spider</th>
+				<th onclick="sort_jobs_table(2)">URL</th>
+				<th onclick="sort_jobs_table(3)">Depth</th>
+				<th onclick="sort_jobs_table(4)">ID</th>
+			</tr>
+			{% for finished in finishedDict %}
+			<tr>
+				<td>{{ finished.datetime }}</td>
+				<td>{{ finished.spider }}</td>
+				<td>{{ finished.url }}</td>
+				<td>{{ finished.depth }}</td>
+				<td>{{ finished.jobid }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+		{% else %}
+		<h5>No jobs have been completed.</h5>
+		{% endif %}
 	</div>
 </div>
 
