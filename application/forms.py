@@ -7,7 +7,8 @@ from wtforms import (
 	TimeField,
 	IntegerField,
 	SelectField,
-	SubmitField
+	SubmitField,
+	PasswordField
 )
 from wtforms.validators import (
 	NumberRange,
@@ -197,7 +198,7 @@ class AdminConfig_DataTransfer_Form(Form):
 		validators=[
 			InputRequired()])
 
-	ftp_pw = StringField(
+	ftp_pw = PasswordField(
 		"FTP Password",
 		validators=[
 			InputRequired()])
@@ -207,6 +208,12 @@ class AdminConfig_DataTransfer_Form(Form):
 		validators=[
 			InputRequired()])
 
+	workers = IntegerField(
+		"Host Multi-thread Workers",
+		validators=[
+			InputRequired(),
+			NumberRange(min=1, max=1000, message="Only a maximum of 1000 Workers can be set")])
+
 
 """Form for Admin App Launch Page"""
 class AdminConfig_AppLaunch_Form(Form):
@@ -215,7 +222,7 @@ class AdminConfig_AppLaunch_Form(Form):
 		validators=[
 			InputRequired()])
 
-	arkime_password = StringField(
+	arkime_password = PasswordField(
 		"Arkime Password",
 		validators=[
 			InputRequired()])

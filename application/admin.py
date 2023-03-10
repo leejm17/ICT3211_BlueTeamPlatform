@@ -12,7 +12,8 @@ def retrieve_glob_var():
 		"debian_ip": os.environ["DEBIAN_IP"],
 		"ftp_user": os.environ["FTP_USER"],
 		"ftp_pw": os.environ["FTP_PW"],
-		"cron_user": os.environ["CRON_USER"]}
+		"cron_user": os.environ["CRON_USER"],
+		"workers": os.environ["WORKERS"]}
 
 
 """Arkime Variables"""
@@ -62,7 +63,7 @@ def update_env(env, form):
 	for field in form:
 		if field.data != os.environ[field.name.upper()]:
 			updated_configs.append(field.label)
-			dotenv.set_key(dotenv_file, field.name.upper(), field.data)
+			dotenv.set_key(dotenv_file, field.name.upper(), str(field.data))
 
 	# Return list of variables that were updated
 	return updated_configs

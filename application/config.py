@@ -1,10 +1,13 @@
-""" Flask Configurations """
 import ftplib, ssl
+from concurrent import futures
+import queue
 
 # Import Local Files
 from admin import retrieve_glob_var, retrieve_database_var
 import getpass
 
+
+########## START Flask Configurations ##########
 
 """Global Configs"""
 class Config:
@@ -35,6 +38,7 @@ class ProdConfig(Config):
 	TESTING = False
 
 
+########## END Flask Configurations ##########
 ########## START FTP Methods ##########
 
 """
@@ -62,9 +66,68 @@ def init_conn():
 def download_file(csv_file, ftps):
 	with open(csv_file, "wb") as f:
 		# Command for Downloading the file "RETR csv_file"
-		ftps.retrbinary(f"RETR {csv_file}", f.write) 
-		return 1
-	return 0
+		ftps.retrbinary(f"RETR {csv_file}", f.write)
 
 
 ########## END FTP Methods ##########
+########## START Threading: Data Transfer ##########
+
+def thread_function(directory, mini_list, index):
+	##print("\t\tWorker {} starting".format(index+1))
+
+	"""Initialise FTP Connection"""
+	ftps = init_conn()
+
+	try:
+		"""Download filtered files from this folder (FTP directory)"""
+		ftps.cwd("/"+directory)		# Change FTP directory
+		for csv_file in mini_list:
+			try:
+				download_file(csv_file, ftps)
+			except Exception as e:
+				""" Either of 1 or 2:
+				1. EOF occurred in violation of protocol (_ssl.c: 2396)
+				2. [SSL: Bad Length] bad length (_ssl.c: 2396)
+				Both mean: FileZilla session authentication issue OR Transfer limit reached
+				- FTP session terminated automatically
+				"""
+				ftps.close()		# Close the connection
+				ftps = init_conn()	# Initialise a new FTPS connection to re-authenticate session & reset transfer limit
+				ftps.cwd("/"+directory)		# Change FTP directory
+
+				"""Attempt to download file again"""
+				try:
+					download_file(csv_file, ftps)
+				except Exception as econn:
+					print("\t\t{} {}".format(e, econn))
+					print("\t\tFile name: {}".format(csv_file))
+
+	except Exception as e:
+		try:
+			print("\t\tError Downloading File: {}".format(e))
+		except Exception as econn:
+			print(econn)
+		return False, e
+
+	ftps.close()
+
+	##print("\t\tWorker {} finished".format(index+1))
+
+
+########## END Threading: Data Transfer ##########
+########## START MySQL Database ##########
+
+# Source: https://stackoverflow.com/questions/5504340/python-mysqldb-connection-close-vs-cursor-close
+"""Connect MySQL & Return cursor"""
+def start_conn(mysql):
+	conn = mysql.connect()
+	return conn, conn.cursor()	# Create connection & cursor
+
+
+"""Close MySQL Conn"""
+def end_conn(conn, cursor):
+	cursor.close()	# Close the cursor
+	conn.close()	# Close the connection
+
+
+########## END MySQL Database ##########

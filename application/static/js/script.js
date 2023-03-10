@@ -183,6 +183,7 @@ function retrieve_global_var() {
 			document.getElementById("ftp_user").defaultValue = resp.ftp_user;
 			document.getElementById("ftp_pw").defaultValue = resp.ftp_pw;
 			document.getElementById("cron_user").defaultValue = resp.cron_user;
+			document.getElementById("workers").defaultValue = resp.workers;
 		}
 	});
 
