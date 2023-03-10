@@ -55,7 +55,7 @@ class MyFTP_TLS(ftplib.FTP_TLS):
 
 
 """Modular way to Initiate FTP Connection"""
-def init_conn():
+def init_ftps_conn():
 	global_dict = retrieve_glob_var()
 	ftps = MyFTP_TLS(host=global_dict["windows_ip"], user=global_dict["ftp_user"], passwd=global_dict["ftp_pw"])
 	ftps.prot_p()		# Set up secure connection
@@ -72,11 +72,11 @@ def download_file(csv_file, ftps):
 ########## END FTP Methods ##########
 ########## START Threading: Data Transfer ##########
 
-def thread_function(directory, mini_list, index):
+def thread_datatransfer(directory, mini_list, index):
 	##print("\t\tWorker {} starting".format(index+1))
 
 	"""Initialise FTP Connection"""
-	ftps = init_conn()
+	ftps = init_ftps_conn()
 
 	try:
 		"""Download filtered files from this folder (FTP directory)"""
@@ -92,7 +92,7 @@ def thread_function(directory, mini_list, index):
 				- FTP session terminated automatically
 				"""
 				ftps.close()		# Close the connection
-				ftps = init_conn()	# Initialise a new FTPS connection to re-authenticate session & reset transfer limit
+				ftps = init_ftps_conn()	# Initialise a new FTPS connection to re-authenticate session & reset transfer limit
 				ftps.cwd("/"+directory)		# Change FTP directory
 
 				"""Attempt to download file again"""
@@ -119,13 +119,13 @@ def thread_function(directory, mini_list, index):
 
 # Source: https://stackoverflow.com/questions/5504340/python-mysqldb-connection-close-vs-cursor-close
 """Connect MySQL & Return cursor"""
-def start_conn(mysql):
+def start_db_conn(mysql):
 	conn = mysql.connect()
 	return conn, conn.cursor()	# Create connection & cursor
 
 
 """Close MySQL Conn"""
-def end_conn(conn, cursor):
+def end_db_conn(conn, cursor):
 	cursor.close()	# Close the cursor
 	conn.close()	# Close the connection
 

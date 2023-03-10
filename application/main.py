@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 # Import Local Files
 from admin import retrieve_glob_var, retrieve_arkime_var
-from config import init_conn, download_file, start_conn, end_conn, thread_function
+from config import init_ftps_conn, download_file, thread_datatransfer, start_db_conn, end_db_conn
 
 # Import Library for commmunication with scapyd scraper
 from scrapyd_api import ScrapydAPI
@@ -37,7 +37,7 @@ def windows_ftp_start(ftp_dir):
 	for root_dir in ftp_dir:
 		try:
 			"""Initialise FTPS Connection"""
-			ftps = init_conn()
+			ftps = init_ftps_conn()
 			root = ftps.mlsd(root_dir)	# FTPS Root directory
 
 			# Return immediately if WiresharkData is established
@@ -133,7 +133,7 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 
 	try:
 		"""Initialise FTPS Connection"""
-		ftps = init_conn()
+		ftps = init_ftps_conn()
 	except Exception as e:
 		try:
 			# Exit connection if any error
@@ -302,7 +302,7 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 	start_all = time.time()
 
 	"""Initialise FTPS Connection"""
-	#ftps = init_conn()
+	#ftps = init_ftps_conn()
 
 	"""Iterate folders in filtered_dict"""
 	from __main__ import app
@@ -332,7 +332,7 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 		print("\t\tDownloading with {} workers:".format(len(directory_list)))
 		with ThreadPoolExecutor(max_workers=int(retrieve_glob_var()["workers"])) as executor:
 			for mini_list in directory_list:
-				future = executor.submit(thread_function, directory, mini_list, directory_list.index(mini_list))
+				future = executor.submit(thread_datatransfer, directory, mini_list, directory_list.index(mini_list))
 
 		# Print Time taken to iterate and download files from this directory
 		end_dur = time.time()
@@ -671,7 +671,7 @@ def update_spider_db(mysql):
 
 	# Query for jobs that are "pending" or "running"
 	query = "SELECT jobid from spiderjobs WHERE status='pending' OR status='running';"
-	conn, cursor = start_conn(mysql)
+	conn, cursor = start_db_conn(mysql)
 	cursor.execute(query)
 	jobs = cursor.fetchall()
 
@@ -685,7 +685,7 @@ def update_spider_db(mysql):
 		cursor.execute(query, (job_status, job[0]))
 		conn.commit()
 
-	end_conn(conn, cursor)
+	end_db_conn(conn, cursor)
 
 
 """Return a list of available Spiders from Scrapyd"""
@@ -704,10 +704,10 @@ def submit_job(mysql, form):
 	- Based on user-input URL & Spider, and status is Pending/Running
 	"""
 	query = "SELECT jobid from spiderjobs WHERE url=%s AND spider=%s AND (status='pending' OR status='running');"
-	conn, cursor = start_conn(mysql)
+	conn, cursor = start_db_conn(mysql)
 	cursor.execute(query, (form.url.data, form.spiderChoice.data))
 	job_id = cursor.fetchone()
-	end_conn(conn, cursor)
+	end_db_conn(conn, cursor)
 	print("job_id: {}".format(job_id))
 
 	if job_id == None:
@@ -741,7 +741,7 @@ def insert_job(form, scrapyd, mysql, conn, cursor):
 	query = "INSERT INTO `scfami_spider`.`spiderjobs` \
 			(`project`,`spider`,`jobid`,`url`,`depth`,`status`)\
 			VALUES (%s, %s, %s, %s, %s, %s);"
-	conn, cursor = start_conn(mysql)
+	conn, cursor = start_db_conn(mysql)
 	cursor.execute(query, (
 					PROJECT_NAME,
 					form.spiderChoice.data,
@@ -750,7 +750,7 @@ def insert_job(form, scrapyd, mysql, conn, cursor):
 					form.scrapingDepth.data,
 					scrapyd.job_status(PROJECT_NAME, new_job_id)))
 	conn.commit()
-	end_conn(conn, cursor)
+	end_db_conn(conn, cursor)
 	print("New Job executed")
 	flash(u"URL has been submitted for crawling", "success")
 
@@ -760,7 +760,7 @@ def retrieve_spider_jobs(mysql, filter_url="unique"):
 	db_columns = ("project", "spider", "jobid", "url", "depth", "status", "datetime")
 
 	"""Retrieve Jobs that are pending/running from DB"""
-	conn, cursor = start_conn(mysql)
+	conn, cursor = start_db_conn(mysql)
 	cursor.execute("SELECT * from spiderjobs WHERE (status='pending' OR status='running');")
 	running_data_tuple = cursor.fetchall()
 
@@ -778,7 +778,7 @@ def retrieve_spider_jobs(mysql, filter_url="unique"):
 		cursor.execute(query, (filter_url))
 
 	finished_data_tuple = cursor.fetchall()
-	end_conn(conn, cursor)
+	end_db_conn(conn, cursor)
 
 	"""Format & Append pending/running Jobs into a list"""
 	running_list = []
