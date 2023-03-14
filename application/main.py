@@ -613,17 +613,20 @@ def action_cronjobs(action_jobid):
 """Retrieve Local Applications"""
 def list_of_local_apps():
 	"""Blacklist system-installed local apps"""
-	system_apps = ["pipewire", "enchant-2", "gnome-todo", "im-config", "man", "mousetweaks", "file-roller", "gnome-shell", "gnome-system-monitor", "unattended-upgrades", "m2300w", "totem", "ucf", "debconf", "os-prober", "libreoffice", "info", "update-manager", "orca", "gnome-control-center", "pnm2ppa", "eog", "system-config-printer", "gnome-session", "speech-dispatcher", "rygel", "apturl", "npm", "perl", "brltty", "evince", "file", "systemd", "dconf", "remmina", "rsync", "distro-info", "gcc", "gettext", "locale", "plymouth", "gedit", "gnome-logs", "ibus", "pulseaudio", "nodejs", "tracker3", "lftp", "nano", "groff", "seahorse", "foo2qpdl", "update-notifier", "aspell", "ghostscript", "p11-kit", "dpkg", "python3", "session-migration", "gdb", "foo2zjs", "rhythmbox", "zenity", "nautilus", "yelp"]
+	#system_apps = ["pipewire", "enchant-2", "gnome-todo", "im-config", "man", "mousetweaks", "file-roller", "gnome-shell", "gnome-system-monitor", "unattended-upgrades", "m2300w", "totem", "ucf", "debconf", "os-prober", "libreoffice", "info", "update-manager", "orca", "gnome-control-center", "pnm2ppa", "eog", "system-config-printer", "gnome-session", "speech-dispatcher", "rygel", "apturl", "npm", "perl", "brltty", "evince", "file", "systemd", "dconf", "remmina", "rsync", "distro-info", "gcc", "gettext", "locale", "plymouth", "gedit", "gnome-logs", "ibus", "pulseaudio", "nodejs", "tracker3", "lftp", "nano", "groff", "seahorse", "foo2qpdl", "update-notifier", "aspell", "ghostscript", "p11-kit", "dpkg", "python3", "session-migration", "gdb", "foo2zjs", "rhythmbox", "zenity", "nautilus", "yelp"]
 
 	"""Local apps are found in these two paths"""
-	share_path = "/usr/share"
+	"""share_path = "/usr/share"
 	bin_path = "/usr/bin"
 
 	app_list = []
 	# Return apps that are NOT found in both paths & NOT blacklisted local apps
 	for path in os.listdir(share_path):
 		if os.path.os.path.isfile(os.path.join(bin_path, path)) and path not in system_apps:
-			app_list.append(path)
+			app_list.append(path)"""
+
+	"""Whitelist relevant local apps"""
+	app_list = ["FileZilla", "Wireshark", "zui"]
 
 	return app_list
 
