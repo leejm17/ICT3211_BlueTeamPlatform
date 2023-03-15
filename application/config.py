@@ -26,7 +26,8 @@ class Config:
 
 """Development Configuration"""
 class DevConfig(Config):
-	APP_IP = "localhost"
+	#APP_IP = "localhost"
+	APP_IP = "172.16.2.6"
 	FLASK_ENV = "development"
 	DEBUG = True
 	TESTING = True
