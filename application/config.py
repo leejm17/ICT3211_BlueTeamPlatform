@@ -11,7 +11,7 @@ import getpass
 
 """Global Configs"""
 class Config:
-	APP_IP = "localhost"	# "172.16.2.6"
+	#APP_IP = "localhost"	# "172.16.2.6"
 	APP_PORT = 6065
 	APP_DIR = "/home/{}/Documents/ICT3211_BlueTeamPlatform/application".format(getpass.getuser())
 
@@ -26,6 +26,7 @@ class Config:
 
 """Development Configuration"""
 class DevConfig(Config):
+	APP_IP = "localhost"
 	FLASK_ENV = "development"
 	DEBUG = True
 	TESTING = True
@@ -33,6 +34,7 @@ class DevConfig(Config):
 
 """Production Configuration"""
 class ProdConfig(Config):
+	APP_IP = "172.16.2.6"
 	FLASK_ENV = "production"
 	DEBUG = False
 	TESTING = False
