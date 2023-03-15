@@ -103,7 +103,7 @@ def datatransfer_smartmeter_page():
 				return render_template("/data_transfer/smart_meter.html", ip=global_var()["windows_ip"], form=form, dir_list=dir_list, meters=dir_list, days_of_week=days_of_week)
 			# Else FTP Connection NOT Established
 			else:
-				return render_template("/data_transfer/connection_failure.html", ip=global_var()["windows_ip"], message=dir_list)
+				return render_template("/data_transfer/connection_failure.html", message=dir_list)
 
 		else:
 			"""Data Transfer Process"""
@@ -215,7 +215,7 @@ def spider_submitjob_page():
 		form.spiderChoice.choices = retrieve_spiders()	# Get available spiders from Scrapyd
 	except:
 		print("Spider not online")
-		return render_template("/spider/spider.html")
+		return render_template("/spider/connection_failure.html")
 
 	"""Update Job Status & Submit New Job"""
 	update_spider_db(mysql)
