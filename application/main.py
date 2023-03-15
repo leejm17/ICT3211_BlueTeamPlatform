@@ -276,14 +276,17 @@ def windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_tim
 
 	# Return filtered_dict, but remove empty keys
 	filtered_dict = {meter: files for meter, files in filtered_dict.items() if files}
-	meter_dict = {}
-	for folder_path in filtered_dict:
-		folder_path = folder_path.split("/")
-		if folder_path[0] not in meter_dict:
-			meter_dict[folder_path[0]] = []
-		meter_dict[folder_path[0]] += [folder_path[1]]
-	for meter in meter_dict:
-		print("\t{}: {}".format(meter, meter_dict[meter]))
+	
+	# Print Filtered Meters
+	if data_source == "SmartMeterData":
+		meter_dict = {}
+		for folder_path in filtered_dict:
+			folder_path = folder_path.split("/")
+			if folder_path[0] not in meter_dict:
+				meter_dict[folder_path[0]] = []
+			meter_dict[folder_path[0]] += [folder_path[1]]
+		for meter in meter_dict:
+			print("\t{}: {}".format(meter, meter_dict[meter]))
 
 	return True, filtered_dict
 
@@ -315,12 +318,19 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 		print("\tNo. of Files in {}: {}".format(directory, dir_cnt))
 
 		"""Set up Download Directory"""
-		download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format(
-						"/".join(app.config["APP_DIR"].split("/")[:-2]),
-						data_source,
-						job_name,
-						current_datetime,
-						directory.split("/")[1])
+		if data_source == "SmartMeterData":	# SmartMeterData root folder
+			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format(
+							"/".join(app.config["APP_DIR"].split("/")[:-2]),
+							data_source,
+							job_name,
+							current_datetime,
+							directory.split("/")[1])
+		else:								# WiresharkData root folder
+			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format(
+							"/".join(app.config["APP_DIR"].split("/")[:-2]),
+							data_source,
+							job_name,
+							current_datetime)
 
 		# Mkdir if Download directory does NOT exist
 		if not os.path.isdir(download_dir):
