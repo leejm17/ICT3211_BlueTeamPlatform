@@ -14,7 +14,7 @@
 	</p>
 	<p>
 		<b><u>Job Details</u></b><br />
-		{% set message_list = job_message.split("-") %}
+		{% set message_list = job_message.split("^") %}
 		{% for param in message_list %}
 			{{ param }}<br />
 		{% endfor %}

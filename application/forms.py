@@ -79,6 +79,31 @@ class DataTransfer_Form(Form):
 
 
 	#### Transfer Type: Schedule only ####
+	timezone = SelectField(
+		label="Timezone",
+		choices=[
+			"UTC +00",
+			"GMT +01", "GMT +02", "GMT +03", "GMT +04", "GMT +05", "GMT +06", "GMT +07", "GMT +08", "GMT +09", "GMT +10", "GMT +11", "GMT +12",
+			"GMT -01", "GMT -02", "GMT -03", "GMT -04", "GMT -05", "GMT -06", "GMT -07", "GMT -08", "GMT -09", "GMT -10", "GMT -11", "GMT -12"],
+		default="GMT +08",
+		validators=[
+			InputRequired()])
+
+	timezone_prefix = SelectField(
+		label="Timezone",
+		choices=["+", "-"],
+		default="+",
+		validators=[
+			InputRequired()])
+
+	timezone_value = SelectField(
+		label="GMT",
+		choices=[
+			"00", "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"],
+		default="08",
+		validators=[
+			InputRequired()])
+
 	transfer_freq = RadioField(
 		label="Transfer Frequency",
 		choices=["Daily", "Weekly", "Monthly"],

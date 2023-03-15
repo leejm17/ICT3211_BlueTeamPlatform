@@ -101,10 +101,12 @@ def windows_ftp_process(form):
 	"""Filter Files for Data Transfer Process
 	:return file_dict: Filtered list of {FTPS Directory: Filenames} based on date, start_time, end_time
 	"""
-	print("\tdate: {}".format(form.date.data))
+	print("\tdate: {}".format(form.date.data))	
+	timezone = int("{}{}".format(form.timezone_prefix.data, form.timezone_value.data))
+	print("\ttimezone: GMT {}".format(timezone))
 	print("\tstart_time: {} (gmt+8)".format(form.start_time.data))
 	print("\tend_time: {} (gmt+8)".format(form.end_time.data))
-	success, filtered_dict = windows_ftp_filter_datetime(form.data_source.data, form.date.data, form.start_time.data, form.end_time.data, file_dict)
+	success, filtered_dict = windows_ftp_filter_datetime(form.data_source.data, form.date.data, timezone, form.start_time.data, form.end_time.data, file_dict)
 	if not success:
 		return success, filtered_dict
 
@@ -210,15 +212,15 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 
 
 """Filter Files for Data Transfer Process"""
-def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_dict):
+def windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_time, file_dict):
 	# Dict to store Dir & filtered File Names based on date, start_time, end_time
 	filtered_dict = {}
 
 	# Format date and time
-	start_datetime = datetime.combine(date, start_time) - timedelta(hours=8)
+	start_datetime = datetime.combine(date, start_time) - timedelta(hours=timezone)
 	start_date = start_datetime.strftime("%Y%m%d")
 	start_time = int(start_datetime.strftime("%H%M%S"))
-	end_datetime = datetime.combine(date, end_time) - timedelta(hours=8)
+	end_datetime = datetime.combine(date, end_time) - timedelta(hours=timezone)
 	end_date = end_datetime.strftime("%Y%m%d")
 	end_time = int(end_datetime.strftime("%H%M%S"))
 
@@ -227,6 +229,7 @@ def windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_di
 		return False, "Start Datetime cannot be later than End Datetime"
 
 	print("Filtering Files for Data Transfer Process")
+	print("\ttimezone: GMT {}".format(timezone))
 	print("\tstart_date: {}".format(start_date))
 	print("\tstart_time (utc): {}".format(start_time))
 	print("\tend_date: {}".format(end_date))
@@ -301,7 +304,7 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 	# Calculate Time taken to iterate and download all files
 	start_all = time.time()
 
-	"""Initialise FTPS Connection"""
+	"""Initialise FTPS Connection: Ignore, handled by Multi-thread"""
 	#ftps = init_ftps_conn()
 
 	"""Iterate folders in filtered_dict"""
@@ -358,9 +361,11 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 
 """Initialise the Scheduling of Data Transfer Process"""
 def windows_ftp_automate(form):
+	timezone = int("{}{}".format(form.timezone_prefix.data, form.timezone_value.data))
 	print("Initialise the Scheduling of Data Transfer Process")
 	print("\tdata_source: {}".format(form.data_source.data))
 	print("\tmeters: {}".format(form.meters.data))
+	print("\ttimezone: GMT {}".format(timezone))
 	print("\tstart_time: {}".format(form.start_time.data))
 	print("\ttransfer_dur: +{} minutes".format(form.transfer_dur.data))	# end_time = start_time + transfer_dur
 	end_time = (datetime.combine(form.date.data, form.start_time.data) + timedelta(minutes=int(form.transfer_dur.data))).strftime("%H:%M:%S")
@@ -383,7 +388,7 @@ def windows_ftp_automate(form):
 		print("\ttransfer_freq_time: {}\n".format(form.transfer_freq_time.data))
 		success, cron, job = cronjob_format(
 			"daily", None, form.transfer_freq_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
 
 	elif form.transfer_freq.data == "Weekly":
 		"""
@@ -396,7 +401,7 @@ def windows_ftp_automate(form):
 			return False, "Unspecified Parameters", "Please ensure your parameters are selected."
 		success, cron, job = cronjob_format(
 			"weekly", form.transfer_freq_week.data, form.transfer_freq_week_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
 
 	elif form.transfer_freq.data == "Monthly":
 		"""
@@ -407,13 +412,13 @@ def windows_ftp_automate(form):
 		print("\ttransfer_freq_month_time: {}\n".format(form.transfer_freq_month_time.data))
 		success, cron, job = cronjob_format(
 			"monthly", form.transfer_freq_month.data, form.transfer_freq_month_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, form.start_time.data, end_time)
+			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
 
 	else:
 		"""Frequency is NOT recognised"""
 		return False, "Unspecified Parameters", "Please ensure your parameters are selected."
 
-	return success, cron, "{}-Duration of Data To Collect: {} minutes".format(job, form.transfer_dur.data)
+	return success, cron, "{}^Duration of Data To Collect: {} minutes".format(job, form.transfer_dur.data)
 
 
 """ References:
@@ -423,8 +428,8 @@ sudo cat /var/spool/cron/crontabs/user
 date
 crontab -l"""
 """Schedule Job (Data Transfer Process)"""
-def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, start_time, end_time):
-	# Every job requires: frequency, week/month, scheduled_time, job_name, data_source, meters, start_time, end_time
+def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, timezone, start_time, end_time):
+	# Every job requires: frequency, week/month, scheduled_time, job_name, data_source, meters, timezone, start_time, end_time
 	sched_time = str(sched_time)
 
 	"""Initialise Cron"""
@@ -432,13 +437,15 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 
 	"""Create New Job"""
 	from __main__ import app
-	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from app import app; from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_completed.txt".format(app.config["APP_DIR"], data_source, meters, start_time, end_time, job_name, app.config["APP_DIR"]), comment=job_name)
+	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from app import app; from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_log.txt".format(app.config["APP_DIR"], data_source, meters, timezone, start_time, end_time, job_name, app.config["APP_DIR"]), comment=job_name)
 
 	"""Craft Display Message"""
+	if timezone >= 0:
+		timezone = "+{}".format(timezone)
 	if data_source == "SmartMeterData":
-		job_message = "Job Name: {}-Data Source: {}-Meters: {}-Data Start Time: {}-Data End Time: {}".format(job_name, data_source, meters, start_time, end_time)
+		job_message = "Job Name: {}^Data Source: {}^Meters: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, meters, start_time, end_time, timezone)
 	else:
-		job_message = "Job Name: {}-Data Source: {}-Data Start Time: {}-Data End Time: {}".format(job_name, data_source, start_time, end_time)
+		job_message = "Job Name: {}^Data Source: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, start_time, end_time, timezone)
 
 	# Format Time
 	hour = sched_time.split(":")[0]
@@ -477,12 +484,12 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 
 
 """Method to call for scheduled jobs (Data Transfer process)"""
-def cronjob_process(data_source, meters, start_time, end_time, job_name):
+def cronjob_process(data_source, meters, timezone, start_time, end_time, job_name):
 	# Data1: 'WiresharkData', [], '07:00:00', '12:00:00'	>> 2 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('WiresharkData', [], '07:00:00', '12:00:00', 'Job Name')"
+	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('WiresharkData', [], '8', '07:00:00', '12:00:00', 'Job Name')"
 
 	# Data2: 'SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00'	>> 4 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00', 'Job Name')"
+	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '0', '07:00:00', '12:00:00', 'Job Name')"
 
 	# Today's date (i.e. Current date of Job)
 	from datetime import date
@@ -499,7 +506,7 @@ def cronjob_process(data_source, meters, start_time, end_time, job_name):
 		print("Cron unable to initiate FTP: {}".format(file_dict))
 
 	"""Filter Files for Data Transfer Process"""
-	success, filtered_dict = windows_ftp_filter_datetime(data_source, date, start_time, end_time, file_dict)
+	success, filtered_dict = windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_time, file_dict)
 	if not success:
 		print("Cron unable to download files: {}".format(filtered_dict))
 
@@ -514,7 +521,7 @@ def cronjob_process(data_source, meters, start_time, end_time, job_name):
 
 """Retrieve Scheduled Jobs (Data Transfers)"""
 def retrieve_cronjobs():
-	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "start_time": "12:00", "end_time": "12:30"}]
+	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
 
 	cron_list = []
 	job_id = 0
@@ -543,6 +550,11 @@ def retrieve_cronjobs():
 		meter_list = ast.literal_eval(meters)
 		meters = ", ".join(meter_list)
 
+		# Format Timezone
+		timezone = int(parameters[2].strip("\"()' "))
+		if timezone >= 0:
+			timezone = "+{}".format(timezone)
+
 		# Retrieve Schedule
 		sched = str(job).split(" cd ")[0].split(" ")
 		if job_enabled == "#":
@@ -570,7 +582,16 @@ def retrieve_cronjobs():
 			sched_desc = "{}:{}H every day.".format(hour, minute)
 
 		# Putting Schedule, Meters, Time, etc together
-		cron_dict = {"id": job_id, "name": job.comment, "sched_desc": sched_desc, "data_source": parameters[0].strip("\"()' "), "meters": meters, "start_time": ":".join(parameters[2].strip("\"()' ").split(":")[0:2]), "end_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2]), "enabled": job_enabled}
+		cron_dict = {
+			"id": job_id,
+			"name": job.comment,
+			"sched_desc": sched_desc,
+			"data_source": parameters[0].strip("\"()' "),
+			"meters": meters,
+			"timezone": timezone,
+			"start_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2]),
+			"end_time": ":".join(parameters[4].strip("\"()' ").split(":")[0:2]),
+			"enabled": job_enabled}
 		cron_list.append(cron_dict)
 
 	return cron_list
@@ -612,19 +633,6 @@ def action_cronjobs(action_jobid):
 
 """Retrieve Local Applications"""
 def list_of_local_apps():
-	"""Blacklist system-installed local apps"""
-	#system_apps = ["pipewire", "enchant-2", "gnome-todo", "im-config", "man", "mousetweaks", "file-roller", "gnome-shell", "gnome-system-monitor", "unattended-upgrades", "m2300w", "totem", "ucf", "debconf", "os-prober", "libreoffice", "info", "update-manager", "orca", "gnome-control-center", "pnm2ppa", "eog", "system-config-printer", "gnome-session", "speech-dispatcher", "rygel", "apturl", "npm", "perl", "brltty", "evince", "file", "systemd", "dconf", "remmina", "rsync", "distro-info", "gcc", "gettext", "locale", "plymouth", "gedit", "gnome-logs", "ibus", "pulseaudio", "nodejs", "tracker3", "lftp", "nano", "groff", "seahorse", "foo2qpdl", "update-notifier", "aspell", "ghostscript", "p11-kit", "dpkg", "python3", "session-migration", "gdb", "foo2zjs", "rhythmbox", "zenity", "nautilus", "yelp"]
-
-	"""Local apps are found in these two paths"""
-	"""share_path = "/usr/share"
-	bin_path = "/usr/bin"
-
-	app_list = []
-	# Return apps that are NOT found in both paths & NOT blacklisted local apps
-	for path in os.listdir(share_path):
-		if os.path.os.path.isfile(os.path.join(bin_path, path)) and path not in system_apps:
-			app_list.append(path)"""
-
 	"""Whitelist relevant local apps"""
 	app_list = ["FileZilla", "Wireshark", "zui"]
 
