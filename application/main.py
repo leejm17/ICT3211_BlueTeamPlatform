@@ -501,6 +501,9 @@ def cronjob_process(data_source, meters, timezone, start_time, end_time, job_nam
 	# Data2: 'SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00'	>> 4 files downloaded
 	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '0', '07:00:00', '12:00:00', 'Job Name')"
 
+	print("\nInitiating Scheduled Job for \"{}\"".format(job_name))
+	print("Job Start Time: {} (Local Timezone)\n".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+
 	# Today's date (i.e. Current date of Job)
 	from datetime import date
 	##date = datetime.strptime("2023-02-01", "%Y-%m-%d")	# For demo purpose only
@@ -513,17 +516,24 @@ def cronjob_process(data_source, meters, timezone, start_time, end_time, job_nam
 	"""Initiate FTPS for Data Transfer Process"""
 	success, file_dict = windows_ftp_initiate(data_source, meters)
 	if not success:
-		print("Cron unable to initiate FTP: {}".format(file_dict))
+		print("Cron unable to initiate FTP: {}\n".format(file_dict))
+		print("########## ########## ########## ##########")
+		return 1
 
 	"""Filter Files for Data Transfer Process"""
-	success, filtered_dict = windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_time, file_dict)
+	success, filtered_dict = windows_ftp_filter_datetime(data_source, date, int(timezone), start_time, end_time, file_dict)
 	if not success:
-		print("Cron unable to download files: {}".format(filtered_dict))
+		print("Cron unable to download files: {}\n".format(filtered_dict))
+		print("########## ########## ########## ##########")
+		return 1
 
 	"""Download filtered files from filtered_dict via FTP"""
 	success, message = windows_ftp_transfer(data_source, filtered_dict, job_name)
-	print("Cron Job Success: {}".format(message))
+	print("Job End Time: {} (Local Timezone)".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+	print("Cron Job Success: {} files downloaded".format(message[0]))
+	print("Download Path: \"{}\"\n".format(message[1]))
 	print("########## ########## ########## ##########")
+	return 0
 
 
 ########## END Data Transfer (Smart Meter): Schedule Transfer ##########
