@@ -342,7 +342,7 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 
 		"""Download 120 files at a time with multi-threaded workers"""
 		directory_list = [filtered_dict[directory][i * 120:(i + 1) * 120] for i in range((len(filtered_dict[directory]) + 120 - 1) // 120 )]
-		print("\t\tDownloading with {} workers:".format(len(directory_list)))
+		print("\t\t{} workers will be used:".format(len(directory_list)))
 		with ThreadPoolExecutor(max_workers=int(retrieve_glob_var()["workers"])) as executor:
 			for mini_list in directory_list:
 				future = executor.submit(thread_datatransfer, directory, mini_list, directory_list.index(mini_list))
