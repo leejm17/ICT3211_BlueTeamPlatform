@@ -61,9 +61,10 @@ def update_env(env, form):
 	updated_configs = []
 	# Write changes to .env file
 	for field in form:
+		field.data = str(field.data)
 		if field.data != os.environ[field.name.upper()]:
 			updated_configs.append(field.label)
-			dotenv.set_key(dotenv_file, field.name.upper(), str(field.data))
+			dotenv.set_key(dotenv_file, field.name.upper(), field.data)
 
 	# Return list of variables that were updated
 	return updated_configs
