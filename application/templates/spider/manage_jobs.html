@@ -1,6 +1,17 @@
 <head>
 	<title>Manage Jobs</title>
 	<style>
+		/* Source: https://www.w3docs.com/snippets/html/how-to-create-a-table-with-a-fixed-header-and-scrollable-body.html */
+		.table-fixed-head {
+			overflow-y: auto; /* make the table scrollable if height is more than 150 px  */
+			height: 150px; /* gives an initial height of 150px to the table */
+		}
+
+		.table-fixed-head thead th {
+			position: sticky; /* make the table heads sticky */
+			top: 0px; /* table head will be placed from the top of the table and sticks to it */
+		}
+
 		table {
 			font-family: arial, sans-serif;
 			border-collapse: collapse;
@@ -13,7 +24,7 @@
 			padding: 8px;
 		}
 
-		tr:nth-child(even) {
+		th, tr:nth-child(even) {
 			background-color: #dddddd;
 		}
 	</style>
@@ -34,26 +45,28 @@
 
 		<h3>Pending / Running</h3>
 		{% if runningDict %}
-		<table class="table">
-			<tr>
-				<th>Status</th>
-				<th>Initiation Date</th>
-				<th>Spider</th>
-				<th>URL</th>
-				<th>Depth</th>
-				<th>ID</th>
-			</tr>
-			{% for running in runningDict %}
-			<tr>
-				<td>{{ running.status }}</td>
-				<td>{{ running.datetime }}</td>
-				<td>{{ running.spider }}</td>
-				<td>{{ running.url }}</td>
-				<td>{{ running.depth }}</td>
-				<td>{{ running.jobid }}</td>
-			</tr>
-			{% endfor %}
-		</table>
+		<div class="table-fixed-head">
+			<table class="table">
+				<tr>
+					<th>Status</th>
+					<th>Initiation Date</th>
+					<th>Spider</th>
+					<th>URL</th>
+					<th>Depth</th>
+					<th>ID</th>
+				</tr>
+				{% for running in runningDict %}
+				<tr>
+					<td>{{ running.status }}</td>
+					<td>{{ running.datetime }}</td>
+					<td>{{ running.spider }}</td>
+					<td>{{ running.url }}</td>
+					<td>{{ running.depth }}</td>
+					<td>{{ running.jobid }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
 		{% else %}
 		<h5>No jobs are in queue.</h5>
 		{% endif %}
@@ -71,24 +84,28 @@
 			<button class="btn btn-primary" type="submit" name="action" value="filter">Filter</button>
 		</form>
 		{% if finishedDict %}
-		<table id="jobs_table">
-			<tr>
-				<th onclick="sort_jobs_table(0)">Initiation Date</th>
-				<th onclick="sort_jobs_table(1)">Spider</th>
-				<th onclick="sort_jobs_table(2)">URL</th>
-				<th onclick="sort_jobs_table(3)">Depth</th>
-				<th onclick="sort_jobs_table(4)">ID</th>
-			</tr>
-			{% for finished in finishedDict %}
-			<tr>
-				<td>{{ finished.datetime }}</td>
-				<td>{{ finished.spider }}</td>
-				<td>{{ finished.url }}</td>
-				<td>{{ finished.depth }}</td>
-				<td>{{ finished.jobid }}</td>
-			</tr>
-			{% endfor %}
-		</table>
+		<div class="table-fixed-head">
+			<table id="jobs_table">
+				<thead>
+					<tr>
+						<th onclick="sort_jobs_table(0)">Initiation Date</th>
+						<th onclick="sort_jobs_table(1)">Spider</th>
+						<th onclick="sort_jobs_table(2)">URL</th>
+						<th onclick="sort_jobs_table(3)">Depth</th>
+						<th onclick="sort_jobs_table(4)">ID</th>
+					</tr>
+				<thead>
+				{% for finished in finishedDict %}
+				<tr>
+					<td>{{ finished.datetime }}</td>
+					<td>{{ finished.spider }}</td>
+					<td>{{ finished.url }}</td>
+					<td>{{ finished.depth }}</td>
+					<td>{{ finished.jobid }}</td>
+				</tr>
+				{% endfor %}
+			</table>
+		</div>
 		{% else %}
 		<h5>No jobs have been completed.</h5>
 		{% endif %}
