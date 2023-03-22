@@ -117,7 +117,7 @@ def windows_ftp_process(form):
 
 
 """Initiate FTPS for Data Transfer Process"""
-def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet", windowsevent_src="All"):
+def windows_ftp_initiate(ftp_dir, meters, wireshark_src="All", windowsevent_src="All"):
 	print("Initiate FTPS for Data Transfer Process")
 
 	# Dict to store Dir & corresponding File Names
@@ -126,7 +126,7 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet", windowsevent
 	# If SmartMeterData, then ftp_dir has two folders
 	if ftp_dir == "SmartMeterData":
 		ftp_dir = ["SmartMeterData", "Archive_SmartMeterData"]
-	# Else WiresharkData, then ftp_dir has only one folder
+	# Else WiresharkData / KEPServerEXData / WindowsEventData, then ftp_dir has only one folder
 	else:
 		ftp_dir = [ftp_dir]
 
@@ -175,17 +175,17 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet", windowsevent
 				"""
 				# WiresharkData folder contains filenames in a specific format
 				if root_dir == "WiresharkData":
-					print("\tWireshark File: {}".format(dir_list[0]))
 					if wireshark_src != "All":
 						if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
+							print("\tWireshark File: {}".format(dir_list[0]))
 							directory = "{}/{}".format(root_dir, wireshark_src)
+							file_dict[directory] = []
+							file_dict[directory] += [dir_list[0]]
 					else:
+						print("\tWireshark File: {}".format(dir_list[0]))
 						directory = "{}/{}".format(root_dir, dir_list[0].split(".")[0].split("_")[-1])
-					try:
 						file_dict[directory] = []
 						file_dict[directory] += [dir_list[0]]
-					except:
-						pass
 
 				# KEPServerEXData folder
 				elif root_dir == "KEPServerEXData":
@@ -421,6 +421,15 @@ def windows_ftp_automate(form):
 	print("\tjob_name: {}".format(form.job_name.data))
 	print("\ttransfer_freq: {}".format(form.transfer_freq.data))	# For Cron
 
+	if form.data_source.data == "SmartMeterData":
+		sub_folders = form.meters.data
+	elif form.data_source.data == "WiresharkData":
+		sub_folders = form.wireshark_source.data
+	elif form.data_source.data == "KEPServerEXData":
+		sub_folders = []
+	elif form.data_source.data == "WindowsEventData":
+		sub_folders = form.windowsevent_source.data
+
 	"""
 	Cron Params: schedule, command, comment
 	1. schedule: freq, week/month, scheduled_time
@@ -436,7 +445,7 @@ def windows_ftp_automate(form):
 		print("\ttransfer_freq_time: {}\n".format(form.transfer_freq_time.data))
 		success, cron, job = cronjob_format(
 			"daily", None, form.transfer_freq_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
+			form.data_source.data, sub_folders, timezone, form.start_time.data, end_time)
 
 	elif form.transfer_freq.data == "Weekly":
 		"""
@@ -449,7 +458,7 @@ def windows_ftp_automate(form):
 			return False, "Unspecified Parameters", "Please ensure your parameters are selected."
 		success, cron, job = cronjob_format(
 			"weekly", form.transfer_freq_week.data, form.transfer_freq_week_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
+			form.data_source.data, sub_folders, timezone, form.start_time.data, end_time)
 
 	elif form.transfer_freq.data == "Monthly":
 		"""
@@ -460,7 +469,7 @@ def windows_ftp_automate(form):
 		print("\ttransfer_freq_month_time: {}\n".format(form.transfer_freq_month_time.data))
 		success, cron, job = cronjob_format(
 			"monthly", form.transfer_freq_month.data, form.transfer_freq_month_time.data, form.job_name.data,
-			form.data_source.data, form.meters.data, timezone, form.start_time.data, end_time)
+			form.data_source.data, sub_folders, timezone, form.start_time.data, end_time)
 
 	else:
 		"""Frequency is NOT recognised"""
@@ -476,8 +485,8 @@ sudo cat /var/spool/cron/crontabs/user
 date
 crontab -l"""
 """Schedule Job (Data Transfer Process)"""
-def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, timezone, start_time, end_time):
-	# Every job requires: frequency, week/month, scheduled_time, job_name, data_source, meters, timezone, start_time, end_time
+def cronjob_format(freq, week_month, sched_time, job_name, data_source, sub_folders, timezone, start_time, end_time):
+	# Every job requires: frequency, week/month, scheduled_time, job_name, data_source, sub_folders, timezone, start_time, end_time
 	sched_time = str(sched_time)
 
 	"""Initialise Cron"""
@@ -485,13 +494,15 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 
 	"""Create New Job"""
 	from __main__ import app
-	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from app import app; from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_log.txt".format(app.config["APP_DIR"], data_source, meters, timezone, start_time, end_time, job_name, app.config["APP_DIR"]), comment=job_name)
+	job = root_cron.new(command="cd {} && /usr/bin/python3 -c 'from app import app; from main import cronjob_process; cronjob_process(\"{}\", \"{}\", \"{}\", \"{}\", \"{}\", \"{}\")' >> {}/jobs_log.txt".format(app.config["APP_DIR"], data_source, sub_folders, timezone, start_time, end_time, job_name, app.config["APP_DIR"]), comment=job_name)
 
 	"""Craft Display Message"""
 	if timezone >= 0:
 		timezone = "+{}".format(timezone)
 	if data_source == "SmartMeterData":
-		job_message = "Job Name: {}^Data Source: {}^Meters: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, meters, start_time, end_time, timezone)
+		job_message = "Job Name: {}^Data Source: {}^Meters: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, sub_folders, start_time, end_time, timezone)
+	elif data_source == "WiresharkData" or data_source == "WindowsEventData":
+		job_message = "Job Name: {}^Data Source: {}^Sub-folders: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, sub_folders, start_time, end_time, timezone)
 	else:
 		job_message = "Job Name: {}^Data Source: {}^Data Start Time: {}^Data End Time: {}^Timezone (GMT): {}".format(job_name, data_source, start_time, end_time, timezone)
 
@@ -531,14 +542,9 @@ def cronjob_format(freq, week_month, sched_time, job_name, data_source, meters, 
 	return True, cron_message, job_message
 
 
-"""Method to call for scheduled jobs (Data Transfer process)"""
-def cronjob_process(data_source, meters, timezone, start_time, end_time, job_name):
-	# Data1: 'WiresharkData', [], '07:00:00', '12:00:00'	>> 2 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('WiresharkData', [], '8', '07:00:00', '12:00:00', 'Job Name')"
-
-	# Data2: 'SmartMeterData', ['Meter1', 'Meter2'], '07:00:00', '12:00:00'	>> 4 files downloaded
-	# cd /home/user/Desktop/BlueTeam/venv_2/ICT3211_BlueTeamPlatform/application && python3 -c "from app import app; from main import cronjob_process; cronjob_process('SmartMeterData', ['Meter1', 'Meter2'], '0', '07:00:00', '12:00:00', 'Job Name')"
-
+"""Method to call for scheduled jobs (Data Transfer process)
+	To view jobs: sudo cat /var/spool/cron/crontabs/$(whoami)"""
+def cronjob_process(data_source, sub_folders, timezone, start_time, end_time, job_name):	
 	print("\nInitiating Scheduled Job for \"{}\"".format(job_name))
 	print("Job Start Time: {} (Local Timezone)\n".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 
@@ -552,7 +558,7 @@ def cronjob_process(data_source, meters, timezone, start_time, end_time, job_nam
 	end_time = datetime.strptime(end_time, "%H:%M:%S").time()
 
 	"""Initiate FTPS for Data Transfer Process"""
-	success, file_dict = windows_ftp_initiate(data_source, meters)
+	success, file_dict = windows_ftp_initiate(data_source, sub_folders, sub_folders, sub_folders)
 	if not success:
 		print("Cron unable to initiate FTP: {}\n".format(file_dict))
 		print("########## ########## ########## ##########")
@@ -579,7 +585,10 @@ def cronjob_process(data_source, meters, timezone, start_time, end_time, job_nam
 
 """Retrieve Scheduled Jobs (Data Transfers)"""
 def retrieve_cronjobs():
-	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "meters": "['meter1', 'meter2']", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
+	# [{"id": "1", "name": "Job One", "data_source": "SmartMeterData", "sub_folders": "['meter1', 'meter2']", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
+	# [{"id": "2", "name": "Job Two", "data_source": "WiresharkData", "sub_folders": "All", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
+	# [{"id": "3", "name": "Job Two", "data_source": "KEPServerEXData", "sub_folders": "[]", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
+	# [{"id": "4", "name": "Job Four", "data_source": "WindowsEventData", "sub_folders": "All", "timezone": "8", "start_time": "12:00", "end_time": "12:30"}]
 
 	cron_list = []
 	job_id = 0
@@ -601,13 +610,16 @@ def retrieve_cronjobs():
 			continue
 		job_enabled = str(job)[0]
 
-		# Format Meters
-		meters = parameters[1].strip("\"()' ")
-		if meters == "[]":
-			meters = "-"
+		# Format Sub-folders
+		sub_folders = parameters[1].strip("\"()' ")
+		if sub_folders == "[]":
+			sub_folders = "-"
 		else:
-			meter_list = ast.literal_eval(meters)
-			meters = ", ".join(meter_list)
+			try:
+				sub_folder_list = ast.literal_eval(sub_folders)
+				sub_folders = ", ".join(sub_folder_list)
+			except:
+				pass
 
 		# Format Timezone
 		timezone = int(parameters[2].strip("\"()' "))
@@ -640,13 +652,13 @@ def retrieve_cronjobs():
 		elif minute != "*" and hour != "*":
 			sched_desc = "{}:{}H every day.".format(hour, minute)
 
-		# Putting Schedule, Meters, Time, etc together
+		# Putting Schedule, Sub-folders, Time, etc together
 		cron_dict = {
 			"id": job_id,
 			"name": job.comment,
 			"sched_desc": sched_desc,
 			"data_source": parameters[0].strip("\"()' "),
-			"meters": meters,
+			"sub_folders": sub_folders,
 			"timezone": timezone,
 			"start_time": ":".join(parameters[3].strip("\"()' ").split(":")[0:2]),
 			"end_time": ":".join(parameters[4].strip("\"()' ").split(":")[0:2]),

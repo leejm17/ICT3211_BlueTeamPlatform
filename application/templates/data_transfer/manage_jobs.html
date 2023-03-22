@@ -34,7 +34,7 @@
 
 		{% elif job_list %}
 		<h5 class="form-label">Manage your scheduled jobs here!</h5>
-		<input type="text" id="jobs_search" onkeyup="search_jobs_table()" placeholder="Search for meters...">
+		<input type="text" id="jobs_search" onkeyup="search_jobs_table()" placeholder="Search for sub-folders...">
 		<table id="jobs_table">
 			<thead>
 				<tr>
@@ -44,7 +44,7 @@
 					<th onclick="sort_jobs_table(3)">Data Start Time</th>
 					<th onclick="sort_jobs_table(4)">Data End Time</th>
 					<th onclick="sort_jobs_table(5)">Data Source</th>
-					<th onclick="sort_jobs_table(6)">Meters (if any)</th>
+					<th onclick="sort_jobs_table(6)">Sub-folders (if any)</th>
 					<th onclick="sort_jobs_table(7)">Active?</th>
 					<th>Action</th>
 				</tr>
@@ -59,7 +59,7 @@
 						<td>{{ job["start_time"] }}H (GMT{{ job["timezone"] }})</td>
 						<td>{{ job["end_time"] }}H (GMT{{ job["timezone"] }})</td>
 						<td>{{ job["data_source"] }}</td>
-						<td>{{ job["meters"] }}</td>
+						<td>{{ job["sub_folders"] }}</td>
 						<td
 						{% if job["enabled"] == "#" %}style="background-color:red; color:white">No
 						{% else %}style="background-color:green; color:white">Yes</td>{% endif %}
