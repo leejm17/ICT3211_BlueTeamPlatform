@@ -58,8 +58,14 @@ class DataTransfer_Form(Form):
 	#### Wireshark Data: WiresharkData only ####
 	wireshark_source = RadioField(
 		label="Wireshark Source",
-		choices=["Ethernet", "WiFi"],
-		default="Ethernet")
+		choices=["All", "Ethernet", "WiFi"],
+		default="All")
+
+	#### Windows Event Logs: WindowsEventData only ####
+	windowsevent_source = RadioField(
+		label="Windows Event Source",
+		choices=["All", "Security", "System"],
+		default="All")
 
 
 	#### Transfer Type: Now only ####

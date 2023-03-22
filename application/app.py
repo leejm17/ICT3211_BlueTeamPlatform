@@ -84,7 +84,7 @@ def datatransfer_page():
 def datatransfer_smartmeter_page():
 	form = DataTransfer_Form(request.form)
 	if request.method == "POST" and request.form:
-		ftp_dir = ["SmartMeterData", "WiresharkData"]
+		ftp_dir = ["SmartMeterData", "WiresharkData", "KEPServerEXData", "WindowsEventData"]
 
 		if "browse" in request.form["submit"]:
 			"""Open FTP_Downloads folder with Files application"""

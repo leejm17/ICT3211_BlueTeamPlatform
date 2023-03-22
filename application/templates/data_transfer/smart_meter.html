@@ -18,11 +18,22 @@
 				SmartMeter Data
 			{% else %}Re-initiate FTP{% endif %}
 			</button>
-		</form>
-		<form action="/data_transfer/smart_meter" method="POST">
+
 			<button class="btn btn-info" type="submit" name="submit" value="WiresharkData">
 			{% if not dir_list or form.data_source.data != "WiresharkData" %}
 				Wireshark Data
+			{% else %}Re-initiate FTP{% endif %}
+			</button>
+
+			<button class="btn btn-success" type="submit" name="submit" value="KEPServerEXData">
+			{% if not dir_list or form.data_source.data != "KEPServerEXData" %}
+				KEPServerEX Event Logs
+			{% else %}Re-initiate FTP{% endif %}
+			</button>
+
+			<button class="btn btn-warning" type="submit" name="submit" value="WindowsEventData">
+			{% if not dir_list or form.data_source.data != "WindowsEventData" %}
+				Windows Event Logs
 			{% else %}Re-initiate FTP{% endif %}
 			</button>
 		</form>
@@ -33,14 +44,19 @@
 	<div class="mb-3">
 		{% if form.data_source.data == "SmartMeterData" %}
 		<h5 class="form-label">Specify the meters, date & time range to download <b>SmartMeter Data</b> files, or automate the process.</h5>
-		{% else %}
+		{% elif form.data_source.data == "WiresharkData" %}
 		<h5 class="form-label">Specify the date & time range to download <b>PCAP</b> files, or automate the process.</h5>
+		{% elif form.data_source.data == "KEPServerEXData" %}
+		<h5 class="form-label">Specify the date & time range to download <b>KEPServerEX Log</b> files, or automate the process.</h5>
+		{% elif form.data_source.data == "WindowsEventData" %}
+		<h5 class="form-label">Specify the date & time range to download <b>Windows Event Log</b> files, or automate the process.</h5>
 		{% endif %}
 		<form action="/data_transfer/smart_meter" method="POST">
 			<div>
 				<input type="hidden" name="data_source" value="{{ form.data_source.data }}">
 				{{ form.data_source.label }}: {{ form.data_source.data }}
 			</div>
+
 			{% if form.data_source.data == "SmartMeterData" %}
 			<div>
 				<label>Select Meters:</label>
@@ -51,7 +67,7 @@
 				</label>
 				{% endfor %}
 			</div>
-			{% else %}
+			{% elif form.data_source.data == "WiresharkData" %}
 			<div>{{ form.wireshark_source.label }}:
 				{% for source in form.wireshark_source %}
 				<tr>
@@ -60,7 +76,17 @@
 				</tr>
 				{% endfor %}
 			</div>
+			{% elif form.data_source.data == "WindowsEventData" %}
+			<div>{{ form.windowsevent_source.label }}:
+				{% for source in form.windowsevent_source %}
+				<tr>
+					<td>{{ source }}</td>
+					<td>{{ source.label }}</td>
+				</tr>
+				{% endfor %}
+			</div>
 			{% endif %}
+
 			<div>{{ form.transfer_type.label }}:
 				{% for type in form.transfer_type %}
 				<tr>

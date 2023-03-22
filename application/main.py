@@ -23,7 +23,7 @@ def windows_ftp_start(ftp_dir):
 	# If SmartMeterData, then ftp_dir has two folders
 	if ftp_dir == "SmartMeterData":
 		ftp_dir = ["SmartMeterData", "Archive_SmartMeterData"]
-	# Else WiresharkData, then ftp_dir has only one folder
+	# Else WiresharkData / KEPServerEXData / WindowsEventData, then ftp_dir has only one root folder
 	else:
 		ftp_dir = [ftp_dir]
 
@@ -40,10 +40,10 @@ def windows_ftp_start(ftp_dir):
 			ftps = init_ftps_conn()
 			root = ftps.mlsd(root_dir)	# FTPS Root directory
 
-			# Return immediately if WiresharkData is established
-			if root_dir == "WiresharkData":
+			# Return immediately if WiresharkData / KEPServerEXData / WindowsEventData is established
+			if root_dir == "WiresharkData" or root_dir == "KEPServerEXData" or root_dir == "WindowsEventData":
 				ftps.quit()
-				return True, "Wireshark"
+				return True, root_dir.split("Data")[0]
 		except Exception as e:
 			try:
 				# Exit connection if any error
@@ -94,7 +94,7 @@ def windows_ftp_process(form):
 	"""
 	print("\tdata_source: {}".format(form.data_source.data))
 	print("\tmeters: {}".format(form.meters.data))
-	success, file_dict = windows_ftp_initiate(form.data_source.data, form.meters.data, form.wireshark_source.data)
+	success, file_dict = windows_ftp_initiate(form.data_source.data, form.meters.data, form.wireshark_source.data, form.windowsevent_source.data)
 	if not success:
 		return success, file_dict
 
@@ -117,7 +117,7 @@ def windows_ftp_process(form):
 
 
 """Initiate FTPS for Data Transfer Process"""
-def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
+def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet", windowsevent_src="All"):
 	print("Initiate FTPS for Data Transfer Process")
 
 	# Dict to store Dir & corresponding File Names
@@ -151,8 +151,8 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 	for root_dir in ftp_dir:
 		try:
 			root = ftps.mlsd(root_dir)	# FTPS Root directory
-			# WiresharkData folder has no sub-directories
-			if root_dir == "WiresharkData":
+			# KEPServerEXData folder has no sub-directories
+			if root_dir == "KEPServerEXData":
 				file_dict[root_dir] = []
 		except Exception as e:
 			try:
@@ -176,22 +176,38 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 				# WiresharkData folder contains filenames in a specific format
 				if root_dir == "WiresharkData":
 					print("\tWireshark File: {}".format(dir_list[0]))
-					if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
-						file_dict[root_dir] += [dir_list[0]]
+					if wireshark_src != "All":
+						if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
+							directory = "{}/{}".format(root_dir, wireshark_src)
+					else:
+						directory = "{}/{}".format(root_dir, dir_list[0].split(".")[0].split("_")[-1])
+					try:
+						file_dict[directory] = []
+						file_dict[directory] += [dir_list[0]]
+					except:
+						pass
 
-				# If filename is a meter name
+				# KEPServerEXData folder
+				elif root_dir == "KEPServerEXData":
+					print("\tKEPServerEX File: {}".format(dir_list[0]))
+					file_dict[root_dir] += [dir_list[0]]
+
+				# WindowsEventData folder contains 2 sub-folders (Security / System)
+				elif root_dir == "WindowsEventData":
+					if dir_list[1]["type"] == "dir":
+						if windowsevent_src != "All":
+							directory = "{}/{}".format(root_dir, windowsevent_src)
+						else:
+							directory = "{}/{}".format(root_dir, dir_list[0])
+					file_dict[directory] = windows_append_ftp_files(ftps, file_dict, directory)
+
+				# If filename is a meter name folder
 				elif dir_list[0] in meters:
 					# If file's metadata reveals a folder, then it is a meter folder
 					if dir_list[1]["type"] == "dir":
-						directory = root_dir + "/" + dir_list[0]
+						directory = "{}/{}".format(root_dir, dir_list[0])
+						file_dict[directory] = windows_append_ftp_files(ftps, file_dict, directory)
 
-						"""Iterate and append all files in meter folder"""
-						print("\tCurrently appending {}: {}".format(root_dir, dir_list[0]))
-						file_list = ftps.mlsd(directory)
-						file_dict[directory] = []
-						for data in file_list:
-							##print("File: {}".format(data[0]))	# Print Filename
-							file_dict[directory] += [data[0]]
 		except Exception as e:
 			# FTPS directory has Permissions Error iterating files
 			ftps.close()
@@ -211,10 +227,23 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="Ethernet"):
 	return True, file_dict
 
 
+"""Iterate and append all files in meter / windows event folder"""
+def windows_append_ftp_files(ftps, file_dict, directory):
+	print("\tCurrently appending {}: {}".format(directory.split("/")[0], directory.split("/")[1]))
+	file_list = ftps.mlsd(directory)
+	file_dict[directory] = []
+	for data in file_list:
+		##print("File: {}".format(data[0]))	# Print Filename
+		file_dict[directory] += [data[0]]
+
+	return file_dict[directory]
+
+
 """Filter Files for Data Transfer Process"""
 def windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_time, file_dict):
 	# Dict to store Dir & filtered File Names based on date, start_time, end_time
 	filtered_dict = {}
+	data_source_list = ["WiresharkData", "KEPServerEXData", "WindowsEventData"]
 
 	# Format date and time
 	start_datetime = datetime.combine(date, start_time) - timedelta(hours=timezone)
@@ -244,13 +273,14 @@ def windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_tim
 			filtered_date_file = csv_file.split("_")[0]
 			##print(start_date, filtered_date_file)	# Print Filtered Date & Date of selected .csv file
 
-			# WiresharkData filenames are of a specific time format
-			if data_source == "WiresharkData":
+			# WiresharkData / KEPServerEXData / WindowsEventData filenames are of a specific time format
+			if data_source in data_source_list:
 				filtered_time_file = int("{}00".format(csv_file.split("_")[1].split(".")[0]))
 			# SmartMeterData filenames are of a different time format
 			else:
 				filtered_time_file = int(csv_file.split("_")[1].split(".")[0])
 
+			"""Filter filenames based on user-specified date/time"""
 			if start_date == end_date == filtered_date_file:
 				"""Append .csv filename if start, end dates and time are same"""
 				# Store .csv filename if Start time <= filtered range <= End time
@@ -293,6 +323,7 @@ def windows_ftp_filter_datetime(data_source, date, timezone, start_time, end_tim
 
 """Download filtered files from filtered_dict via FTP"""
 def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
+	data_source_list = ["SmartMeterData", "WiresharkData", "WindowsEventData"]
 	download_dir = ""
 	download_cnt = 0	# Count number of files downloaded
 	files_cnt = 0		# Count number of files in total
@@ -307,7 +338,7 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 	# Calculate Time taken to iterate and download all files
 	start_all = time.time()
 
-	"""Initialise FTPS Connection: Ignore, handled by Multi-thread"""
+	"""Initialise FTPS Connection (Ignore; handled by Multi-thread)"""
 	#ftps = init_ftps_conn()
 
 	"""Iterate folders in filtered_dict"""
@@ -318,14 +349,14 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 		print("\tNo. of Files in {}: {}".format(directory, dir_cnt))
 
 		"""Set up Download Directory"""
-		if data_source == "SmartMeterData":	# SmartMeterData root folder
+		if data_source in data_source_list:	# SmartMeterData / WiresharkData / WindowsEventData root folder
 			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}/{}".format(
 							"/".join(app.config["APP_DIR"].split("/")[:-2]),
 							data_source,
 							job_name,
 							current_datetime,
 							directory.split("/")[1])
-		else:								# WiresharkData root folder
+		else:								# KEPServerEXData root folder
 			download_dir = "{}/FTP_Downloads/Smart_Meter/{}/{}/{}".format(
 							"/".join(app.config["APP_DIR"].split("/")[:-2]),
 							data_source,
@@ -343,6 +374,11 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 		"""Download 120 files at a time with multi-threaded workers"""
 		directory_list = [filtered_dict[directory][i * 120:(i + 1) * 120] for i in range((len(filtered_dict[directory]) + 120 - 1) // 120 )]
 		print("\t\tWorkers required: {}".format(len(directory_list)))
+
+		# String formatting for WiresharkData folder
+		if "WiresharkData" in directory:
+			directory = directory.split("/")[0]
+
 		with ThreadPoolExecutor(max_workers=int(retrieve_glob_var()["workers"])) as executor:
 			for mini_list in directory_list:
 				future = executor.submit(thread_datatransfer, directory, mini_list, directory_list.index(mini_list))
@@ -360,8 +396,10 @@ def windows_ftp_transfer(data_source, filtered_dict, job_name="default"):
 	os.chdir(current_dir)
 
 	# Return message containing files downloaded & download directory
-	download_path = "/".join(download_dir.split("/")[:-1])
-	message = [files_cnt, download_path]
+	if data_source in data_source_list:
+		message = [files_cnt, "/".join(download_dir.split("/")[:-1])]
+	else:
+		message = [files_cnt, download_dir]
 
 	return True, message
 
@@ -567,8 +605,9 @@ def retrieve_cronjobs():
 		meters = parameters[1].strip("\"()' ")
 		if meters == "[]":
 			meters = "-"
-		meter_list = ast.literal_eval(meters)
-		meters = ", ".join(meter_list)
+		else:
+			meter_list = ast.literal_eval(meters)
+			meters = ", ".join(meter_list)
 
 		# Format Timezone
 		timezone = int(parameters[2].strip("\"()' "))
