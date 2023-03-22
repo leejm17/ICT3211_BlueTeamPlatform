@@ -705,7 +705,7 @@ def action_cronjobs(action_jobid):
 """Retrieve Local Applications"""
 def list_of_local_apps():
 	"""Whitelist relevant local apps"""
-	app_list = ["FileZilla", "Wireshark", "zui", "dbeaver", "remmina"]
+	app_list = ["filezilla", "wireshark", "zui", "dbeaver", "remmina"]
 
 	return app_list
 
