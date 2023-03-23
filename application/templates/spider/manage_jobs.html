@@ -62,7 +62,7 @@
 					<td>{{ running.spider }}</td>
 					<td>{{ running.url }}</td>
 					<td>{{ running.depth }}</td>
-					<td>{{ running.jobid }}</td>
+					<td><a target="_blank" href="http://{{ ip }}:6800/logs/{{ yara_project }}/{{ running.spider }}/{{ running.jobid }}.log">{{ running.jobid }}</td>
 				</tr>
 				{% endfor %}
 			</table>
@@ -101,7 +101,7 @@
 					<td>{{ finished.spider }}</td>
 					<td>{{ finished.url }}</td>
 					<td>{{ finished.depth }}</td>
-					<td>{{ finished.jobid }}</td>
+					<td><a target="_blank" href="http://{{ ip }}:6800/logs/{{ yara_project }}/{{ finished.spider }}/{{ finished.jobid }}.log">{{ finished.jobid }}</td>
 				</tr>
 				{% endfor %}
 			</table>

@@ -241,7 +241,7 @@ def spider_managejobs_page():
 	else:
 		runningDict, finishedDict, uniqueDict = retrieve_spider_jobs(mysql)
 
-	return render_template("/spider/manage_jobs.html", runningDict=runningDict, finishedDict=finishedDict, uniqueDict=uniqueDict)
+	return render_template("/spider/manage_jobs.html", runningDict=runningDict, finishedDict=finishedDict, uniqueDict=uniqueDict, ip=app.config["APP_IP"])
 
 
 ########## END Spider Pages ##########
