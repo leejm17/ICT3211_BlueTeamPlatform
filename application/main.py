@@ -179,12 +179,14 @@ def windows_ftp_initiate(ftp_dir, meters, wireshark_src="All", windowsevent_src=
 						if wireshark_src == dir_list[0].split(".")[0].split("_")[-1]:
 							print("\tWireshark File: {}".format(dir_list[0]))
 							directory = "{}/{}".format(root_dir, wireshark_src)
-							file_dict[directory] = []
+							if directory not in file_dict:
+								file_dict[directory] = []
 							file_dict[directory] += [dir_list[0]]
 					else:
 						print("\tWireshark File: {}".format(dir_list[0]))
 						directory = "{}/{}".format(root_dir, dir_list[0].split(".")[0].split("_")[-1])
-						file_dict[directory] = []
+						if directory not in file_dict:
+							file_dict[directory] = []
 						file_dict[directory] += [dir_list[0]]
 
 				# KEPServerEXData folder
