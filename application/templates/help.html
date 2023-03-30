@@ -7,6 +7,225 @@
 {% block body %}
 
 <!--Page content-->
+<div class="container mt-5">
+	<h1>Frequently Asked Questions (FAQ)</h1>
 
+	<div class="accordion accordion-flush" id="accordionFlushFAQ">
+		<h3 style="font-weight:bold;">General Questions</h3>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseGeneralOne" aria-expanded="false" aria-controls="flush-collapseGeneralOne">
+					1. What is this Web application about?
+				</button>
+			</h2>
+			<div id="flush-collapseGeneralOne" class="accordion-collapse collapse" aria-labelledby="flush-headingGeneralOne" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>The SCFAMI Dashboard is a Web platform for grid operators to collect data files from the Smart Meter PC. It offers features such as Data Transfer, Application Launch, Spider Integration and Admin Configurations.</p>
+					<p>The ultimate goal of this platform is to provide grid operators with the visibility to detect and analyse attacks on the Smart Meter Network System.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseGeneralTwo" aria-expanded="false" aria-controls="flush-collapseGeneralTwo">
+					2. What are the features of this Web application?
+				</button>
+			</h2>
+			<div id="flush-collapseGeneralTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingGeneralTwo" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>This platform offers 4 key features for grid operators:</p>
+					<p>
+						<b>Data Transfer:</b> Operators can choose to transfer data files at the point of request, or schedule them for recurrent transfers.<br />
+						<b>Application Launch:</b> Operators can launch Desktop applications or Arkime here.<br />
+						<b>Spider Integration:</b> Operators can schedule Spiders (Web crawlers) to crawl URLs for YARA rules.<br />
+						<b>Admin Configurations:</b> Operators can configure certain administrative settings of the SCFAMI Dashboard.
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseGeneralThree" aria-expanded="false" aria-controls="flush-collapseGeneralThree">
+					3. What are data files?
+				</button>
+			</h2>
+			<div id="flush-collapseGeneralThree" class="accordion-collapse collapse" aria-labelledby="flush-headingGeneralThree" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Any mentions of data files on this Help page refer to the following: <b>Smart Meter data files</b>, <b>Windows Event (System and Security) logs</b>, <b>KEPServer logs</b> and <b>Packet Capture (PCAP) files</b> stored on the Smart Meter PC.</p>
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<h3 style="font-weight:bold;">Admin Configurations Questions</h3>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseAdminOne" aria-expanded="false" aria-controls="flush-collapseAdminOne">
+					1. What is Data Transfer in Admin Configurations and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseAdminOne" class="accordion-collapse collapse" aria-labelledby="flush-headingAdminOne" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Grid operators can update the IP address of the Smart Meter PC, the credentials to use for the Smart Meter connection, and the maximum number of multi-threaded workers the system can use.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseAdminTwo" aria-expanded="false" aria-controls="flush-collapseAdminTwo">
+					2. What is Network Capture in Admin Configurations and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseAdminTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingAdminTwo" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Grid operators can update the directory to open via Nautilus File Manager.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseAdminThree" aria-expanded="false" aria-controls="flush-collapseAdminThree">
+					3. What is Application Launch in Admin Configurations and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseAdminThree" class="accordion-collapse collapse" aria-labelledby="flush-headingAdminThree" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>In the Arkime Views page, Arkime's API is accessed to dynamically populate the page with Arkime views. This API requires login credentials that are set on Arkime itself. Thus, grid operators have the ability to update this on the SCFAMI Dashboard as well.</p>
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<h3 style="font-weight:bold;">Data Transfer Feature</h3>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDataTransferOne" aria-expanded="false" aria-controls="flush-collapseDataTransferOne">
+					1. What is Smart Meter (Windows) in Data Transfer and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseDataTransferOne" class="accordion-collapse collapse" aria-labelledby="flush-headingDataTransferOne" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>This page offers grid operators a feature to transfer data files from the Smart Meter PC at the point of request, or schedule them for recurrent transfers.</p>
+					<p>Upon selecting a type of data file, a Web form will be displayed for operators to fill up. The form consists of the following fields: <b>Transfer Type</b>, <b>Date</b>, <b>Start Time</b>, <b>End Time</b>, and <b>Timezone</b>.</p>
+					<p>
+						When the <b>Transfer Type</b> is selected as <i>Now</i>, the specified range of data files will be transferred now.</p>
+					<p>
+						Conversely, when the <b>Transfer Type</b> is selected as <i>Schedule</i>, the specified range of data files will be transferred at the recurring schedules.<br />
+						For this option, the baseline for Transfer Frequency is <b>Daily</b>. It requires the start time of the data files, the duration to download for, and a job name to identify this job. The recurring download folder will be renamed to the job name specified here. <b>Weekly</b>, on top of the Daily parameters, requires operators to select the days of a week to run this job schedule, while <b>Monthly</b> requires operators to select the day of each month.
+					</p>
+					<p>The download path of the data files will be shown after the download process has completed.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDataTransferTwo" aria-expanded="false" aria-controls="flush-collapseDataTransferTwo">
+					2. What is Network Capture in Data Transfer and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseDataTransferTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingDataTransferTwo" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>A side feature of this Ubuntu machine is that there are scheduled jobs that run periodically to remotely capture network traffic on the Honeypot machine.</p>
+					<p>This page serves to open the directory of the captured files on the Nautilus File Manager.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDataTransferThree" aria-expanded="false" aria-controls="flush-collapseDataTransferThree">
+					3. What is Manage Jobs in Data Transfer and how do I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseDataTransferThree" class="accordion-collapse collapse" aria-labelledby="flush-headingDataTransferThree" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Data Transfer jobs that are scheduled will be displayed as a table on this page. Grid operators can choose to delete any scheduled job, disable a current job, or enable a disabled job.</p>
+					<p>Note that all jobs are automatically set to enabled when they are created.</p>
+				</div>
+			</div>
+		</div>
+
+		<br />
+
+		<h3 style="font-weight:bold;">Application Launch Questions</h3>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseAppLaunchOne" aria-expanded="false" aria-controls="flush-collapseAppLaunchOne">
+					1. What is Local Applications in Application Launch and how can I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseAppLaunchOne" class="accordion-collapse collapse" aria-labelledby="flush-headingAppLaunchOne" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>5 open-source Desktop GUI applications are identified for grid operators to use. They are FileZilla, Wireshark, Zui, Dbeaver and Remmina. They can be launched from the click of their respective buttons.</p>
+					<p>
+						<b>Filezilla:</b> Enables operators to manage data files using a comprehensive interface.<br />
+						<b>Wireshark:</b> Allows operators to analyse PCAP files or network traffic.<br />
+						<b>Zui:</b> A Desktop application for Brim which is used to explore and analyse structured data files.<br />
+						<b>Dbeaver:</b> A SQL client software that is meant to query jobs created by the Spider Integration explained below.<br />
+						<b>Remmina:</b> A RDP client that provides operators with an option to connect remotely to the Smart Meter PC.<br />
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseAppLaunchTwo" aria-expanded="false" aria-controls="flush-collapseAppLaunchTwo">
+					2. What is Arkime Views in Application Launch and how can I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseAppLaunchTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingAppLaunchTwo" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Arkime allows operators to see exactly what is going on from a network point of view.</p>
+					<p>Grid operators can click on any of the buttons to open a new tab with Arkime Sessions with the filtered view. These views are created on Arkime itself.</p>
+				</div>
+			</div>
+		</div>
+
+		<h3 style="font-weight:bold;">Spider Integration Questions</h3>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSpiderOne" aria-expanded="false" aria-controls="flush-collapseSpiderOne">
+					1. What is a Spider?
+				</button>
+			</h2>
+			<div id="flush-collapseSpiderOne" class="accordion-collapse collapse" aria-labelledby="flush-headingSpiderOne" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Spiders, in this context, are Web crawlers designed to browse user-specified URLs for YARA files.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSpiderTwo" aria-expanded="false" aria-controls="flush-collapseSpiderTwo">
+					2. What is Submit Job in Spider and how can I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseSpiderTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingSpiderTwo" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Grid operators can specify a URL to crawl, the depth of the crawling and the Spider to use.</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-item">
+			<h2 class="accordion-header">
+				<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSpiderThree" aria-expanded="false" aria-controls="flush-collapseSpiderThree">
+					3. What is Manage Jobs in Spider and how can I use it?
+				</button>
+			</h2>
+			<div id="flush-collapseSpiderThree" class="accordion-collapse collapse" aria-labelledby="flush-headingSpiderThree" data-bs-parent="#accordionFlushFAQ">
+				<div class="accordion-body">
+					<p>Spider jobs that are Running or Completed will be displayed as their respective tables on this page. Grid operators can view these jobs from the two tables.</p>
+					<p>
+						For the Completed table, a default filter is provided to showcase the details of jobs with unique URLs. The filter is dynamic and operators can filter by specific URLs that were scheduled.<br />
+						Operators can also query for these jobs via Dbeaver mentioned in Local Applications above.
+					</p>
+				</div>
+			</div>
+		</div>
+		
+	</div>
+	
+</div>
 
 {% endblock %}
