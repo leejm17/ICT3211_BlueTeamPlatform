@@ -22,14 +22,16 @@ One of the features of this Web application is to provide users with an intuitiv
 Detailed instructions to install these 5 applications are described at the end of this README file (**[Install Local Applications](https://github.com/leejm17/ICT3211_BlueTeamPlatform/edit/main/README.md#install-local-applications-optional)**).
 
 ## Installation Steps
-These are the installation steps to install software dependencies required to run the Web application smoothly.
+You may choose to use a Virtual Environment if you wish to do so.
+
+These are the installation steps to install software dependencies required to run the Web application smoothly, without ```venv```.
 
 1. Update Ubuntu's repository sources.
 ```
 sudo apt update
 ```
 
-2. Install Python software packages required to run the Web application.
+2. Install Python3 software packages required to run the Web application.
 ```
 pip3 install -r requirements.txt
 ```
@@ -52,11 +54,38 @@ ARKIME_PASSWORD='[password]'
 #### 2. .database
 Credentials to connect to the MySQL database.
 ```
-DATABASE_DB='scfami_spider'	# database name
+DATABASE_DB='[database name]'
 DB_HOST='[IP address of machine hosting the database]'
 DB_PWD='[database password]'
 DB_USER='[database username]'
 SECRET_KEY='[Flask config's secret string, generated with Python secrets module]'
+```
+Following which, create a MySQL database to use the full suite of the integrated Spider feature.
+1. Install MySQL.
+```
+sudo apt-get install mysql-server
+```
+2. Configure a Root password.
+```
+sudo mysql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '[new root password]';
+```
+3. Create a new database user for MySQL that has separate privileges from Root.
+```
+CREATE USER '[database username]'@'localhost' IDENTIFIED BY '[database password]';
+```
+4. Create a database for Spider if it does not exist on this MySQL instance.
+```
+CREATE DATABASE [database name];
+```
+5. Grant privileges to this database for the newly-created database user.
+```
+GRANT ALL ON [database name].* TO '[database username]'@'localhost';
+exit
+```
+6. Import the database file **/scfami_spider.sql** as the newly-created database user.
+```
+mysql -u [database username] -p [database name] < scfami_spider.sql
 ```
 
 #### 3. .datatransfer
