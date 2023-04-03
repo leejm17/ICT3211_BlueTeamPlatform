@@ -1,5 +1,5 @@
 # ICT3211_BlueTeamPlatform
-A Python-based Web application platform that integrates open-source tools and in-house projects for the purpose of monitoring and analysing a Smart Meter Network System.
+A Python-based Web application platform that integrates open-source tools and in-house projects for the purpose of monitoring and analysing a Smart Meter Network System. Python Flask is the Web framework was used in the development of this application.
 
 This Web application was developed in conjunction with a [RedTeamPlatform](https://github.com/leejm17/ICT3211_RedTeamPlatform) project.
 
@@ -39,6 +39,22 @@ ICT3211_BlueTeamPlatform ('/': Root directory)
 This Web application was developed and has been tested successfully on **Ubuntu 22.04.1 LTS** (Jammy Jellyfish).
 
 **Python 3.10.6** is the preferred Python version.
+
+## Repository Directory
+This Web application was developed in the view that the repository will always be in the user's Documents directory (**/home/$USER/Documents/**).
+
+Thus, please ensure that this repository is cloned to your Ubuntu's Documents directory.
+
+If you wish to use another directory, modify the following two files:
+1. **/application/config.py**
+```
+Line 15: APP_DIR = "[New Directory]/ICT3211_BlueTeamPlatform/application"
+```
+2. **/start_SCFAMI.sh**
+```
+Line 19: FLASK_DIRECTORY="[New Directory]/ICT3211_BlueTeamPlatform/application"
+```
+Refer to [Launching Web application](https://github.com/leejm17/ICT3211_BlueTeamPlatform#launching-web-application) below for the correct use of **start_SCFAMI.sh**.
 
 ## Pre-existing Projects
 This Web application has integrated certain in-house projects at the recommendation of academic researchers from the Singapore Institute of Technology (SIT). It is advised that the following projects be set-up appropriately in order to use the full suite of this Web application:
