@@ -19,7 +19,7 @@ This Web application has integrated certain in-house projects at the recommendat
 ## Pre-existing Applications
 One of the features of this Web application is to provide users with an intuitive way to launch 5 pre-identified local applications without having to _Show Applications_. It is optional to install these local applications (FileZilla Client, Wireshark, Zui (Brim), DBeaver, Remmina).
 
-Detailed instructions to install these 5 applications are described at the end of this README file (**[Install Local Applications](https://github.com/leejm17/ICT3211_BlueTeamPlatform/edit/main/README.md#install-local-applications-optional)**).
+Detailed instructions to install these 5 applications are described at the end of this README file (**[Install Local Applications](https://github.com/leejm17/ICT3211_BlueTeamPlatform#optional-install-local-applications)**).
 
 ## Installation Steps
 You may choose to use a Virtual Environment if you wish to do so.
@@ -129,7 +129,7 @@ Enjoy!
 
 
 # (Optional) Install Local Applications
-Adding on to **[Pre-existing Applications](https://github.com/leejm17/ICT3211_BlueTeamPlatform/edit/main/README.md#pre-existing-applications)** above, the installation of these 5 applications allow users to launch local applications that may aid in his/her analysis.
+Adding on to **[Pre-existing Applications](https://github.com/leejm17/ICT3211_BlueTeamPlatform#pre-existing-applications)** above, the installation of these 5 applications allow users to launch local applications that may aid in his/her analysis.
 
 #### FileZilla Client
 FileZilla Client is a FTP Client application to connect to FTP Servers.
