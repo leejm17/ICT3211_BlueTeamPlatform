@@ -215,12 +215,12 @@ class AdminConfig_DataTransfer_Form(Form):
 			InputRequired()])
 
 	ftp_user = StringField(
-		"FTP User",
+		"FTPS User",
 		validators=[
 			InputRequired()])
 
 	ftp_pw = PasswordField(
-		"FTP Password",
+		"FTPS Password",
 		validators=[
 			InputRequired()])
 

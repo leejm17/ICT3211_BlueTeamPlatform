@@ -71,6 +71,3 @@ def update_env(env, form):
 
 
 ########## END .datatransfer / .arkime / .networkcapture Config ##########
-########## START Spider Config ##########
-# Code Here
-########## END Spider Config ##########

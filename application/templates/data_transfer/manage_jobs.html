@@ -38,7 +38,6 @@
 		<table id="jobs_table">
 			<thead>
 				<tr>
-					<th>Job ID</th>
 					<th>Job Name</th>
 					<th>Job Schedule (GMT+8)</th>
 					<th>Data Start Time</th>
@@ -53,7 +52,6 @@
 				<tbody>
 					{% for job in job_list %}
 					<tr>
-						<td>{{ job["id"] }}</td>
 						<td>{{ job["name"] }}</td>
 						<td>{{ job["sched_desc"] }}</td>
 						<td>{{ job["start_time"] }}H (GMT{{ job["timezone"] }})</td>

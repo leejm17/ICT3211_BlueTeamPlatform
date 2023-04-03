@@ -717,13 +717,13 @@ def retrieve_arkime_views():
 	arkime_cred = retrieve_arkime_var()
 	try:
 		# Call https://<arkime>/api/views to return a dict similar to arkime_views
-		from requests.auth import HTTPDigestAuth
-		request_views = requests.get("http://{}:8005/api/views".format(request.remote_addr),
-						auth=HTTPDigestAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
-						verify=False)
-		"""request_views = requests.get("https://{}/api/views".format(request.remote_addr),
+		"""
+		In the event where Arkime's port number is changed,
+		 manually insert the port below '{}:[port]' and restart Flask application
+		"""
+		request_views = requests.get("https://{}/api/views".format(request.remote_addr),
 						auth=HTTPBasicAuth(arkime_cred["arkime_user"], arkime_cred["arkime_password"]),
-						verify=False)"""
+						verify=False)
 
 		# If Arkime is online but unable to fetch data, might be due to authentication issue
 		if request_views.status_code != 200:
@@ -889,6 +889,3 @@ def retrieve_spider_jobs(mysql, filter_url="unique"):
 
 
 ########## END Spider ##########
-########## START Help ##########
-# Code Here
-########## END Help ##########

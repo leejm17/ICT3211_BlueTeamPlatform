@@ -11,7 +11,6 @@ import getpass
 
 """Global Configs"""
 class Config:
-	#APP_IP = "localhost"	# "172.16.2.6"
 	APP_PORT = 6065
 	APP_DIR = "/home/{}/Documents/ICT3211_BlueTeamPlatform/application".format(getpass.getuser())
 
@@ -26,8 +25,8 @@ class Config:
 
 """Development Configuration"""
 class DevConfig(Config):
-	APP_IP = "localhost"
-	#APP_IP = "172.16.2.6"
+	#APP_IP = "localhost"
+	APP_IP = "172.16.2.6"
 	FLASK_ENV = "development"
 	DEBUG = True
 	TESTING = True
@@ -42,7 +41,7 @@ class ProdConfig(Config):
 
 
 ########## END Flask Configurations ##########
-########## START FTP Methods ##########
+########## START FTPS Methods ##########
 
 """
 Explicit FTPS, with shared TLS session
@@ -72,7 +71,7 @@ def download_file(csv_file, ftps):
 		ftps.retrbinary(f"RETR {csv_file}", f.write)
 
 
-########## END FTP Methods ##########
+########## END FTPS Methods ##########
 ########## START Threading: Data Transfer ##########
 
 def thread_datatransfer(directory, mini_list, index):
