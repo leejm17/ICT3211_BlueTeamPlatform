@@ -3,7 +3,36 @@ A Python-based Web application platform that integrates open-source tools and in
 
 This Web application was developed in conjunction with a [RedTeamPlatform](https://github.com/leejm17/ICT3211_RedTeamPlatform) project.
 
-Both projects are brought to you by IS Team 8 (AY 2022/23, Tri 2).
+Both projects are brought to you by IS Team 8 (AY 2022/23, Tri 2) from the Singapore Institute of Technology (SIT).
+
+
+## Directory Structure
+This is the directory structure for this GitHub repository.
+```
+ICT3211_BlueTeamPlatform ('/': Root directory)
+├── application
+│   ├── static  	(CSS, JS files)
+│   ├── templates	(HTML files for the 4 main features)
+│   │   ├── admin	(Admin pages)
+│   │   ├── app_launch	(App Launch pages)
+│   │   ├── data_transfer (Data Transfer pages)
+│   │   ├── spider	(Spider pages)
+│   │   ├── base.html	(Base template for HTML files)
+│   │   ├── help.html	(FAQ page)
+│   │   └── home.html	(Home page)
+│   ├── admin.py	(Methods for Global Variables, Admin pages)
+│   ├── app.py  	(Initialise Flask; GET/POST App Routes for all pages)
+│   ├── config.py	(Classes for Flask Configs; Methods for FTPS, Multithreading)
+│   ├── forms.py	(Classes for Flask Forms; URL validation for Spider)
+│   └── main.py 	(Methods for Data Transfer, App Launch, Spider pages)
+├── .arkime 		(Instructions below)
+├── .database		(Instructions below)
+├── .datatransfer	(Instructions below)
+├── .networkcapture
+├── README.md
+├── requirements.txt
+└── scfami_spider.sql	(Used by .database)
+```
 
 
 # Pre-requisites
@@ -104,6 +133,9 @@ Not sensitive, given in **/.networkcapture**.
 
 ## Other Configurations
 By default, this Flask Web application is using a _Development_ configuration as seen on **Line 23** in **/application/app.py**.
+```
+Line 23: app.config.from_object("config.DevConfig")	# Using a development configuration
+```
 
 If you wish to use the _Production_ configuration, ensure the following:
 ```
